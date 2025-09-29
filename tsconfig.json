@@ -6,6 +6,8 @@
     "declarationDir": "dist",
     "emitDeclarationOnly": false,
     "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "moduleResolution": "bundler",
     "noEmit": false,
     "outDir": "dist",
