@@ -51,6 +51,7 @@ This repository contains common components, utilities, and services used across 
 | `yarn clean:node` | Removes node_modules directories and yarn.lock file |
 | `yarn clean:dist` | Removes the dist directory                          |
 | `yarn test`       | Runs tests using Vitest                             |
+| `yarn typecheck` | Checks TypeScript types without emitting files       |
 
 
 ## Peer Dependencies

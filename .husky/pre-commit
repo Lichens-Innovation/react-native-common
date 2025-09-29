@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+# exit immediately if any command fails
+set -e
+
+yarn typecheck
