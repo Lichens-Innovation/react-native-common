@@ -1,4 +1,4 @@
-import React from 'react';
+import { jsx as _jsx } from "react/jsx-runtime";
 import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
@@ -16,11 +16,7 @@ export const LogEntryItem = ({ logEntry }) => {
         await setClipboardTextContent(text);
         showSnackbarMessage(t('common:copiedToClipboard'));
     };
-    return (<ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.logEntry}>
-      <Pressable onLongPress={() => handleLongPress(logEntry.msg)}>
-        <Text style={[styles.logText, { color }]}>{formatLogMessage(logEntry.msg)}</Text>
-      </Pressable>
-    </ScrollView>);
+    return (_jsx(ScrollView, { horizontal: true, showsHorizontalScrollIndicator: false, contentContainerStyle: styles.logEntry, children: _jsx(Pressable, { onLongPress: () => handleLongPress(logEntry.msg), children: _jsx(Text, { style: [styles.logText, { color }], children: formatLogMessage(logEntry.msg) }) }) }));
 };
 const useStyles = () => {
     const theme = useAppTheme();

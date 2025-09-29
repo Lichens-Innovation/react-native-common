@@ -1,4 +1,4 @@
-import React from 'react';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Dialog, Portal, Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
@@ -7,26 +7,7 @@ export const ModalSpinner = ({ isVisible, title = 'Loading', description = 'Plea
     if (!isVisible) {
         return null;
     }
-    return (<Portal>
-      <Dialog visible={isVisible} onDismiss={onDismiss}>
-        <Dialog.Title style={styles.title}>{title}</Dialog.Title>
-
-        <Dialog.Content>
-          <ActivityIndicator style={styles.spinner}/>
-          <Text>{description}</Text>
-
-          <View style={styles.progressLogs}>
-            {modelLoadingLogs.map((log) => (<Text numberOfLines={1} key={log} ellipsizeMode="tail" style={styles.progressLog}>
-                {log}
-              </Text>))}
-          </View>
-        </Dialog.Content>
-
-        <Dialog.Actions>
-          <Button onPress={onDismiss}>Cancel</Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>);
+    return (_jsx(Portal, { children: _jsxs(Dialog, { visible: isVisible, onDismiss: onDismiss, children: [_jsx(Dialog.Title, { style: styles.title, children: title }), _jsxs(Dialog.Content, { children: [_jsx(ActivityIndicator, { style: styles.spinner }), _jsx(Text, { children: description }), _jsx(View, { style: styles.progressLogs, children: modelLoadingLogs.map((log) => (_jsx(Text, { numberOfLines: 1, ellipsizeMode: "tail", style: styles.progressLog, children: log }, log))) })] }), _jsx(Dialog.Actions, { children: _jsx(Button, { onPress: onDismiss, children: "Cancel" }) })] }) }));
 };
 const useStyles = () => {
     const theme = useAppTheme();

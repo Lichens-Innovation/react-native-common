@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { useAnimateOnFocus } from '../../hooks/use-animate-on-focus';
 export const SafeContainer = ({ children, style }) => {
@@ -5,7 +6,7 @@ export const SafeContainer = ({ children, style }) => {
     if (!isVisible) {
         return null;
     }
-    return <SafeAreaView style={[styles.container, style]}>{children}</SafeAreaView>;
+    return _jsx(SafeAreaView, { style: [styles.container, style], children: children });
 };
 const styles = StyleSheet.create({
     container: {

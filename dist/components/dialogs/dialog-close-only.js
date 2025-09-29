@@ -9,6 +9,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 import { Button, Dialog, Portal } from 'react-native-paper';
@@ -24,19 +25,7 @@ export const DialogCloseOnly = (_a) => {
     if (!isVisible) {
         return null;
     }
-    return (<Portal>
-      <Dialog style={[styles.dialog, dialogStyleProp]} visible={true} onDismiss={onClose} {...dialogProps}>
-        {hasIcon && <Dialog.Icon icon={icon}/>}
-        {hasTitle && <Dialog.Title>{title}</Dialog.Title>}
-        {hasContent && <Dialog.Content>{content}</Dialog.Content>}
-
-        <Dialog.Actions>
-          <Button mode="contained" onPress={onClose}>
-            {t('common:close')}
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>);
+    return (_jsx(Portal, { children: _jsxs(Dialog, Object.assign({ style: [styles.dialog, dialogStyleProp], visible: true, onDismiss: onClose }, dialogProps, { children: [hasIcon && _jsx(Dialog.Icon, { icon: icon }), hasTitle && _jsx(Dialog.Title, { children: title }), hasContent && _jsx(Dialog.Content, { children: content }), _jsx(Dialog.Actions, { children: _jsx(Button, { mode: "contained", onPress: onClose, children: t('common:close') }) })] })) }));
 };
 const useStyles = () => {
     const { width, alignSelf } = useDialogStyles();

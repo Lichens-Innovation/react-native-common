@@ -9,12 +9,10 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-import React from 'react';
+import { jsx as _jsx } from "react/jsx-runtime";
 import { ScrollView } from 'react-native';
 export const PreTag = (_a) => {
     var { children, style } = _a, props = __rest(_a, ["children", "style"]);
-    return (<ScrollView horizontal={true} style={style} {...props}>
-    {children}
-  </ScrollView>);
+    return (_jsx(ScrollView, Object.assign({ horizontal: true, style: style }, props, { children: children })));
 };
 //# sourceMappingURL=syntax-coloring-tag-pre.js.map

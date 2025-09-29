@@ -9,7 +9,8 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-import React, { useEffect, useState } from 'react';
+import { jsx as _jsx } from "react/jsx-runtime";
+import { useEffect, useState } from 'react';
 import { DialogCloseOnly } from '../dialogs/dialog-close-only';
 import { BarcodeScanner } from './barcode-scanner';
 import { getPermissionMessage, requestCameraPermissions } from './barcode-scanner.utils';
@@ -24,8 +25,8 @@ export const BarcodeScannerDialog = (_a) => {
     }
     if (!hasPermission) {
         const message = getPermissionMessage(hasPermission);
-        return <DialogCloseOnly isVisible={true} title={title} onClose={onClose} content={message} {...rest}/>;
+        return _jsx(DialogCloseOnly, Object.assign({ isVisible: true, title: title, onClose: onClose, content: message }, rest));
     }
-    return (<DialogCloseOnly isVisible={true} title={title} onClose={onClose} content={<BarcodeScanner onBarcodeScanned={onBarcodeScanned}/>} {...rest}/>);
+    return (_jsx(DialogCloseOnly, Object.assign({ isVisible: true, title: title, onClose: onClose, content: _jsx(BarcodeScanner, { onBarcodeScanned: onBarcodeScanned }) }, rest)));
 };
 //# sourceMappingURL=barcode-scanner-dialog.js.map

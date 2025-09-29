@@ -9,6 +9,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { Button, Dialog, Portal } from 'react-native-paper';
@@ -30,27 +31,7 @@ export const DialogSyntaxColorResult = (_a) => {
     if (!isVisible) {
         return null;
     }
-    return (<Portal>
-      <Dialog visible={true} onDismiss={onClose} style={styles.dialog} {...dialogProps}>
-        {hasIcon && <Dialog.Icon icon={icon}/>}
-        {hasTitle && <Dialog.Title>{title}</Dialog.Title>}
-
-        <Dialog.ScrollArea>
-          <ScrollView>
-            <SyntaxColoring code={code} language={language} maxCodeLength={maxCodeLength}/>
-          </ScrollView>
-        </Dialog.ScrollArea>
-
-        <Dialog.Actions>
-          <Button mode="outlined" onPress={onCopy} icon="content-copy">
-            {t('common:copy')}
-          </Button>
-          <Button mode="contained" onPress={onClose}>
-            {t('common:close')}
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>);
+    return (_jsx(Portal, { children: _jsxs(Dialog, Object.assign({ visible: true, onDismiss: onClose, style: styles.dialog }, dialogProps, { children: [hasIcon && _jsx(Dialog.Icon, { icon: icon }), hasTitle && _jsx(Dialog.Title, { children: title }), _jsx(Dialog.ScrollArea, { children: _jsx(ScrollView, { children: _jsx(SyntaxColoring, { code: code, language: language, maxCodeLength: maxCodeLength }) }) }), _jsxs(Dialog.Actions, { children: [_jsx(Button, { mode: "outlined", onPress: onCopy, icon: "content-copy", children: t('common:copy') }), _jsx(Button, { mode: "contained", onPress: onClose, children: t('common:close') })] })] })) }));
 };
 const useStyles = () => {
     const { width, alignSelf } = useDialogStyles();

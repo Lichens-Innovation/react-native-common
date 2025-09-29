@@ -5,7 +5,7 @@ type IconProps = {
     color?: string;
     size?: number;
 };
-export declare const TabBarIcon: ({ name, color, size }: IconProps) => import("react").JSX.Element;
+export declare const TabBarIcon: ({ name, color, size }: IconProps) => import("react/jsx-runtime").JSX.Element;
 export declare const styles: {
     tabBarIcon: {
         marginBottom: number;

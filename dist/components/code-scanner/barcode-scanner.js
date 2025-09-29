@@ -1,5 +1,5 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import { CameraView } from 'expo-camera';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -8,15 +8,7 @@ import { BARCODE_TYPES } from './barcode-scanner.utils';
 export const BarcodeScanner = ({ onBarcodeScanned }) => {
     const styles = useStyles();
     const { t } = useTranslation();
-    return (<>
-      <View style={styles.cameraContainer}>
-        <CameraView style={[StyleSheet.absoluteFillObject, styles.camera]} onBarcodeScanned={onBarcodeScanned} barcodeScannerSettings={{ barcodeTypes: BARCODE_TYPES }} facing="back"/>
-      </View>
-
-      <Text variant="bodySmall" style={styles.instruction}>
-        {t('common:barcodeScanner.scanBarcodeInstruction')}
-      </Text>
-    </>);
+    return (_jsxs(_Fragment, { children: [_jsx(View, { style: styles.cameraContainer, children: _jsx(CameraView, { style: [StyleSheet.absoluteFillObject, styles.camera], onBarcodeScanned: onBarcodeScanned, barcodeScannerSettings: { barcodeTypes: BARCODE_TYPES }, facing: "back" }) }), _jsx(Text, { variant: "bodySmall", style: styles.instruction, children: t('common:barcodeScanner.scanBarcodeInstruction') })] }));
 };
 const DIALOG_HEADER_AND_FOOTER_HEIGHT = 200;
 const MAX_CAMERA_HEIGHT = 560;

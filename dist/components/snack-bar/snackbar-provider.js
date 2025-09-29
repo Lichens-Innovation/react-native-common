@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { InteractionManager } from 'react-native';
 import { Snackbar } from 'react-native-paper';
@@ -25,12 +26,6 @@ export const SnackbarProvider = ({ children }) => {
         const timeoutId = setTimeout(() => setVisibility(false), duration);
         return () => clearTimeout(timeoutId);
     }, [isVisible, duration, setVisibility]);
-    return (<SnackbarContext.Provider value={{ showSnackbarMessage }}>
-      {children}
-
-      <Snackbar visible={isVisible} onDismiss={() => setVisibility(false)} duration={Snackbar.DURATION_LONG}>
-        {message}
-      </Snackbar>
-    </SnackbarContext.Provider>);
+    return (_jsxs(SnackbarContext.Provider, { value: { showSnackbarMessage }, children: [children, _jsx(Snackbar, { visible: isVisible, onDismiss: () => setVisibility(false), duration: Snackbar.DURATION_LONG, children: message })] }));
 };
 //# sourceMappingURL=snackbar-provider.js.map

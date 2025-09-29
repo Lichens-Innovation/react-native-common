@@ -1,5 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { router, useLocalSearchParams } from 'expo-router';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Button, Card, Text } from 'react-native-paper';
@@ -9,32 +9,7 @@ export const ErrorBoundaryScreen = () => {
     const styles = useStyles();
     const { t } = useTranslation();
     const { title, description, id } = useLocalSearchParams();
-    return (<View style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Title title={title} titleStyle={styles.errorText}/>
-
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.label}>
-            ID:
-          </Text>
-          <Text variant="bodySmall">{id}</Text>
-
-          <Text variant="titleMedium" style={styles.label}>
-            Description:
-          </Text>
-          <Text variant="bodySmall">{description}</Text>
-        </Card.Content>
-
-        <Card.Actions>
-          <Button mode="outlined" onPress={shareCurrentLogsFile}>
-            {t('common:errorBoundary.details')}
-          </Button>
-          <Button mode="contained" onPress={() => router.replace('/')}>
-            {t('common:close')}
-          </Button>
-        </Card.Actions>
-      </Card>
-    </View>);
+    return (_jsx(View, { style: styles.container, children: _jsxs(Card, { style: styles.card, children: [_jsx(Card.Title, { title: title, titleStyle: styles.errorText }), _jsxs(Card.Content, { children: [_jsx(Text, { variant: "titleMedium", style: styles.label, children: "ID:" }), _jsx(Text, { variant: "bodySmall", children: id }), _jsx(Text, { variant: "titleMedium", style: styles.label, children: "Description:" }), _jsx(Text, { variant: "bodySmall", children: description })] }), _jsxs(Card.Actions, { children: [_jsx(Button, { mode: "outlined", onPress: shareCurrentLogsFile, children: t('common:errorBoundary.details') }), _jsx(Button, { mode: "contained", onPress: () => router.replace('/'), children: t('common:close') })] })] }) }));
 };
 const useStyles = () => {
     const theme = useAppTheme();

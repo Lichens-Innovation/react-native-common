@@ -1,8 +1,9 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { LegendList } from '@legendapp/list';
 import { useToggle } from '@uidotdev/usehooks';
 import { format } from 'date-fns';
 import { filesize } from 'filesize';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Button, Icon, IconButton, List, Text } from 'react-native-paper';
@@ -24,29 +25,15 @@ export const EventLogsScreen = () => {
             .then(() => setFiles([]))
             .finally(() => toggleDeleteConfirmVisibility());
     };
-    return (<View style={styles.container}>
-      <Text variant="titleMedium" style={styles.title}>
-        {t('common:eventLogs')}
-      </Text>
-
-      <LegendList data={files} renderItem={({ item }) => {
-            var _a, _b;
-            const title = item.uri.split('/').pop();
-            const updatedAt = 'modificationTime' in item ? new Date(((_a = item.modificationTime) !== null && _a !== void 0 ? _a : 0) * 1000) : new Date();
-            const formattedUpdatedAt = format(updatedAt, 'yyyy-MM-dd HH:mm:ss');
-            const size = 'size' in item ? filesize((_b = item.size) !== null && _b !== void 0 ? _b : 0) : '';
-            const description = `${formattedUpdatedAt} [ ${size} ]`;
-            return (<List.Item title={title} description={description} left={(props) => (<List.Icon {...props} icon={(props) => <Icon source="file-document" {...props}/>}/>)} right={() => (<IconButton iconColor={theme.colors.primary} icon="share" onPress={() => shareTextFile(item.uri)}/>)}/>);
-        }} estimatedItemSize={30}/>
-
-      <View style={styles.actions}>
-        <Button mode="outlined" icon="delete" onPress={() => toggleDeleteConfirmVisibility()}>
-          {t('common:delete')}
-        </Button>
-      </View>
-
-      <DialogOkCancel icon="alert" title={t('common:confirm')} description={t('common:deleteAllLogsFilesConfirmation')} isVisible={isDeleteDialogVisible} onOk={onDeleteConfirmed} onCancel={toggleDeleteConfirmVisibility}/>
-    </View>);
+    return (_jsxs(View, { style: styles.container, children: [_jsx(Text, { variant: "titleMedium", style: styles.title, children: t('common:eventLogs') }), _jsx(LegendList, { data: files, renderItem: ({ item }) => {
+                    var _a, _b;
+                    const title = item.uri.split('/').pop();
+                    const updatedAt = 'modificationTime' in item ? new Date(((_a = item.modificationTime) !== null && _a !== void 0 ? _a : 0) * 1000) : new Date();
+                    const formattedUpdatedAt = format(updatedAt, 'yyyy-MM-dd HH:mm:ss');
+                    const size = 'size' in item ? filesize((_b = item.size) !== null && _b !== void 0 ? _b : 0) : '';
+                    const description = `${formattedUpdatedAt} [ ${size} ]`;
+                    return (_jsx(List.Item, { title: title, description: description, left: (props) => (_jsx(List.Icon, Object.assign({}, props, { icon: (props) => _jsx(Icon, Object.assign({ source: "file-document" }, props)) }))), right: () => (_jsx(IconButton, { iconColor: theme.colors.primary, icon: "share", onPress: () => shareTextFile(item.uri) })) }));
+                }, estimatedItemSize: 30 }), _jsx(View, { style: styles.actions, children: _jsx(Button, { mode: "outlined", icon: "delete", onPress: () => toggleDeleteConfirmVisibility(), children: t('common:delete') }) }), _jsx(DialogOkCancel, { icon: "alert", title: t('common:confirm'), description: t('common:deleteAllLogsFilesConfirmation'), isVisible: isDeleteDialogVisible, onOk: onDeleteConfirmed, onCancel: toggleDeleteConfirmVisibility })] }));
 };
 const useStyles = () => {
     const theme = useAppTheme();

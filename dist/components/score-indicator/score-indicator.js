@@ -1,4 +1,4 @@
-import React from 'react';
+import { jsx as _jsx } from "react/jsx-runtime";
 import { StyleSheet, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
@@ -8,9 +8,7 @@ const ScoreIndicator = ({ score }) => {
     if (score === undefined || score === null) {
         return null;
     }
-    return (<View style={styles.container}>
-      <ProgressBar progress={score} color={getColorForPercentage(score)} style={styles.progressBar}/>
-    </View>);
+    return (_jsx(View, { style: styles.container, children: _jsx(ProgressBar, { progress: score, color: getColorForPercentage(score), style: styles.progressBar }) }));
 };
 const useStyles = () => {
     const theme = useAppTheme();

@@ -1,5 +1,5 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { observer } from 'mobx-react-lite';
-import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
@@ -13,15 +13,9 @@ export const SyntaxColoring = observer(({ code, language, maxCodeLength }) => {
     const style = commonStore.isDarkMode ? dark : light;
     const isSyntaxHighlightingEnabled = !maxCodeLength || code.length < maxCodeLength;
     if (isSyntaxHighlightingEnabled) {
-        return (<SyntaxHighlighter language={language} style={style} PreTag={PreTag} CodeTag={CodeTag}>
-        {code}
-      </SyntaxHighlighter>);
+        return (_jsx(SyntaxHighlighter, { language: language, style: style, PreTag: PreTag, CodeTag: CodeTag, children: code }));
     }
-    return (<ScrollView horizontal showsHorizontalScrollIndicator={true}>
-      <Text style={styles.codeText} numberOfLines={0}>
-        {code}
-      </Text>
-    </ScrollView>);
+    return (_jsx(ScrollView, { horizontal: true, showsHorizontalScrollIndicator: true, children: _jsx(Text, { style: styles.codeText, numberOfLines: 0, children: code }) }));
 });
 const styles = StyleSheet.create({
     codeText: {

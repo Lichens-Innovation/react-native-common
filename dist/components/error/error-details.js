@@ -1,4 +1,4 @@
-import React from 'react';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { Platform, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text } from 'react-native-paper';
@@ -6,12 +6,7 @@ import { useAppTheme } from '../../theme/theme';
 export const ErrorDetails = ({ error, title = 'Error' }) => {
     const styles = useStyles();
     const errorToStringify = Object.assign(Object.assign({}, error), { stack: undefined });
-    return (<ScrollView style={styles.container}>
-      <Text variant="bodySmall" style={styles.errorText}>
-        {title}
-      </Text>
-      <Text style={styles.jsonText}>{JSON.stringify(errorToStringify, null, 2)}</Text>
-    </ScrollView>);
+    return (_jsxs(ScrollView, { style: styles.container, children: [_jsx(Text, { variant: "bodySmall", style: styles.errorText, children: title }), _jsx(Text, { style: styles.jsonText, children: JSON.stringify(errorToStringify, null, 2) })] }));
 };
 const useStyles = () => {
     const theme = useAppTheme();

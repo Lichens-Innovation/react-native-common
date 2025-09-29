@@ -9,6 +9,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 import { Button, Dialog, Portal, Text } from 'react-native-paper';
@@ -26,22 +27,7 @@ export const DialogOkCancel = (_a) => {
     if (!isVisible) {
         return null;
     }
-    return (<Portal>
-      <Dialog style={[styles.dialog, dialogStyleProp]} visible={true} onDismiss={onCancel} {...dialogProps}>
-        {hasIcon && <Dialog.Icon icon={icon}/>}
-
-        {hasTitle && <Dialog.Title>{hasTitleString ? <Text>{title}</Text> : title}</Dialog.Title>}
-
-        {hasDescription && (<Dialog.Content>{hasDescriptionString ? <Text>{description}</Text> : description}</Dialog.Content>)}
-
-        <Dialog.Actions>
-          <Button onPress={onCancel}>{t('common:cancel')}</Button>
-          <Button style={styles.button} mode="contained" onPress={onOk}>
-            {t('common:ok')}
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>);
+    return (_jsx(Portal, { children: _jsxs(Dialog, Object.assign({ style: [styles.dialog, dialogStyleProp], visible: true, onDismiss: onCancel }, dialogProps, { children: [hasIcon && _jsx(Dialog.Icon, { icon: icon }), hasTitle && _jsx(Dialog.Title, { children: hasTitleString ? _jsx(Text, { children: title }) : title }), hasDescription && (_jsx(Dialog.Content, { children: hasDescriptionString ? _jsx(Text, { children: description }) : description })), _jsxs(Dialog.Actions, { children: [_jsx(Button, { onPress: onCancel, children: t('common:cancel') }), _jsx(Button, { style: styles.button, mode: "contained", onPress: onOk, children: t('common:ok') })] })] })) }));
 };
 const useStyles = () => {
     const { width, alignSelf } = useDialogStyles();

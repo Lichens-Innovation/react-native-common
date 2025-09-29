@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
@@ -9,15 +10,10 @@ export const DropDownSelector = ({ label, value, onChange, isError, options, pla
     const [isFocus, setIsFocus] = useState(false);
     const hasLabel = !!label;
     const styles = useStyles({ isFocus, hasLabel });
-    return (<View>
-      {hasLabel && (<Text variant='bodySmall' style={[styles.dropdownTitle, isFocus && { color: primary }, isError && { color: error }]}>{label}</Text>)}
-
-      <Dropdown style={[styles.dropdown, isFocus && { borderColor: primary }, isError && { borderColor: error }]} autoScroll={false} // @see https://github.com/hoaphantn7604/react-native-element-dropdown/issues/345
-     placeholderStyle={styles.placeholderStyle} selectedTextStyle={styles.selectedTextStyle} inputSearchStyle={styles.inputSearchStyle} iconStyle={styles.iconStyle} data={options} search={false} maxHeight={300} labelField="label" valueField="value" placeholder={isFocus ? '' : placeholder} searchPlaceholder={searchPlaceholder} value={value} onFocus={() => setIsFocus(true)} onBlur={() => setIsFocus(false)} onChange={({ value }) => {
-            onChange(value);
-            setIsFocus(false);
-        }}/>
-    </View>);
+    return (_jsxs(View, { children: [hasLabel && (_jsx(Text, { variant: 'bodySmall', style: [styles.dropdownTitle, isFocus && { color: primary }, isError && { color: error }], children: label })), _jsx(Dropdown, { style: [styles.dropdown, isFocus && { borderColor: primary }, isError && { borderColor: error }], autoScroll: false, placeholderStyle: styles.placeholderStyle, selectedTextStyle: styles.selectedTextStyle, inputSearchStyle: styles.inputSearchStyle, iconStyle: styles.iconStyle, data: options, search: false, maxHeight: 300, labelField: "label", valueField: "value", placeholder: isFocus ? '' : placeholder, searchPlaceholder: searchPlaceholder, value: value, onFocus: () => setIsFocus(true), onBlur: () => setIsFocus(false), onChange: ({ value }) => {
+                    onChange(value);
+                    setIsFocus(false);
+                } })] }));
 };
 const useStyles = ({ isFocus, hasLabel }) => {
     const theme = useAppTheme();

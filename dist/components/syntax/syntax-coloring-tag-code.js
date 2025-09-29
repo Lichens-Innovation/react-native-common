@@ -9,17 +9,13 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-import React from 'react';
+import { jsx as _jsx } from "react/jsx-runtime";
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { getMonospaceFontName } from '../../utils/font.utils';
 export const CodeTag = (_a) => {
     var { children, style } = _a, props = __rest(_a, ["children", "style"]);
     const styles = useStyles();
-    return (<ScrollView horizontal={true}>
-      <Text style={[styles.codeText, style]} {...props}>
-        {children}
-      </Text>
-    </ScrollView>);
+    return (_jsx(ScrollView, { horizontal: true, children: _jsx(Text, Object.assign({ style: [styles.codeText, style] }, props, { children: children })) }));
 };
 const useStyles = () => {
     return StyleSheet.create({
