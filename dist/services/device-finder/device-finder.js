@@ -1,6 +1,5 @@
 import Zeroconf from 'react-native-zeroconf';
 import { logger } from '../../logger/logger';
-import { commonSettingsStore } from '../../store/common-settings.store';
 export class DeviceFinder {
     constructor() {
         this.type = '';
@@ -43,7 +42,6 @@ export class DeviceFinder {
             return;
         }
         this.discoveredDevices.push(bonjourDevice);
-        commonSettingsStore.setLastKnownCameraIP(bonjourDevice.addresses[0]);
         this.onSuccessCallback();
     }
     onScanFailure(error) {
