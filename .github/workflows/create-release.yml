@@ -1,0 +1,103 @@
+name: Create release
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write  # required for GitHub Packages publish
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+
+      - name: Check yarn version
+        run: yarn --version
+
+      - name: Configure npm authentication
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run unit tests
+        run: yarn test
+
+      - name: Check if version changed
+        id: check
+        run: |
+          CURRENT_VERSION=$(jq -r .version package.json)
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Fetch all tags to ensure we have them
+          git fetch --tags
+          
+          # Get the latest tag, sorted by version
+          LATEST_TAG=$(git tag -l "v*" | sort -V | tail -n1)
+          
+          # If no tags found, use default
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+          
+          echo "Latest tag: $LATEST_TAG"
+
+          LATEST_VERSION=${LATEST_TAG#v}
+
+          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ];
+          then
+            echo "Version changed"
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Version not changed"
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build the project
+        if: steps.check.outputs.version_changed == 'true'
+        run: yarn build
+
+      - name: Configure Git
+        if: steps.check.outputs.version_changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Commit dist/ folder
+        if: steps.check.outputs.version_changed == 'true'
+        run: |
+          git add dist/
+          if git diff --staged --quiet; then
+            echo "No changes to commit in dist/ folder"
+          else
+            git commit -m "chore: add dist/ for v${{ steps.check.outputs.new_version }}"
+            git push origin main
+          fi
+
+      - name: Publish to GitHub Packages
+        if: steps.check.outputs.version_changed == 'true'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag release
+        if: steps.check.outputs.version_changed == 'true'
+        run: |
+          git tag -a "v${{ steps.check.outputs.new_version }}" -m "v${{ steps.check.outputs.new_version }}"
+          git push origin "v${{ steps.check.outputs.new_version }}"
