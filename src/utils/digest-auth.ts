@@ -1,5 +1,5 @@
-import { md5 } from '@noble/hashes/legacy';
-import { bytesToHex } from '@noble/hashes/utils';
+import { md5 } from '@noble/hashes/legacy.js';
+import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
 import { AxiosRequestConfig } from 'axios';
 import { produce } from 'immer';
 import { logger } from '../logger/logger';
@@ -36,7 +36,7 @@ export class DigestAuth {
   }
 
   private md5(str: string): string {
-    return bytesToHex(md5(str));
+    return bytesToHex(md5(utf8ToBytes(str)));
   }
 
   private getRandomBytes(length: number): Uint8Array {
