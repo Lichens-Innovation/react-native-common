@@ -47,7 +47,7 @@ This repository contains common components, utilities, and services used across 
 ### Installation
 
 ```bash
-yarn add @lichens/react-native-common
+yarn add @Lichens-Innovation/react-native-common
 ```
 
 ### Basic Usage Example
