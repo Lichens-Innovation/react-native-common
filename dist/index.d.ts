@@ -1,5 +1,5 @@
 export * from './components';
-export * from './config/env.config';
+export * from './config';
 export * from './hooks';
 export * from './i18n';
 export * from './logger';
