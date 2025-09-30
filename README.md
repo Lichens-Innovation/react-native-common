@@ -1,4 +1,4 @@
-# Rinno React Common Module
+# React Native Common Module
 
 This repository contains common components, utilities, and services used across React Native Expo applications.
 
@@ -32,14 +32,9 @@ This repository contains common components, utilities, and services used across 
 
 ## Installation
 
-1. Clone the repository:
    ```bash
    git clone https://github.com/Lichens-Innovation/react-native-common.git
    cd react-native-common
-   ```
-
-2. Install dependencies:
-   ```bash
    yarn install
    ```
 
