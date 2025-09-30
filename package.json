@@ -3,7 +3,7 @@
   "description": "Lichens Innovation React Native Expo shared components, utilities and services",
   "repository": "https://github.com/Lichens-Innovation/react-native-common",
   "author": "Lichens Innovation",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
