@@ -55,9 +55,9 @@ yarn add @lichens/react-native-common
 Here's how to import and use the `DialogOkCancel` component:
 
 ```tsx
+import { DialogOkCancel } from '@Lichens-Innovation/react-native-common';
 import React, { useState } from 'react';
-import { View, Button } from 'react-native';
-import { DialogOkCancel } from '@lichens/react-native-common';
+import { Button } from 'react-native-paper';
 
 export const MyComponent = () => {
   const [showDialog, setShowDialog] = useState(false);
@@ -73,7 +73,7 @@ export const MyComponent = () => {
   };
 
   return (
-    <View>
+    <>
       <Button 
         title="Show Dialog" 
         onPress={() => setShowDialog(true)} 
@@ -86,7 +86,7 @@ export const MyComponent = () => {
         onOk={handleOk}
         onCancel={handleCancel}
       />
-    </View>
+    </>
   );
 };
 ```
