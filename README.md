@@ -1,3 +1,21 @@
+- [React Native Common Module](#react-native-common-module)
+  - [Reusable Components](#reusable-components)
+  - [Services, Utilities and Hooks](#services-utilities-and-hooks)
+  - [Consume in a project](#consume-in-a-project)
+    - [Installation](#installation)
+    - [Basic Usage Example](#basic-usage-example)
+  - [Contributions](#contributions)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation-1)
+    - [Scripts](#scripts)
+  - [Peer Dependencies](#peer-dependencies)
+    - [Why Peer Dependencies?](#why-peer-dependencies)
+    - [Our Implementation Strategy](#our-implementation-strategy)
+    - [Why devDependencies + peerDependencies?](#why-devdependencies--peerdependencies)
+  - [WinRT integration](#winrt-integration)
+  - [Project coding guidelines](#project-coding-guidelines)
+  - [License](#license)
+
 # React Native Common Module
 
 This repository contains common components, utilities, and services used across React Native Expo applications.
@@ -9,7 +27,7 @@ This repository contains common components, utilities, and services used across 
 - various interactive components (dropdowns, bottom sheets, etc.)
 - global theme and light/dark modes support
 
-### Services, Utilities and Hooks
+## Services, Utilities and Hooks
 
 - `@tanstack/react-query` hooks
 - `MMKV`-based efficient data persistence (native storage solution)
@@ -24,21 +42,74 @@ This repository contains common components, utilities, and services used across 
 - various helper functions (strings, dates, base64...)
 - types, interfaces, constants
 
-## Prerequisites
+## Consume in a project
+
+### Installation
+
+```bash
+yarn add @lichens/react-native-common
+```
+
+### Basic Usage Example
+
+Here's how to import and use the `DialogOkCancel` component:
+
+```tsx
+import React, { useState } from 'react';
+import { View, Button } from 'react-native';
+import { DialogOkCancel } from '@lichens/react-native-common';
+
+export const MyComponent = () => {
+  const [showDialog, setShowDialog] = useState(false);
+
+  const handleOk = () => {
+    console.log('User confirmed');
+    setShowDialog(false);
+  };
+
+  const handleCancel = () => {
+    console.log('User cancelled');
+    setShowDialog(false);
+  };
+
+  return (
+    <View>
+      <Button 
+        title="Show Dialog" 
+        onPress={() => setShowDialog(true)} 
+      />
+      
+      <DialogOkCancel
+        isVisible={showDialog}
+        title="Confirm Action"
+        description="Are you sure you want to proceed with this action?"
+        onOk={handleOk}
+        onCancel={handleCancel}
+      />
+    </View>
+  );
+};
+```
+
+## Contributions
+
+Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. If the version field in `package.json` is incremented, the build will be automatically triggered when the PR is merged into the `main` branch, and the new version will be published to our enterprise Git repository.
+
+### Prerequisites
 
 - Node.js (v16 or higher)
 - Yarn
 - React Native development environment set up (see [React Native documentation](https://reactnative.dev/docs/environment-setup))
 
-## Installation
+### Installation
 
-   ```bash
-   git clone https://github.com/Lichens-Innovation/react-native-common.git
-   cd react-native-common
-   yarn install
-   ```
+```bash
+git clone https://github.com/Lichens-Innovation/react-native-common.git
+cd react-native-common
+yarn install
+```
 
-## Scripts
+### Scripts
 
 | Command           | Description                                         |
 |-------------------|-----------------------------------------------------|
