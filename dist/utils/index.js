@@ -22,7 +22,6 @@ export * from './sharing.utils';
 export * from './sqlite.utils';
 export * from './storage';
 export * from './string.utils';
-export * from './strings.utils.test';
 export * from './thread.utils';
 export * from './time.utils';
 export * from './types.utils';
