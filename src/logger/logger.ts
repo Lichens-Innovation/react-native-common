@@ -15,6 +15,7 @@ import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
 import { isDevelopment } from '../utils/env.utils';
 import { LOG_LEVELS, SimpleLogger } from './logger.utils';
+import { isNumber } from '~/utils';
 
 LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed from function components/]);
 
@@ -127,13 +128,18 @@ export const loadAllLogFilesInfo = async (): Promise<FileInfo[]> => {
     const files = await RNFS.readDir(filePath);
     const logFiles = files.filter((file) => file.isFile() && isLogFile(file.name));
 
-    const fileInfos: FileInfo[] = logFiles.map((file) => ({
-      exists: true,
-      isDirectory: false,
-      size: file.size,
-      modificationTime: file.mtime?.getTime(),
-      uri: file.path,
-    }));
+    const fileInfos: FileInfo[] = logFiles.map((file) => {
+      const mTime = file.mtime;
+      const modificationTime = isNumber(mTime) ? mTime : mTime?.getTime();
+
+      return {
+        exists: true,
+        isDirectory: false,
+        size: file.size,
+        modificationTime,
+        uri: file.path,
+      }
+    });
 
     return fileInfos
       .filter((info) => !!info?.exists) // only files that exist
