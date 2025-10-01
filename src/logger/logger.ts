@@ -9,8 +9,8 @@ import {
   transportFunctionType,
 } from 'react-native-logs';
 
+import RNFS from 'react-native-fs';
 import { getSentryDns, isSentryActivated } from '../config/env.config';
-import { nativeFileSystem } from '../services/files/native-file-system';
 import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
 import { isDevelopment } from '../utils/env.utils';
@@ -26,7 +26,7 @@ const bundleId = Platform.select({
 const appName = bundleId?.split('.').pop();
 const logFilenamePrefix = `app-logs-${appName}`;
 const logFilenamePattern = `${logFilenamePrefix}-{date-today}.txt`;
-const filePath = nativeFileSystem.documentDirectory ?? '';
+const filePath = RNFS.DocumentDirectoryPath ?? '';
 
 class LoggerWrapper implements SimpleLogger {
   private _logger: ReturnType<typeof RNLogger.createLogger>;
@@ -106,7 +106,7 @@ export const logger = new LoggerWrapper({
       error: 'error',
     },
     // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#fileasynctransport
-    FS: nativeFileSystem as any,
+    FS: RNFS,
     fileNameDateType: 'iso',
     fileName: logFilenamePattern,
     filePath,
@@ -119,16 +119,21 @@ const isLogFile = (fileName: string): boolean => {
 
 export const loadAllLogFilesInfo = async (): Promise<FileInfo[]> => {
   try {
-    const fileInfo = await nativeFileSystem.getInfoAsync(filePath);
-    if (!fileInfo.exists) {
+    const directoryExists = await RNFS.exists(filePath);
+    if (!directoryExists) {
       return [];
     }
 
-    const files = await nativeFileSystem.readDirectoryAsync(filePath);
-    const promises: Promise<FileInfo>[] = files
-      .filter(isLogFile)
-      .map((file) => nativeFileSystem.getInfoAsync(`${filePath}${file}`));
-    const fileInfos = await Promise.all(promises);
+    const files = await RNFS.readDir(filePath);
+    const logFiles = files.filter((file) => file.isFile() && isLogFile(file.name));
+
+    const fileInfos: FileInfo[] = logFiles.map((file) => ({
+      exists: true,
+      isDirectory: false,
+      size: file.size,
+      modificationTime: file.mtime?.getTime(),
+      uri: file.path,
+    }));
 
     return fileInfos
       .filter((info) => !!info?.exists) // only files that exist
@@ -146,15 +151,15 @@ export const loadCurrentLogsFileUri = async (): Promise<string> => {
 
 export const deleteAllLogFiles = async (): Promise<void> => {
   try {
-    const directoryInfo = await nativeFileSystem.getInfoAsync(filePath);
-    if (!directoryInfo.exists) {
+    const directoryExists = await RNFS.exists(filePath);
+    if (!directoryExists) {
       return;
     }
 
-    const files = await nativeFileSystem.readDirectoryAsync(filePath);
-    const deletePromises = files.filter(isLogFile).map(async (file) => {
-      await nativeFileSystem.deleteAsync(`${filePath}${file}`, { idempotent: true });
-    });
+    const files = await RNFS.readDir(filePath);
+    const logFiles = files.filter((file) => file.isFile() && isLogFile(file.name));
+
+    const deletePromises = logFiles.map((file) => RNFS.unlink(file.path));
 
     await Promise.all(deletePromises);
   } catch (error) {
