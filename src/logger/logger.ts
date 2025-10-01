@@ -14,8 +14,8 @@ import { getSentryDns, isSentryActivated } from '../config/env.config';
 import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
 import { isDevelopment } from '../utils/env.utils';
+import { isNumber } from '../utils/types.utils';
 import { LOG_LEVELS, SimpleLogger } from './logger.utils';
-import { isNumber } from '~/utils';
 
 LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed from function components/]);
 
