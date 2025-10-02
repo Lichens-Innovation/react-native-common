@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/react-native';
-import Constants from 'expo-constants';
-import { InteractionManager, LogBox, Platform } from 'react-native';
+import { InteractionManager, LogBox } from 'react-native';
 import {
   fileAsyncTransport,
   mapConsoleTransport,
@@ -13,18 +12,14 @@ import RNFS from 'react-native-fs';
 import { getSentryDns, isSentryActivated } from '../config/env.config';
 import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
+import { getAppIdentifier } from '../utils/device.utils';
 import { isDevelopment } from '../utils/env.utils';
 import { isString } from '../utils/types.utils';
 import { LOG_LEVELS, SimpleLogger } from './logger.utils';
 
 LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed from function components/]);
 
-const bundleId = Platform.select({
-  ios: Constants.expoConfig?.ios?.bundleIdentifier,
-  android: Constants.expoConfig?.android?.package,
-  default: 'com.rinnovision.app',
-});
-const appName = bundleId?.split('.').pop();
+const appName = getAppIdentifier();
 const logFilenamePrefix = `app-logs-${appName}`;
 const logFilenamePattern = `${logFilenamePrefix}-{date-today}.txt`;
 const filePath = RNFS.DocumentDirectoryPath ?? '';

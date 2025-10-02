@@ -10,7 +10,7 @@ class LoggerWrapper implements SimpleLogger {
   private _file: Windows.Storage.IStorageFile | null = null;
 
   get todayFilename(): string {
-    return `rinno-desktop-${format(new Date(), 'yyyy-MM-dd')}.log`;
+    return `desktop-${format(new Date(), 'yyyy-MM-dd')}.log`;
   }
 
   private async createTodayFile(): Promise<Windows.Storage.IStorageFile> {
