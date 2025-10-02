@@ -39,7 +39,7 @@ export const EventLogsScreen: FunctionComponent = () => {
         data={files}
         renderItem={({ item }: { item: FileInfo }) => {
           const title = item.uri.split('/').pop();
-          const updatedAt = 'modificationTime' in item ? new Date((item.modificationTime ?? 0) * 1000) : new Date();
+          const updatedAt = 'modificationTime' in item ? new Date((item.modificationTime ?? 0)) : new Date();
           const formattedUpdatedAt = format(updatedAt, 'yyyy-MM-dd HH:mm:ss');
           const size = 'size' in item ? filesize(item.size ?? 0) : '';
           const description = `${formattedUpdatedAt} [ ${size} ]`;

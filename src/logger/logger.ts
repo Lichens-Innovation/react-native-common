@@ -14,7 +14,7 @@ import { getSentryDns, isSentryActivated } from '../config/env.config';
 import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
 import { isDevelopment } from '../utils/env.utils';
-import { isNumber } from '../utils/types.utils';
+import { isString } from '../utils/types.utils';
 import { LOG_LEVELS, SimpleLogger } from './logger.utils';
 
 LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed from function components/]);
@@ -130,7 +130,8 @@ export const loadAllLogFilesInfo = async (): Promise<FileInfo[]> => {
 
     const fileInfos: FileInfo[] = logFiles.map((file) => {
       const mTime = file.mtime;
-      const modificationTime = isNumber(mTime) ? mTime : mTime?.getTime();
+      const isTimestampString = isString(mTime);
+      const modificationTime = isTimestampString ? new Date(mTime).getTime() : mTime?.getTime();
 
       return {
         exists: true,
@@ -138,7 +139,7 @@ export const loadAllLogFilesInfo = async (): Promise<FileInfo[]> => {
         size: file.size,
         modificationTime,
         uri: file.path,
-      }
+      };
     });
 
     return fileInfos
