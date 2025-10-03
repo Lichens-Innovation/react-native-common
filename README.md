@@ -44,7 +44,17 @@ This repository contains common components, utilities, and services used across 
 
 ## Consume in a project
 
+Depending on your Expo SDK version, here are the compatibility table for `react-native-common` module:
+
+| Version Family | Expo SDK Version | Description                                           |
+|----------------|------------------|-------------------------------------------------------|
+| 1.x.y          | SDK 52, SDK 53   | Compatible with applications using Expo SDK 52 and 53 |
+| 2.x.y          | SDK 54           | Compatible with applications using Expo SDK 54        |
+| 3.x.y          | SDK 55           | Compatible with applications using Expo SDK 55        |
+
 ### Installation
+
+The following will install the latest available version:
 
 ```bash
 yarn add @Lichens-Innovation/react-native-common
@@ -117,7 +127,7 @@ yarn install
 | `yarn clean:node` | Removes node_modules directories and yarn.lock file |
 | `yarn clean:dist` | Removes the dist directory                          |
 | `yarn test`       | Runs tests using Vitest                             |
-| `yarn typecheck` | Checks TypeScript types without emitting files       |
+| `yarn typecheck`  | Checks TypeScript types without emitting files      |
 
 
 ## Peer Dependencies

@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { logger } from '../../logger/logger';
 import { getErrorMessage } from '../../utils/errors.utils';
 import {
