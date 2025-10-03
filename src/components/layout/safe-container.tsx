@@ -1,6 +1,7 @@
 import { FunctionComponent, PropsWithChildren } from 'react';
-import { SafeAreaView, StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAnimateOnFocus } from '../../hooks/use-animate-on-focus';
 
 type SafeContainerProps = PropsWithChildren<{
