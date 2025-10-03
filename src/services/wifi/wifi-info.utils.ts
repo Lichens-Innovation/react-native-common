@@ -4,6 +4,7 @@ import { logger } from '../../logger/logger';
 import { isRealDevice } from '../../utils/device.utils';
 import { DEFAULT_CONNECT_WIFI_TIMEOUT, toWifiInfoArray, WifiInfo } from './wifi-info.types';
 import { fetchAvailableWifiListSimulator, fetchWifiInfosSimulator } from './wifi-info.utils.simulator';
+import { Platform } from 'react-native';
 
 export const fetchWifiInfo = async (): Promise<WifiInfo> => {
   if (!isRealDevice()) {
@@ -11,8 +12,11 @@ export const fetchWifiInfo = async (): Promise<WifiInfo> => {
   }
 
   try {
+    logger.info('[fetchWifiInfo] requesting location permission');
     await requestLocationPermission();
+    logger.info('[fetchWifiInfo] location permission requested');
 
+    logger.info('[fetchWifiInfo] calling WifiManager.getCurrentWifiSSID');
     const [ssid, signalStrength, ip] = await Promise.all([
       WifiManager.getCurrentWifiSSID(),
       // the following methods are not implemented on all platforms:
@@ -68,10 +72,22 @@ export const connectToWiFi = async ({
 };
 
 export const disconnectFromWiFi = async (): Promise<void> => {
+  logger.info('[disconnectFromWiFi]: disconnecting from WiFi');
+
   try {
-    logger.info('[disconnectFromWiFi]: disconnecting from WiFi');
-    await WifiManager.disconnect();
-    logger.info('[disconnectFromWiFi]: Disconnected from WiFi');
+    const ssid = await WifiManager.getCurrentWifiSSID();
+    logger.info(`[disconnectFromWiFi]: Current WiFi SSID: ${ssid}`);
+
+    if (Platform.OS === 'ios') {
+      await WifiManager.disconnectFromSSID(ssid);
+    } else if (Platform.OS === 'android') {
+      const result = await WifiManager.disconnect();
+      logger.info(`[disconnectFromWiFi]: Disconnected from WiFi result: ${result}`);
+    } else {
+     logger.info(`[disconnectFromWiFi]: Unsupported platform: ${Platform.OS}`);
+    }
+
+    logger.info('[disconnectFromWiFi]: Disconnected from WiFi ended.');
   } catch (e: unknown) {
     logger.error('[disconnectFromWiFi]: Error disconnecting from WiFi', e);
     throw e;
@@ -81,6 +97,12 @@ export const disconnectFromWiFi = async (): Promise<void> => {
 export const fetchAvailableWifiList = async (): Promise<WifiInfo[]> => {
   if (!isRealDevice()) {
     return fetchAvailableWifiListSimulator();
+  }
+
+  if (Platform.OS === 'ios') {
+    // Apple does not allow third-party apps to scan surrounding WiFi networks.
+    logger.info('[fetchAvailableWifiList] returning empty array for iOS');
+    return [];
   }
 
   try {
