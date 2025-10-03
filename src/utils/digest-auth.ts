@@ -3,6 +3,7 @@ import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
 import { AxiosRequestConfig } from 'axios';
 import { produce } from 'immer';
 import { logger } from '../logger/logger';
+import { sanitizeUrl } from '../logger/logger.utils';
 import axiosInstance from './axios.config';
 import { validateGetRandomValues } from './env.utils';
 
@@ -123,7 +124,7 @@ export class DigestAuth {
   async request(config: AxiosRequestConfig): Promise<any> {
     try {
       const method = config.method?.toUpperCase() ?? 'GET';
-      logger.debug(`[DigestAuth] ${method}: ${config.url}`);
+      logger.debug(`[DigestAuth] ${method}: ${sanitizeUrl(config.url)}`);
       const response = await axiosInstance(config);
       logger.debug(`[DigestAuth] response status: ${response.status}`);
 
@@ -176,7 +177,7 @@ export class DigestAuth {
       };
     });
 
-    logger.debug(`[DigestAuth] emitting 2nd request with new config for url: ${config.url}`);
+    logger.debug(`[DigestAuth] emitting 2nd request with new config for url: ${sanitizeUrl(config.url)}`);
     return axiosInstance(newConfig);
   }
 }

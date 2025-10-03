@@ -9,3 +9,6 @@ export const PeriodsInMilliseconds = {
   oneHour: ONE_HOUR_IN_MS,
   oneDay: ONE_DAY_IN_MS,
 } as const;
+
+// shorter alias for PeriodsInMilliseconds
+export const PeriodsInMS = PeriodsInMilliseconds;

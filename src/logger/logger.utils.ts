@@ -49,6 +49,15 @@ export const logRequestStart = (request: InternalAxiosRequestConfig) => {
   return request;
 };
 
+export const sanitizeUrl = (url?: string | null) => {
+  if (!url) return url;
+
+  // remove any user:password@ from the url
+  const regExp = /http:\/\/(.*):(.*)@(.*)/;
+  const isMatching = url.match(regExp);
+  return isMatching ? `http://${isMatching[3]}` : url;
+};
+
 export const logRequestEnd = (response: AxiosResponse) => {
   const { status, config } = response;
   const { method, baseURL, url } = config;
@@ -57,7 +66,8 @@ export const logRequestEnd = (response: AxiosResponse) => {
   const duration = startTime ? `(${Date.now() - startTime}ms)` : '';
 
   const { verb, fullUrl } = buildRequestLogInfos({ baseURL, url, method });
-  logger.info(`➡️ Axios ${verb} ${fullUrl} http ${status} ${duration}.`);
+  const sanitizedUrl = sanitizeUrl(fullUrl);
+  logger.info(`➡️ Axios ${verb} ${sanitizedUrl} http ${status} ${duration}.`);
 
   return response;
 };

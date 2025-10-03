@@ -1,4 +1,4 @@
-import { isNullish } from '../../utils/types.utils';
+import { PeriodsInMS } from '../../utils/time.utils';
 
 export interface WifiInfo {
   signalStrength: number;
@@ -20,38 +20,17 @@ interface WifiEntry {
   timestamp: number;
 }
 
-export const MIN_WIFI_PASSWORD_LENGTH = 8;
-
-export const RV_CAM_NETWORK_SSID_REGEX = /^RVMAX[_-][a-zA-Z0-9]+$/i;
-export const RINNO_CAM_NETWORK_SSID_REGEX = /^RVMAX\-[0-9]+$/;
-
-export const DEFAULT_CONNECT_WIFI_TIMEOUT = 10 * 1000;
-
-export const isRinnoNormalizedSSID = (ssid?: string): boolean => {
-  if (!ssid) {
-    return false;
-  }
-
-  return RINNO_CAM_NETWORK_SSID_REGEX.test(ssid);
-};
-
-export const getRVMaxWiFiDefaultPassword = (ssid?: string | null): string => {
-  if (isNullish(ssid) || isRinnoNormalizedSSID(ssid)) {
-    return 'RinnoVision';
-  }
-
-  return 'Rinnovision'; // legacy default password
-};
+export const DEFAULT_CONNECT_WIFI_TIMEOUT = 10 * PeriodsInMS.oneSecond;
 
 export const toWifiInfoArray = (networks: WifiEntry[]): WifiInfo[] => {
   if (!Array.isArray(networks)) {
     return [];
   }
 
-  return [...networks].map(toWifiInfo).sort(wifiNetworkComparator);
+  return [...networks].map(toWifiInfo);
 };
 
-const toWifiInfo = (network: WifiEntry): WifiInfo => {
+export const toWifiInfo = (network: WifiEntry): WifiInfo => {
   const { SSID, BSSID, level, capabilities, frequency, timestamp } = network;
 
   return {
@@ -63,20 +42,4 @@ const toWifiInfo = (network: WifiEntry): WifiInfo => {
     timestamp,
     isHidden: SSID === '(hidden SSID)',
   };
-};
-
-export const isRvCamNetwork = (ssid: string) => {
-  return RV_CAM_NETWORK_SSID_REGEX.test(ssid);
-};
-
-export const wifiNetworkComparator = (a: WifiInfo, b: WifiInfo) => {
-  if (isRvCamNetwork(a.ssid) && !isRvCamNetwork(b.ssid)) {
-    return -1;
-  }
-
-  if (!isRvCamNetwork(a.ssid) && isRvCamNetwork(b.ssid)) {
-    return 1;
-  }
-
-  return b.signalStrength - a.signalStrength;
 };

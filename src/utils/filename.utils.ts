@@ -15,7 +15,7 @@ type HandlebarTemplateWithArgs = {
 
 /**
  * Transforms a pattern string into a handlebars template string
- * Example: from "RVMAX360_{{{HH:mm:ss}}}" ===> "RVMAX360_{{timestampFormat timestamp arg1}}"
+ * Example: from "MyPrefix_{{{HH:mm:ss}}}" ===> "MyPrefix_{{timestampFormat timestamp arg1}}"
  *
  * @param inputPattern - the pattern string to transform
  * @returns the handlebars template string and the arguments
