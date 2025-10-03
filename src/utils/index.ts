@@ -15,6 +15,7 @@ export * from './font.utils';
 export * from './http.utils';
 export * from './image.utils';
 export * from './licences.utils';
+export * from './linking.utils';
 export * from './network.utils';
 export * from './platform.utils';
 export * from './regex';
