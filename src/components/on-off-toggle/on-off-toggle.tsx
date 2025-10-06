@@ -16,8 +16,8 @@ interface OnOffToggleProps {
 
 export const OnOffToggle: FunctionComponent<OnOffToggleProps> = ({ isOn, onValueChange, style }) => {
   const theme = useAppTheme();
-  const currentValue = isOn ? OnOffState.on : OnOffState.off;
   const checkedColor = theme.colors.primary;
+  const uncheckedColor = theme.colors.tertiary;
 
   return (
     <SegmentedButtons
@@ -27,14 +27,14 @@ export const OnOffToggle: FunctionComponent<OnOffToggleProps> = ({ isOn, onValue
         {
           value: OnOffState.on,
           icon: 'play',
-          disabled: currentValue === OnOffState.on,
           checkedColor,
+          uncheckedColor,
         },
         {
           value: OnOffState.off,
           icon: 'stop',
-          disabled: currentValue === OnOffState.off,
           checkedColor,
+          uncheckedColor,
         },
       ]}
       style={style}
