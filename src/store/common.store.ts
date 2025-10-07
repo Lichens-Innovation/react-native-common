@@ -16,15 +16,16 @@ class CommonStore {
       name: 'CommonStore',
       properties: ['isDarkMode'],
       storage: mmkvStorageForMobxPersist,
+    }).then(() => {
+      logger.info('[CommonStore] Hydration complete');
     });
 
+    // Note: no need to remove the listener since it's attached to the lifecycle of the running app
     AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
-      if (nextAppState === this.appStatus) {
-        return;
-      }
+      if (nextAppState === this.appStatus) return;
 
-      logger.info(`[CommonStore] App state changed to ${nextAppState}`);
       runInAction(() => {
+        logger.info(`[CommonStore] App state changed to ${nextAppState}`);
         this.appStatus = nextAppState;
       });
     });
