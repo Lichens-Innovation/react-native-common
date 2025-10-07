@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { makePersistable } from 'mobx-persist-store';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
 import { logger } from '../logger/logger';
 import { mmkvStorageForMobxPersist } from '../utils/storage';
 
@@ -9,6 +9,7 @@ const DEFAULT_DARK_MODE = true;
 class CommonStore {
   isDarkMode: boolean = DEFAULT_DARK_MODE;
   appStatus: AppStateStatus = 'active';
+  appStateSubscription?: NativeEventSubscription;
 
   constructor() {
     makeAutoObservable(this);
@@ -20,8 +21,7 @@ class CommonStore {
       logger.info('[CommonStore] Hydration complete');
     });
 
-    // Note: no need to remove the listener since it's attached to the lifecycle of the running app
-    AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+    this.appStateSubscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
       if (nextAppState === this.appStatus) return;
 
       runInAction(() => {
@@ -37,6 +37,10 @@ class CommonStore {
 
   setIsDarkMode(isDarkMode: boolean) {
     this.isDarkMode = isDarkMode;
+  }
+
+  dispose() {
+    this.appStateSubscription?.remove();
   }
 }
 
