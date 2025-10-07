@@ -1,10 +1,10 @@
 import * as Location from 'expo-location';
+import { Platform } from 'react-native';
 import WifiManager from 'react-native-wifi-reborn';
 import { logger } from '../../logger/logger';
 import { isRealDevice } from '../../utils/device.utils';
 import { DEFAULT_CONNECT_WIFI_TIMEOUT, toWifiInfoArray, WifiInfo } from './wifi-info.types';
 import { fetchAvailableWifiListSimulator, fetchWifiInfosSimulator } from './wifi-info.utils.simulator';
-import { Platform } from 'react-native';
 
 export const fetchWifiInfo = async (): Promise<WifiInfo> => {
   if (!isRealDevice()) {
@@ -12,9 +12,7 @@ export const fetchWifiInfo = async (): Promise<WifiInfo> => {
   }
 
   try {
-    logger.info('[fetchWifiInfo] requesting location permission');
     await requestLocationPermission();
-    logger.info('[fetchWifiInfo] location permission requested');
 
     logger.info('[fetchWifiInfo] calling WifiManager.getCurrentWifiSSID');
     const [ssid, signalStrength, ip] = await Promise.all([
@@ -84,7 +82,7 @@ export const disconnectFromWiFi = async (): Promise<void> => {
       const result = await WifiManager.disconnect();
       logger.info(`[disconnectFromWiFi]: Disconnected from WiFi result: ${result}`);
     } else {
-     logger.info(`[disconnectFromWiFi]: Unsupported platform: ${Platform.OS}`);
+      logger.info(`[disconnectFromWiFi]: Unsupported platform: ${Platform.OS}`);
     }
 
     logger.info('[disconnectFromWiFi]: Disconnected from WiFi ended.');
@@ -124,7 +122,14 @@ export const fetchAvailableWifiList = async (): Promise<WifiInfo[]> => {
 };
 
 export const requestLocationPermission = async (): Promise<void> => {
+  const currentStatus = await Location.getForegroundPermissionsAsync();
+  if (currentStatus.status === 'granted') {
+    return;
+  }
+
+  logger.info('[requestLocationPermission] requesting location permission');
   const { status } = await Location.requestForegroundPermissionsAsync();
+  logger.info(`[requestLocationPermission] location permission requested, result: ${status}`);
 
   if (status !== 'granted') {
     throw new Error(`Location permission not granted: ${status}`);

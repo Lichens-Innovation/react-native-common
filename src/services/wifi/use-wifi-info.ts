@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, AppState, AppStateStatus } from 'react-native';
+import { Alert } from 'react-native';
 
 import { useSnackbar } from '../../components/snack-bar/snackbar-provider';
 import { logger } from '../../logger/logger';
@@ -136,18 +136,4 @@ export const useLoadAvailableWifiListErrorSnackbar = () => {
       showSnackbarMessage(message);
     }
   }, [isErrorNetworks, errorNetworks, t, showSnackbarMessage]);
-};
-
-export const useRefreshWifiOnActiveAppState = () => {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
-      if (nextAppState === 'active') {
-        queryClient.invalidateQueries({ queryKey: WifiDiagnoseQueryKey.details() });
-      }
-    });
-
-    return () => subscription.remove();
-  }, []);
 };

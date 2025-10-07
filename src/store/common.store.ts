@@ -1,11 +1,14 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { makePersistable } from 'mobx-persist-store';
+import { AppState, AppStateStatus } from 'react-native';
+import { logger } from '../logger/logger';
 import { mmkvStorageForMobxPersist } from '../utils/storage';
 
 const DEFAULT_DARK_MODE = true;
 
 class CommonStore {
   isDarkMode: boolean = DEFAULT_DARK_MODE;
+  appStatus: AppStateStatus = 'active';
 
   constructor() {
     makeAutoObservable(this);
@@ -13,6 +16,17 @@ class CommonStore {
       name: 'CommonStore',
       properties: ['isDarkMode'],
       storage: mmkvStorageForMobxPersist,
+    });
+
+    AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === this.appStatus) {
+        return;
+      }
+
+      logger.info(`[CommonStore] App state changed to ${nextAppState}`);
+      runInAction(() => {
+        this.appStatus = nextAppState;
+      });
     });
   }
 
