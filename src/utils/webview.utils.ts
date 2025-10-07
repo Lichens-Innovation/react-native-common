@@ -9,6 +9,13 @@ export const htmlDocumentMessage = (message = {}) => {
     `;
 };
 
+export const htmlDocumentRawMessage = (message = '') => {
+  return `
+      window.onReactNativeMessage("${message}");
+      true;
+    `;
+};
+
 interface LogIncomingHtmlDocMessageArgs {
   type?: LoggerMethods;
   log?: string;
