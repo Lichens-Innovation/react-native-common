@@ -1,6 +1,6 @@
+import { useIsFocused } from '@react-navigation/native';
 import { FunctionComponent, PropsWithChildren } from 'react';
 import { SafeAreaView, StyleSheet, ViewStyle } from 'react-native';
-import { useAnimateOnFocus } from '../../hooks/use-animate-on-focus';
 
 type SafeContainerProps = PropsWithChildren<{
   style?: ViewStyle;
@@ -8,8 +8,8 @@ type SafeContainerProps = PropsWithChildren<{
 }>;
 
 export const SafeContainer: FunctionComponent<SafeContainerProps> = ({ children, style }) => {
-  const isVisible = useAnimateOnFocus();
-  if (!isVisible) {
+  const isScreenFocused = useIsFocused();
+  if (!isScreenFocused) {
     return null;
   }
 
