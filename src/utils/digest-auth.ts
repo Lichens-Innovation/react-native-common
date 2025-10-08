@@ -135,7 +135,7 @@ export class DigestAuth {
       const { authHeader, isDigestChallenge } = this.parseHttpErrorHeaders(e);
 
       if (!isDigestChallenge) {
-        logger.error(`[DigestAuth] error received. Axios error code: "${e.code}" status: "${e.response?.status}"`);
+        logger.info(`[DigestAuth] error received. Axios error code: "${e.code}" status: "${e.response?.status}"`);
         throw e;
       }
 
@@ -154,7 +154,7 @@ export class DigestAuth {
   private handleNoResponseError(e: any) {
     const hasReceivedResponse = e.response !== undefined;
     if (!hasReceivedResponse) {
-      logger.error(`[DigestAuth] no response. Axios error code: "${e.code}"`);
+      logger.info(`[DigestAuth] no response. Axios error code: "${e.code}"`);
       throw e;
     }
   }

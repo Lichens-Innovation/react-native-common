@@ -3,6 +3,7 @@ export * from './use-animate-on-focus';
 export * from './use-image-picker';
 export * from './use-invalidate-queries-on-focus';
 export * from './use-on-html-message';
+export * from './use-screen-focus-change';
 export * from './use-single-file-selector';
 export * from './use-timeout-state';
 export * from './use-timeout-toggle';
