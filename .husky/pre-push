@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# Prevent force push on protected branches
+# This is a soft protection - can be bypassed with --no-verify if needed
+protected_branches='main|master|development'
+
+while read local_ref local_sha remote_ref remote_sha
+do
+  branch=${remote_ref#refs/heads/}
+  
+  # Check if branch is protected (exact match)
+  if [[ "$branch" =~ ^($protected_branches)$ ]]; then
+    # Skip deletion checks
+    if [ "$remote_sha" != "0000000000000000000000000000000000000000" ]; then
+      # Check if this is a force push
+      if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+        echo "❌ Force push detected on protected branch: $branch"
+        echo "   Attempting to push $local_sha on top of $remote_sha"
+        echo ""
+        echo "💡 If this is intentional, use: git push --force --no-verify"
+        echo "   Otherwise, use: git pull --rebase"
+        exit 1
+      fi
+    fi
+  fi
+done
+
+exit 0

@@ -2,11 +2,11 @@
   - [Reusable Components](#reusable-components)
   - [Services, Utilities and Hooks](#services-utilities-and-hooks)
   - [Consume in a project](#consume-in-a-project)
-    - [Installation](#installation)
+    - [Adding the dependency to an existing mobile application](#adding-the-dependency-to-an-existing-mobile-application)
     - [Basic Usage Example](#basic-usage-example)
   - [Contributions](#contributions)
     - [Prerequisites](#prerequisites)
-    - [Installation](#installation-1)
+    - [Installation](#installation)
     - [Scripts](#scripts)
   - [Peer Dependencies](#peer-dependencies)
     - [Why Peer Dependencies?](#why-peer-dependencies)
@@ -52,9 +52,9 @@ Depending on your Expo SDK version, here are the compatibility table for `react-
 | 2.x.y          | SDK 54           | Compatible with applications using Expo SDK 54        |
 | 3.x.y          | SDK 55           | Compatible with applications using Expo SDK 55        |
 
-### Installation
+### Adding the dependency to an existing mobile application
 
-The following will install the latest available version:
+The following will install the latest available version on your react-native app:
 
 ```bash
 yarn add @Lichens-Innovation/react-native-common
@@ -107,7 +107,7 @@ Contributions to the project are made by simply improving the current codebase a
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (LTS or higher)
 - Yarn
 - React Native development environment set up (see [React Native documentation](https://reactnative.dev/docs/environment-setup))
 
