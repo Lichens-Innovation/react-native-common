@@ -5,6 +5,17 @@ import { EncodingType } from '../services/files/native-file-system.types';
 const DEFAULT_ENCODING = EncodingType.UTF8;
 const DEFAULT_OPTIONS = { encoding: DEFAULT_ENCODING };
 
+const SCHEME_PREFIXES = {
+  file: 'file',
+  content: 'content',
+  http: 'http',
+  https: 'https',
+  ftp: 'ftp',
+  ftps: 'ftps',
+  sftp: 'sftp',
+  smb: 'smb',
+} as const;
+
 export const isFileExists = async (fileUri = '') => {
   const { exists } = await nativeFileSystem.getInfoAsync(fileUri);
   return exists;
@@ -114,7 +125,7 @@ export const isFileUri = (uri: string): boolean => {
   }
 
   try {
-    return new URL(uri).protocol === 'file:';
+    return new URL(uri).protocol === `${SCHEME_PREFIXES.file}:`;
   } catch (e: unknown) {
     logger.info('[isFileUri] Invalid file URI: [${uri}]', e);
     return false;
@@ -126,5 +137,5 @@ export const normalizeFileUri = (fileUri?: string | null): string => {
     return '';
   }
 
-  return isFileUri(fileUri) ? fileUri : `file://${fileUri}`;
+  return isFileUri(fileUri) ? fileUri : `${SCHEME_PREFIXES.file}://${fileUri}`;
 };
