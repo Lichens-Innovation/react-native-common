@@ -1,6 +1,7 @@
 import { logger } from '../logger/logger';
 import { nativeFileSystem } from '../services/files/native-file-system';
 import { EncodingType } from '../services/files/native-file-system.types';
+import { hasScheme, SCHEME_PREFIXES } from './uri.utils';
 
 const DEFAULT_ENCODING = EncodingType.UTF8;
 const DEFAULT_OPTIONS = { encoding: DEFAULT_ENCODING };
@@ -109,5 +110,31 @@ export const nowAsIsoFilename = () => {
 };
 
 export const isFileUri = (uri: string): boolean => {
-  return !!uri && new URL(uri).protocol === 'file:';
+  if (!hasScheme(uri)) {
+    return false;
+  }
+
+  try {
+    return new URL(uri).protocol === `${SCHEME_PREFIXES.file}:`;
+  } catch (e: unknown) {
+    logger.debug(`[isFileUri] Invalid URI: [${uri}]`, e);
+    return false;
+  }
+};
+
+export const normalizeFileUri = (uri?: string | null): string => {
+  if (!uri) {
+    return '';
+  }
+
+  if (isFileUri(uri)) {
+    return uri;
+  }
+
+  if (hasScheme(uri)) {
+    logger.debug(`[normalizeFileUri] Non-file URI scheme provided: [${uri}]`);
+    return '';
+  }
+
+  return `${SCHEME_PREFIXES.file}://${uri}`;
 };
