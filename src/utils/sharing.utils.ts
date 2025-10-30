@@ -2,7 +2,7 @@ import * as Sharing from 'expo-sharing';
 import i18next from 'i18next';
 import { Platform } from 'react-native';
 import { loadCurrentLogsFileUri, logger } from '../logger/logger';
-import { isFileUri } from './file.utils';
+import { normalizeFileUri } from './file.utils';
 
 const buildShareOptionsFromMimeType = (mimeType?: string): Sharing.SharingOptions => {
   if (!mimeType) {
@@ -59,14 +59,6 @@ export const shareFile = async ({ fileUri, mimeType }: ShareFileArgs): Promise<v
   Sharing.shareAsync(normalizedFileUri, options).catch((e: unknown) => {
     logger.error(`Error while sharing file [${normalizedFileUri}] of type ${mimeType}`, e);
   });
-};
-
-const normalizeFileUri = (fileUri: string) => {
-  if (!fileUri) {
-    return '';
-  }
-
-  return isFileUri(fileUri) ? fileUri : `file://${fileUri}`;
 };
 
 export const shareCurrentLogsFile = async (): Promise<void> => {

@@ -120,3 +120,11 @@ export const isFileUri = (uri: string): boolean => {
     return false;
   }
 };
+
+export const normalizeFileUri = (fileUri?: string | null): string => {
+  if (!fileUri) {
+    return '';
+  }
+
+  return isFileUri(fileUri) ? fileUri : `file://${fileUri}`;
+};
