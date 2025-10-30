@@ -109,5 +109,14 @@ export const nowAsIsoFilename = () => {
 };
 
 export const isFileUri = (uri: string): boolean => {
-  return !!uri && new URL(uri).protocol === 'file:';
+  if (!uri) {
+    return false;
+  }
+
+  try {
+    return new URL(uri).protocol === 'file:';
+  } catch (e: unknown) {
+    logger.info('[isFileUri] Invalid file URI: [${uri}]', e);
+    return false;
+  }
 };
