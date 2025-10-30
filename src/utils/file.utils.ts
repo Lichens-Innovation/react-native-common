@@ -1,20 +1,10 @@
 import { logger } from '../logger/logger';
 import { nativeFileSystem } from '../services/files/native-file-system';
 import { EncodingType } from '../services/files/native-file-system.types';
+import { hasScheme, SCHEME_PREFIXES } from './uri.utils';
 
 const DEFAULT_ENCODING = EncodingType.UTF8;
 const DEFAULT_OPTIONS = { encoding: DEFAULT_ENCODING };
-
-const SCHEME_PREFIXES = {
-  file: 'file',
-  content: 'content',
-  http: 'http',
-  https: 'https',
-  ftp: 'ftp',
-  ftps: 'ftps',
-  sftp: 'sftp',
-  smb: 'smb',
-} as const;
 
 export const isFileExists = async (fileUri = '') => {
   const { exists } = await nativeFileSystem.getInfoAsync(fileUri);
@@ -120,14 +110,14 @@ export const nowAsIsoFilename = () => {
 };
 
 export const isFileUri = (uri: string): boolean => {
-  if (!uri) {
+  if (!hasScheme(uri)) {
     return false;
   }
 
   try {
     return new URL(uri).protocol === `${SCHEME_PREFIXES.file}:`;
   } catch (e: unknown) {
-    logger.info('[isFileUri] Invalid file URI: [${uri}]', e);
+    logger.info(`[isFileUri] Invalid URI: [${uri}]`, e);
     return false;
   }
 };
