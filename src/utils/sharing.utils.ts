@@ -54,11 +54,17 @@ export const shareFile = async ({ fileUri, mimeType }: ShareFileArgs): Promise<v
 
   const options = buildShareOptionsFromMimeType(mimeType);
   const normalizedFileUri = normalizeFileUri(fileUri);
-  logger.info(`Sharing file [${normalizedFileUri}] of type ${mimeType}...`);
+  if (!normalizedFileUri) {
+    logger.warn(`[shareFile] Invalid file URI: [${fileUri}]`);
+    return;
+  }
 
-  Sharing.shareAsync(normalizedFileUri, options).catch((e: unknown) => {
+  try {
+    logger.info(`Sharing file [${normalizedFileUri}] of type ${mimeType}.`);
+    await Sharing.shareAsync(normalizedFileUri, options);
+  } catch (e: unknown) {
     logger.error(`Error while sharing file [${normalizedFileUri}] of type ${mimeType}`, e);
-  });
+  }
 };
 
 export const shareCurrentLogsFile = async (): Promise<void> => {

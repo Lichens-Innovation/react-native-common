@@ -117,15 +117,24 @@ export const isFileUri = (uri: string): boolean => {
   try {
     return new URL(uri).protocol === `${SCHEME_PREFIXES.file}:`;
   } catch (e: unknown) {
-    logger.info(`[isFileUri] Invalid URI: [${uri}]`, e);
+    logger.debug(`[isFileUri] Invalid URI: [${uri}]`, e);
     return false;
   }
 };
 
-export const normalizeFileUri = (fileUri?: string | null): string => {
-  if (!fileUri) {
+export const normalizeFileUri = (uri?: string | null): string => {
+  if (!uri) {
     return '';
   }
 
-  return isFileUri(fileUri) ? fileUri : `${SCHEME_PREFIXES.file}://${fileUri}`;
+  if (isFileUri(uri)) {
+    return uri;
+  }
+
+  if (hasScheme(uri)) {
+    logger.debug(`[normalizeFileUri] Non-file URI scheme provided: [${uri}]`);
+    return '';
+  }
+
+  return `${SCHEME_PREFIXES.file}://${uri}`;
 };

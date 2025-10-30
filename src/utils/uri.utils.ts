@@ -16,5 +16,6 @@ export const hasScheme = (uri?: string | null): boolean => {
     return false;
   }
 
-  return SCHEME_PREFIXES_ARRAY.some((prefix) => uri.startsWith(`${prefix}://`));
+  const lowerUri = uri.toLowerCase();
+  return SCHEME_PREFIXES_ARRAY.some((prefix) => lowerUri.startsWith(`${prefix}://`));
 };
