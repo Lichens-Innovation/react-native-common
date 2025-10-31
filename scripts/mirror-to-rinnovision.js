@@ -19,7 +19,7 @@ const main = async () => {
     console.info('\t✔️ Fetch completed');
 
     console.info('\nPushing all (branches, tags, commits) to mirror (also pruning remote branches)...');
-    execSync('git push --mirror mirror', { stdio: 'inherit' });
+    execSync('git push --prune mirror "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"', { stdio: 'inherit' });
     console.info('\t✔️ Mirror push completed');
 
     console.info('\n✅ Mirror to rinnovision completed successfully');
