@@ -7,18 +7,18 @@ const main = async () => {
 
   try {
     console.info('\nThis will execute the following git commands:');
-    console.info('\tgit fetch -p origin');
+    console.info('\tgit fetch --prune origin');
     console.info('\tgit push --prune mirror "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"');
     await askConfirmation({ 
       readLineInterface, 
       question: '\n→ [Enter] to proceed \n→ [Ctrl-C] to abort\n' 
     });
 
-    console.info('\nFetching from origin...');
-    execSync('git fetch -p origin', { stdio: 'inherit' });
+    console.info('\nFetching all (branches, tags, commits) and pruning remote branches...');
+    execSync('git fetch --prune origin', { stdio: 'inherit' });
     console.info('\t✔️ Fetch completed');
 
-    console.info('\nPushing to mirror...');
+    console.info('\nPushing all (branches, tags, commits) to mirror (also pruning remote branches)...');
     execSync('git push --mirror mirror', { stdio: 'inherit' });
     console.info('\t✔️ Mirror push completed');
 
