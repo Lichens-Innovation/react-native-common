@@ -1,6 +1,6 @@
 {
   "name": "@Lichens-Innovation/react-native-common",
-  "description": "Lichens Innovation React Native Expo shared components, utilities and services",
+  "description": "Lichens Innovation React Native Expo shared components, utilities, hooks and services",
   "repository": "https://github.com/Lichens-Innovation/react-native-common",
   "author": "Lichens Innovation",
   "version": "2.5.1",
