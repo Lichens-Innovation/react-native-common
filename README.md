@@ -121,13 +121,16 @@ yarn install
 
 ### Scripts
 
-| Command           | Description                                         |
-|-------------------|-----------------------------------------------------|
-| `yarn build`      | Cleans the dist folder and compiles TypeScript      |
-| `yarn clean:node` | Removes node_modules directories and yarn.lock file |
-| `yarn clean:dist` | Removes the dist directory                          |
-| `yarn test`       | Runs tests using Vitest                             |
-| `yarn typecheck`  | Checks TypeScript types without emitting files      |
+| Command                      | Description                                                                 |
+|------------------------------|-----------------------------------------------------------------------------|
+| `yarn build`                 | Cleans the dist folder and compiles TypeScript                              |
+| `yarn clean:node`            | Removes node_modules directories and yarn.lock file                         |
+| `yarn clean:dist`            | Removes the dist directory                                                  |
+| `yarn typecheck`             | Checks TypeScript types without emitting files                              |
+| `yarn watch:for:rvdrain`     | Watches for TS changes and syncs dist files to rvdrain app node_modules     |
+| `yarn watch:for:manufacture` | Watches for TS changes and syncs dist files to manufacture app node_modules |
+| `yarn test`                  | Runs tests using Vitest                                                     |
+| `yarn mirror:to:rinnovision` | Mirrors the package to the Rinnovision repository                           |
 
 
 ## Peer Dependencies
