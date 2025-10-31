@@ -20,6 +20,7 @@
     "build": "npm run clean:dist && tsc",
     "watch:for:rvdrain": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-rvdrain-app-mobile/node_modules/@RinnoVision/rinno-react-commun/dist --watch",
     "watch:for:manufacture": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-manufacture-app/node_modules/@RinnoVision/react-native-common/dist --watch",
+    "mirror:to:rinnovision": "node scripts/mirror-to-rinnovision",
     "test": "vitest"
   },
   "dependencies": {
