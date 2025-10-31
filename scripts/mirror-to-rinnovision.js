@@ -2,9 +2,18 @@
 const { execSync } = require('node:child_process');
 const readline = require('node:readline');
 
+/**
+ * Before running the script, you need to:
+ * - remove the existing mirror remote (if any)
+ * - add the new mirror remote (if not already added)
+ *
+ * git remote remove mirror
+ * git remote add mirror git@github.com:RinnoVision/lichens-react-commun.git
+ */
+
 const GIT_COMMANDS = {
   FETCH: 'git fetch --prune origin',
-  PUSH: 'git push --prune mirror "+refs/remotes/origin/*:refs/heads/*" "+refs/tags/*:refs/tags/*"',
+  PUSH: 'git push --force --prune mirror "+refs/remotes/origin/*:refs/heads/*" "+refs/tags/*:refs/tags/*"',
 };
 
 const main = async () => {
