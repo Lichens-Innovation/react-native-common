@@ -1,5 +1,5 @@
-import { format } from 'date-fns';
-import * as FileSystem from 'expo-file-system/legacy';
+import { Buffer } from 'buffer';
+import { Directory, File, Paths } from 'expo-file-system';
 import { logger } from '../../logger/logger';
 import { getErrorMessage } from '../../utils/errors.utils';
 import {
@@ -13,49 +13,68 @@ import {
 } from './native-file-system.types';
 
 export class NativeFileSystem implements INativeFileSystem {
-  public readonly documentDirectory: string | null = FileSystem.documentDirectory;
+  public readonly documentDirectory: string | null = Paths.document.uri;
   public readonly EncodingType = EncodingType;
 
   async writeAsStringAsync(fileUri: string, contents: string, options?: WriteOptions): Promise<void> {
-    const expoOptions: FileSystem.WritingOptions = {};
+    const file = new File(fileUri);
 
-    if (options?.encoding) {
-      expoOptions.encoding = this.mapEncodingToExpo(options.encoding);
+    // for base64 encoding, pass the base64 string directly
+    if (options?.encoding === EncodingType.Base64) {
+      file.write(contents, { encoding: 'base64' });
+      return;
     }
 
-    await FileSystem.writeAsStringAsync(fileUri, contents, expoOptions);
+    // Default to UTF-8 string
+    file.write(contents, { encoding: 'utf8' });
   }
 
   async readAsStringAsync(fileUri: string, options?: ReadOptions): Promise<string> {
-    const expoOptions: FileSystem.ReadingOptions = {};
+    const file = new File(fileUri);
 
-    if (options?.encoding) {
-      expoOptions.encoding = this.mapEncodingToExpo(options.encoding);
+    if (options?.encoding === EncodingType.Base64) {
+      const bytes = await file.bytes();
+      return Buffer.from(bytes).toString('base64');
     }
 
-    return await FileSystem.readAsStringAsync(fileUri, expoOptions);
+    // default to UTF-8 text
+    return file.textSync();
   }
 
   async getInfoAsync(fileUri: string): Promise<FileInfo> {
-    const info = await FileSystem.getInfoAsync(fileUri);
+    const pathInfo = Paths.info(fileUri);
 
+    if (pathInfo.isDirectory) {
+      const directory = new Directory(fileUri);
+      const info = directory.info();
+      return {
+        exists: info.exists,
+        isDirectory: true,
+        size: info.size,
+        modificationTime: info.modificationTime,
+        uri: fileUri,
+      };
+    }
+
+    const file = new File(fileUri);
+    const info = file.info();
     return {
       exists: info.exists,
-      isDirectory: info.isDirectory,
-      size: 'size' in info ? info.size : undefined,
-      modificationTime: 'modificationTime' in info ? info.modificationTime : undefined,
+      isDirectory: false,
+      size: info.size,
+      modificationTime: info.modificationTime,
       uri: fileUri,
     };
   }
 
-  async copyContentUriToLocal(contentUri: string): Promise<string> {
-    const fileName = `ion_fw_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.bin`;
-    const localUri = `${FileSystem.documentDirectory}${fileName}`;
-
+  async copyContentUriToLocal(contentUri: string, fileName: string): Promise<string> {
     logger.info(`[copyContentUriToLocal] Copying content uri to local file: ${fileName}`);
 
     try {
-      await FileSystem.copyAsync({ from: contentUri, to: localUri });
+      const localUri = `${Paths.document.uri}${fileName}`;
+      const sourceFile = new File(contentUri);
+      const destFile = new File(localUri);
+      sourceFile.copy(destFile);
       logger.info(`[copyContentUriToLocal] Copy successful: ${localUri}`);
       return localUri;
     } catch (e: unknown) {
@@ -65,29 +84,31 @@ export class NativeFileSystem implements INativeFileSystem {
   }
 
   async readDirectoryAsync(fileUri: string): Promise<string[]> {
-    return await FileSystem.readDirectoryAsync(fileUri);
+    const directory = new Directory(fileUri);
+    const contents = directory.list();
+    return contents.map((item) => item.name);
   }
 
   async makeDirectoryAsync(fileUri: string, options?: MakeDirectoryOptions): Promise<void> {
-    await FileSystem.makeDirectoryAsync(fileUri, {
-      intermediates: options?.intermediates ?? false,
-    });
+    const directory = new Directory(fileUri);
+    const intermediates = options?.intermediates ?? false;
+    directory.create({ intermediates });
   }
 
-  async deleteAsync(fileUri: string, options?: DeleteOptions): Promise<void> {
-    await FileSystem.deleteAsync(fileUri, {
-      idempotent: options?.idempotent ?? false,
-    });
-  }
+  async deleteAsync(fileUri: string): Promise<void> {
+    const pathInfo = Paths.info(fileUri);
 
-  private mapEncodingToExpo(encoding: EncodingType): FileSystem.EncodingType {
-    switch (encoding) {
-      case EncodingType.UTF8:
-        return FileSystem.EncodingType.UTF8;
-      case EncodingType.Base64:
-        return FileSystem.EncodingType.Base64;
-      default:
-        return FileSystem.EncodingType.UTF8;
+    if (!pathInfo.exists) {
+      logger.warn(`[deleteAsync] Path does not exist: ${fileUri}`);
+      return;
+    }
+
+    if (pathInfo.isDirectory) {
+      const directory = new Directory(fileUri);
+      directory.delete();
+    } else {
+      const file = new File(fileUri);
+      file.delete();
     }
   }
 }
