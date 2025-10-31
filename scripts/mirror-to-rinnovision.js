@@ -2,27 +2,36 @@
 const { execSync } = require('node:child_process');
 const readline = require('node:readline');
 
+const GIT_COMMANDS = {
+  FETCH: 'git fetch --prune origin',
+  PUSH: 'git push --prune mirror "+refs/remotes/origin/*:refs/heads/*" "+refs/tags/*:refs/tags/*"',
+};
+
 const main = async () => {
-  const readLineInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const readLineInterface = readline.createInterface({ 
+    input: process.stdin, 
+    output: process.stdout 
+  });
 
   try {
     console.info('\nThis will execute the following git commands:');
-    console.info('\tgit fetch --prune origin');
-    console.info('\tgit push --prune mirror "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"');
+    console.info(`\t${GIT_COMMANDS.FETCH}`);
+    console.info(`\t${GIT_COMMANDS.PUSH}`);
+ 
     await askConfirmation({ 
       readLineInterface, 
       question: '\n→ [Enter] to proceed \n→ [Ctrl-C] to abort\n' 
     });
 
     console.info('\nFetching all (branches, tags, commits) and pruning remote branches...');
-    execSync('git fetch --prune origin', { stdio: 'inherit' });
+    execSync(GIT_COMMANDS.FETCH, { stdio: 'inherit' });
     console.info('\t✔️ Fetch completed');
 
     console.info('\nPushing all (branches, tags, commits) to mirror (also pruning remote branches)...');
-    execSync('git push --prune mirror "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"', { stdio: 'inherit' });
+    execSync(GIT_COMMANDS.PUSH, { stdio: 'inherit' });
     console.info('\t✔️ Mirror push completed');
 
-    console.info('\n✅ Mirror to rinnovision completed successfully');
+    console.info('\n✅ Mirror synchronization completed successfully');
   } catch (error) {
     console.error('\n❌ Error:', error);
     process.exit(1);
@@ -39,4 +48,3 @@ const askConfirmation = ({ readLineInterface, question = '' }) => {
 
 // Run the script
 main();
-
