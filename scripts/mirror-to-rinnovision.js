@@ -8,7 +8,7 @@ const readline = require('node:readline');
  * - add the new mirror remote (if not already added)
  *
  * git remote remove mirror
- * git remote add mirror git@github.com:RinnoVision/lichens-react-commun.git
+ * git remote add mirror git@github.com:RinnoVision/react-native-commun.git
  */
 
 const GIT_COMMANDS = {
