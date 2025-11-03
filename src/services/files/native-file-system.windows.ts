@@ -10,6 +10,7 @@ import {
 
 export class NativeFileSystemWindows implements INativeFileSystem {
   public readonly documentDirectory: string | null = null;
+  public readonly cacheDirectory: string | null = null;
   public readonly EncodingType = EncodingType;
 
   async writeAsStringAsync(fileUri: string, contents: string, options?: WriteOptions): Promise<void> {

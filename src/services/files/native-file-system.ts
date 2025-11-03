@@ -3,17 +3,18 @@ import { Directory, File, Paths } from 'expo-file-system';
 import { logger } from '../../logger/logger';
 import { getErrorMessage } from '../../utils/errors.utils';
 import {
-  DeleteOptions,
   EncodingType,
   FileInfo,
   INativeFileSystem,
   MakeDirectoryOptions,
   ReadOptions,
-  WriteOptions,
+  WriteOptions
 } from './native-file-system.types';
 
 export class NativeFileSystem implements INativeFileSystem {
   public readonly documentDirectory: string | null = Paths.document.uri;
+  public readonly cacheDirectory: string | null = Paths.cache.uri;
+
   public readonly EncodingType = EncodingType;
 
   async writeAsStringAsync(fileUri: string, contents: string, options?: WriteOptions): Promise<void> {
