@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import { Directory, File, Paths } from 'expo-file-system';
+import * as FileSystemLegacy from 'expo-file-system/legacy';
 import { logger } from '../../logger/logger';
 import { getErrorMessage } from '../../utils/errors.utils';
 import {
@@ -8,7 +9,7 @@ import {
   INativeFileSystem,
   MakeDirectoryOptions,
   ReadOptions,
-  WriteOptions
+  WriteOptions,
 } from './native-file-system.types';
 
 export class NativeFileSystem implements INativeFileSystem {
@@ -73,9 +74,9 @@ export class NativeFileSystem implements INativeFileSystem {
 
     try {
       const localUri = `${Paths.document.uri}${fileName}`;
-      const sourceFile = new File(contentUri);
-      const destFile = new File(localUri);
-      sourceFile.copy(destFile);
+      // The new Expo SDK 54 API doesn't support content URIs
+      // We need to use the legacy API for copying content URIs correctly
+      await FileSystemLegacy.copyAsync({ from: contentUri, to: localUri });
       logger.info(`[copyContentUriToLocal] Copy successful: ${localUri}`);
       return localUri;
     } catch (e: unknown) {
