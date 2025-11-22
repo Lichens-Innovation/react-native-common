@@ -43,6 +43,10 @@ export class NativeFileSystem implements INativeFileSystem {
     return file.textSync();
   }
 
+  async readAsBase64Async(fileUri: string): Promise<string> {
+    return this.readAsStringAsync(fileUri, { encoding: EncodingType.Base64 });
+  }
+
   async getInfoAsync(fileUri: string): Promise<FileInfo> {
     const pathInfo = Paths.info(fileUri);
 
