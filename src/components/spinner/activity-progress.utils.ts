@@ -1,5 +1,5 @@
 import prettyBytes from 'pretty-bytes';
-import { toFixed } from '~/utils/number.utils';
+import { toFixed } from '../../utils/number.utils';
 
 export interface ActivityProgress {
   loaded: number;
