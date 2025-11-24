@@ -1,8 +1,11 @@
 import prettyBytes from 'pretty-bytes';
+import { toFixed } from '~/utils/number.utils';
 
 export interface ActivityProgress {
   loaded: number;
   total?: number;
+  isBytes?: boolean;
+  decimals?: number;
 }
 
 export const computeActivityProgress = (progress?: ActivityProgress) => {
@@ -10,14 +13,18 @@ export const computeActivityProgress = (progress?: ActivityProgress) => {
     return { percentage: 0, stats: '' };
   }
 
-  const { loaded, total } = progress;
+  const { loaded, total, isBytes = true, decimals = 2 } = progress;
   const hasTotal = !!total;
 
-  const loadedLabel = prettyBytes(loaded);
-  const totalLabel = hasTotal ? prettyBytes(total) : '';
-  const stats = `${loadedLabel} / ${totalLabel}`;
+  if (isBytes) {
+    const loadedLabel = prettyBytes(loaded);
+    const totalLabel = hasTotal ? prettyBytes(total) : '';
+    const stats = `${loadedLabel} / ${totalLabel}`;
+    const percentage = hasTotal ? toFixed((loaded / total) * 100, decimals) : 0;
+    return { percentage, stats };
+  }
 
-  const percentage = hasTotal ? (loaded / total) * 100 : 0;
-
+  const stats = hasTotal ? `${loaded} / ${total}` : `${loaded}`;
+  const percentage = hasTotal ? toFixed((loaded / total) * 100, decimals) : 0;
   return { percentage, stats };
 };
