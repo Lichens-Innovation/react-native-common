@@ -1,6 +1,8 @@
 import { addEventListener, NetInfoState, NetInfoSubscription } from '@react-native-community/netinfo';
 import { AxiosError, isAxiosError } from 'axios';
 import { logger } from '../logger/logger';
+import { REGEX_IPV4 } from './regex';
+import { isBlank } from './string.utils';
 
 const extractInfoFromNetInfoState = (netInfoState: NetInfoState) => {
   const { isConnected, type } = netInfoState;
@@ -34,4 +36,12 @@ export const isAxiosNetworkError = (error: unknown): boolean => {
   }
 
   return AxiosError.ERR_NETWORK === code;
+};
+
+export const isValidIpAddressV4 = (ip?: string | null): boolean => {
+  if (isBlank(ip)) {
+    return false;
+  }
+
+  return REGEX_IPV4.test(ip);
 };
