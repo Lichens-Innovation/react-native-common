@@ -9,7 +9,7 @@ export const ErrorBoundary: FunctionComponent<ErrorBoundaryProps> = ({ error }) 
   const { title, description, errorMsg, id, stack } = useErrorDetails(error);
 
   useEffect(() => {
-    logger.error(`ErrorBoundary Unexpected error: ${errorMsg} (ID: ${id})`, error);
+    logger.error(`ErrorBoundary Unexpected error: ${errorMsg} (ID: ${id}). Stack: ${stack}`, error);
     Sentry.captureException(error, {
       extra: {
         title,
