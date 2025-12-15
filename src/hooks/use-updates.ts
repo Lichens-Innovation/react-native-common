@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { logger } from '../logger/logger';
 import { getDeviceType, isRealDevice } from '../utils/device.utils';
 import { sleep } from '../utils/thread.utils';
+import { isProduction } from '../utils/env.utils.windows';
 
 const checkForUpdateAsync = async (): Promise<void> => {
   const deviceType = getDeviceType();
 
-  if (isRealDevice()) {
+  if (isRealDevice() && isProduction()) {
     logger.info(`[checkForUpdateAsync] Checking for update on ${deviceType}`);
     await Updates.checkForUpdateAsync();
     return;
