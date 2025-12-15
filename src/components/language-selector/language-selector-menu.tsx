@@ -20,6 +20,7 @@ export const LanguageSelectorMenu: FunctionComponent<LanguageSelectorProps> = ({
 
   return (
     <Menu
+      key={String(isMenuVisible)} //Workaround for issue https://github.com/callstack/react-native-paper/issues/4807
       visible={isMenuVisible}
       onDismiss={() => toggleMenu(false)}
       anchorPosition="bottom"
