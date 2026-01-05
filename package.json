@@ -1,9 +1,9 @@
 {
-  "name": "@Lichens-Innovation/react-native-common",
+  "name": "@lichens-innovation/react-native-common",
   "description": "Lichens Innovation React Native Expo shared components, utilities, hooks and services",
   "repository": "https://github.com/Lichens-Innovation/react-native-common",
   "author": "Lichens Innovation",
-  "version": "2.10.1",
+  "version": "2.11.0",
   "private": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,8 @@
     "dist"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "clean:node": "npx rimraf node_modules yarn.lock",
