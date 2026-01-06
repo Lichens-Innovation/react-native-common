@@ -72,7 +72,7 @@ Depending on your Expo SDK version, here are the compatibility table for `react-
 The following will install the latest available version on your react-native app:
 
 ```bash
-yarn add @Lichens-Innovation/react-native-common
+yarn add @lichens-Innovation/react-native-common
 ```
 
 ### Basic Usage Example
@@ -80,7 +80,7 @@ yarn add @Lichens-Innovation/react-native-common
 Here's how to import and use the `DialogOkCancel` component:
 
 ```tsx
-import { DialogOkCancel } from '@Lichens-Innovation/react-native-common';
+import { DialogOkCancel } from '@lichens-Innovation/react-native-common';
 import React, { useState } from 'react';
 import { Button } from 'react-native-paper';
 
@@ -191,4 +191,4 @@ Adhering to established coding guidelines is essential for developing efficient,
 
 ## License
 
-This project is proprietary and confidential. Unauthorized copying, transferring, or reproduction of the contents, via any medium, is strictly prohibited.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
