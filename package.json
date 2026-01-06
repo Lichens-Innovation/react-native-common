@@ -19,8 +19,8 @@
     "clean:dist": "npx rimraf dist",
     "typecheck": "npx tsc --noEmit",
     "build": "npm run clean:dist && tsc",
-    "watch:for:rvdrain": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-rvdrain-app-mobile/node_modules/@Lichens-Innovation/react-native-common/dist --watch",
-    "watch:for:manufacture": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-manufacture-app/node_modules/@Lichens-Innovation/react-native-common/dist --watch",
+    "watch:for:rvdrain": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-rvdrain-app-mobile/node_modules/@lichens-Innovation/react-native-common/dist --watch",
+    "watch:for:manufacture": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-manufacture-app/node_modules/@lichens-Innovation/react-native-common/dist --watch",
     "mirror:to:rinnovision": "node scripts/mirror-to-rinnovision",
     "test": "vitest"
   },
