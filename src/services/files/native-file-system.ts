@@ -1,8 +1,9 @@
+import { getErrorMessage } from '@lichens-innovation/ts-common';
 import { Buffer } from 'buffer';
 import { Directory, File, Paths } from 'expo-file-system';
 import * as FileSystemLegacy from 'expo-file-system/legacy';
+
 import { logger } from '../../logger/logger';
-import { getErrorMessage } from '../../utils/errors.utils';
 import {
   EncodingType,
   FileInfo,

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@lichens-innovation/ts-common';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -5,7 +6,6 @@ import { Alert } from 'react-native';
 
 import { useSnackbar } from '../../components/snack-bar/snackbar-provider';
 import { logger } from '../../logger/logger';
-import { getErrorMessage } from '../../utils/errors.utils';
 import { WifiDiagnoseQueryKey } from './query-keys';
 import {
   connectToWiFi,

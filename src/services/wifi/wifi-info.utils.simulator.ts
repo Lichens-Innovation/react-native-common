@@ -1,4 +1,5 @@
-import { sleep } from '../../utils/thread.utils';
+import { sleep } from '@lichens-innovation/ts-common';
+
 import { WifiInfo } from './wifi-info.types';
 
 const randomIpSegment = () => Math.floor(Math.random() * 255);

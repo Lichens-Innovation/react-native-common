@@ -17,8 +17,6 @@ interface VerticalResizableSplitViewProps {
   minTopRatio?: number;
   /** Maximum proportion for the top section (0 to 1). Default: 0.85 */
   maxTopRatio?: number;
-  /** Style for the container */
-  containerStyle?: ViewStyle;
   /** Style for the drag handle container */
   handleContainerStyle?: ViewStyle;
   /** Style for the drag handle bar */
@@ -33,7 +31,6 @@ export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSpli
   initialTopRatio = 0.5,
   minTopRatio = 0.15,
   maxTopRatio = 0.85,
-  containerStyle,
   handleContainerStyle,
   handleStyle,
   hideHandle = false,
@@ -86,7 +83,7 @@ export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSpli
   }));
 
   return (
-    <View style={[styles.container, containerStyle]} onLayout={handleLayout}>
+    <View style={[styles.container]} onLayout={handleLayout}>
       <Animated.View style={[styles.topSection, topSectionAnimatedStyle]}>{topContent}</Animated.View>
 
       {!hideHandle && (

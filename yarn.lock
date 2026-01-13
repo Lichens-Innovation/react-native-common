@@ -2051,6 +2051,13 @@
   dependencies:
     use-sync-external-store "^1.5.0"
 
+"@lichens-innovation/ts-common@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@lichens-innovation/ts-common/-/ts-common-1.5.0.tgz#66d1957e13600f9ce492f3d141f164be8ef3b571"
+  integrity sha512-rv68UszCqx1pqGYhvzdOGjUAP6NUrHLYPwx1EnMiZIQieoRdF8I2xCW8oKA6k2HQ/MuLrQWNVRDScoFxwE5ULQ==
+  dependencies:
+    date-fns "^3.0.0"
+
 "@noble/hashes@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-2.0.1.tgz#fc1a928061d1232b0a52bb754393c37a5216c89e"
@@ -4436,6 +4443,11 @@ date-fns-tz@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/date-fns-tz/-/date-fns-tz-3.2.0.tgz#647dc56d38ac33a3e37b65e9d5c4cda5af5e58e6"
   integrity sha512-sg8HqoTEulcbbbVXeg84u5UnlsQa8GS5QXMqjjYIhS4abEVVKIUwe0/l/UhrZdKaL/W5eWZNlbTeEIiOXTcsBQ==
+
+date-fns@^3.0.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.6.0.tgz#f20ca4fe94f8b754951b24240676e8618c0206bf"
+  integrity sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==
 
 date-fns@^4.1.0:
   version "4.1.0"

@@ -1,7 +1,8 @@
+import { isNullish } from '@lichens-innovation/ts-common';
 import { BarcodeType, Camera } from 'expo-camera';
 import i18next from 'i18next';
+
 import { logger } from '../../logger/logger';
-import { isNullish } from '../../utils/types.utils';
 
 export const BARCODE_TYPES: BarcodeType[] = [
   'aztec',

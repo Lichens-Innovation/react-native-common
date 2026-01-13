@@ -1,3 +1,4 @@
+import { isString } from '@lichens-innovation/ts-common';
 import * as Sentry from '@sentry/react-native';
 import { InteractionManager, LogBox } from 'react-native';
 import {
@@ -14,7 +15,6 @@ import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
 import { getAppIdentifier } from '../utils/device.utils';
 import { isDevelopment } from '../utils/env.utils';
-import { isString } from '../utils/types.utils';
 import { LOG_LEVELS, SimpleLogger } from './logger.utils';
 
 LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed from function components/]);
