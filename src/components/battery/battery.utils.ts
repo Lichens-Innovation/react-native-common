@@ -1,6 +1,4 @@
-import { isNullish } from '@lichens-innovation/ts-common';
-
-import { getColorForPercentage } from '../../utils/color.utils';
+import { getColorForPercentage, isNullish } from '@lichens-innovation/ts-common';
 
 export const getBatteryIcon = (level?: number | null) => {
   if (isNullish(level)) return 'battery-alert-variant-outline';

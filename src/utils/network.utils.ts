@@ -1,9 +1,8 @@
-import { isBlank } from '@lichens-innovation/ts-common';
+import { isBlank, REGEX_IPV4 } from '@lichens-innovation/ts-common';
 import { addEventListener, NetInfoState, NetInfoSubscription } from '@react-native-community/netinfo';
 import { AxiosError, isAxiosError } from 'axios';
 
 import { logger } from '../logger/logger';
-import { REGEX_IPV4 } from './regex';
 
 const extractInfoFromNetInfoState = (netInfoState: NetInfoState) => {
   const { isConnected, type } = netInfoState;

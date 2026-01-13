@@ -1,8 +1,9 @@
+import { getColorForPercentage } from '@lichens-innovation/ts-common';
 import React, { FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
+
 import { useAppTheme } from '../../theme/theme';
-import { getColorForPercentage } from '../../utils/color.utils';
 
 interface ScoreIndicatorProps {
   score?: number;

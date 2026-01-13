@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@legendapp/list": "^2.0.9",
-    "@lichens-innovation/ts-common": "^1.5.0",
+    "@lichens-innovation/ts-common": "^1.6.1",
     "@noble/hashes": "^2.0.1",
     "@uidotdev/usehooks": "^2.4.1",
     "buffer": "^6.0.3",

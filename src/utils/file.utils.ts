@@ -1,7 +1,8 @@
+import { hasScheme, SCHEME_PREFIXES } from '@lichens-innovation/ts-common';
+
 import { logger } from '../logger/logger';
 import { nativeFileSystem } from '../services/files/native-file-system';
 import { EncodingType } from '../services/files/native-file-system.types';
-import { hasScheme, SCHEME_PREFIXES } from './uri.utils';
 
 const DEFAULT_ENCODING = EncodingType.UTF8;
 const DEFAULT_OPTIONS = { encoding: DEFAULT_ENCODING };
