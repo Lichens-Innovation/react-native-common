@@ -1,43 +1,27 @@
-import { ReactNode, useCallback, useState, type FunctionComponent } from 'react';
-import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
+import { useCallback, useState, type FunctionComponent } from 'react';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { validateProps, VerticalResizableOverlayViewProps } from './vertical-resizable-overlay-view.utils';
 
 const DRAG_HANDLE_HEIGHT = 20;
 const DEFAULT_ANIMATION_CONFIG = { damping: 25, stiffness: 300, mass: 0.8 };
 
-interface VerticalResizableOverlayViewProps {
-  /** Content to display in the overlay section (on top) */
-  topContent: ReactNode;
-  /** Content to display in the background section (fills the entire container) */
-  bottomContent: ReactNode;
-  /** Initial height ratio for the overlay (0 to 1). Default: 0.5 */
-  initialTopRatio?: number;
-  /** Minimum height ratio for the overlay (0 to 1). Default: 0.15 */
-  minTopRatio?: number;
-  /** Maximum height ratio for the overlay (0 to 1). Default: 0.85 */
-  maxTopRatio?: number;
-  /** Aspect ratio (width/height) for the top content. If provided, width will be calculated based on height */
-  topContentAspectRatio?: number;
-  /** Style for the drag handle container */
-  handleContainerStyle?: ViewStyle;
-  /** Style for the drag handle bar */
-  handleStyle?: ViewStyle;
-  /** Whether to hide the drag handle. Default: false */
-  hideHandle?: boolean;
-}
+export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOverlayViewProps> = (props) => {
+  validateProps(props);
 
-export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOverlayViewProps> = ({
-  topContent,
-  bottomContent,
-  initialTopRatio = 0.5,
-  minTopRatio = 0.15,
-  maxTopRatio = 0.85,
-  topContentAspectRatio,
-  handleContainerStyle,
-  handleStyle,
-  hideHandle = false,
-}) => {
+  const {
+    topContent,
+    bottomContent,
+    initialTopRatio = 0.5,
+    minTopRatio = 0.15,
+    maxTopRatio = 0.85,
+    topContentAspectRatio,
+    handleContainerStyle,
+    handleStyle,
+    hideHandle = false,
+  } = props;
+
   // Track measured container height
   const [isReady, setIsReady] = useState(false);
 
@@ -86,7 +70,7 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
       if (calculatedWidth > containerWidth.value) {
         // Width exceeds container, recalculate height to maintain aspect ratio
         width = containerWidth.value;
-        height = containerWidth.value / topContentAspectRatio;
+        height = Math.max(containerWidth.value / topContentAspectRatio, minHeight.value);
       } else {
         width = calculatedWidth;
       }
@@ -102,7 +86,7 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
     if (topContentAspectRatio !== undefined) {
       const calculatedWidth = effectiveHeight * topContentAspectRatio;
       if (calculatedWidth > containerWidth.value) {
-        effectiveHeight = containerWidth.value / topContentAspectRatio;
+        effectiveHeight = Math.max(containerWidth.value / topContentAspectRatio, minHeight.value);
         effectiveWidth = containerWidth.value;
       } else {
         effectiveWidth = calculatedWidth;

@@ -1,40 +1,25 @@
-import { ReactNode, useCallback, useState, type FunctionComponent } from 'react';
-import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
+import { useCallback, useState, type FunctionComponent } from 'react';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { validateProps, VerticalResizableSplitViewProps } from './vertical-resizable-split-view.utils';
 
 const DRAG_HANDLE_HEIGHT = 20;
 const DEFAULT_ANIMATION_CONFIG = { damping: 25, stiffness: 300, mass: 0.8 };
 
-interface VerticalResizableSplitViewProps {
-  /** Content to display in the top section */
-  topContent: ReactNode;
-  /** Content to display in the bottom section */
-  bottomContent: ReactNode;
-  /** Initial proportion for the top section (0 to 1). Default: 0.5 */
-  initialTopRatio?: number;
-  /** Minimum proportion for the top section (0 to 1). Default: 0.15 */
-  minTopRatio?: number;
-  /** Maximum proportion for the top section (0 to 1). Default: 0.85 */
-  maxTopRatio?: number;
-  /** Style for the drag handle container */
-  handleContainerStyle?: ViewStyle;
-  /** Style for the drag handle bar */
-  handleStyle?: ViewStyle;
-  /** Whether to hide the drag handle. Default: false */
-  hideHandle?: boolean;
-}
+export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSplitViewProps> = (props) => {
+  validateProps(props);
 
-export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSplitViewProps> = ({
-  topContent,
-  bottomContent,
-  initialTopRatio = 0.5,
-  minTopRatio = 0.15,
-  maxTopRatio = 0.85,
-  handleContainerStyle,
-  handleStyle,
-  hideHandle = false,
-}) => {
+  const {
+    topContent,
+    bottomContent,
+    initialTopRatio = 0.5,
+    minTopRatio = 0.15,
+    maxTopRatio = 0.85,
+    handleContainerStyle,
+    handleStyle,
+    hideHandle = false,
+  } = props;
   // Track measured container height
   const [isReady, setIsReady] = useState(false);
 
