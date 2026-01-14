@@ -1,6 +1,6 @@
+import { getErrorMessage } from '@lichens-innovation/ts-common';
 import { useTranslation } from 'react-i18next';
 import uuid from 'react-native-uuid';
-import { getErrorMessage } from '../../utils/errors.utils';
 
 export const useErrorDetails = (error: unknown) => {
   const { t } = useTranslation();

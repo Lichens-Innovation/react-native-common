@@ -1,4 +1,4 @@
-import { isNullish } from './types.utils';
+import { isNullish } from '@lichens-innovation/ts-common';
 
 const nativeStorage = new Map<string, string>();
 

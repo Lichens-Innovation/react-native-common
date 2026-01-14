@@ -1,7 +1,7 @@
+import { getErrorMessage, nowAsDateTimeForFilename } from '@lichens-innovation/ts-common';
 import * as SQLite from 'expo-sqlite';
+
 import { logger } from '../logger/logger';
-import { nowAsDateTimeForFilename } from './date.utils';
-import { getErrorMessage } from './errors.utils';
 import { createDirectoryStructure, getDocumentFullFilename, isFileExists } from './file.utils';
 
 interface SQLiteVersionResult {

@@ -1,9 +1,10 @@
+import { sleep } from '@lichens-innovation/ts-common';
 import { nativeApplicationVersion, nativeBuildVersion } from 'expo-application';
 import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
+
 import { logger } from '../logger/logger';
 import { getDeviceType, isRealDevice } from '../utils/device.utils';
-import { sleep } from '../utils/thread.utils';
 import { isProduction } from '../utils/env.utils.windows';
 
 const checkForUpdateAsync = async (): Promise<void> => {

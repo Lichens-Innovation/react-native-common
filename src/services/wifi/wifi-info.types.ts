@@ -1,4 +1,4 @@
-import { PeriodsInMS } from '../../utils/time.utils';
+import { PeriodsInMS } from '@lichens-innovation/ts-common';
 
 export interface WifiInfo {
   signalStrength: number;
