@@ -18,6 +18,7 @@ Table of content
 
 - [React Native Common Module](#react-native-common-module)
   - [Reusable Components](#reusable-components)
+    - [Examples](#examples)
   - [Services, Utilities and Hooks](#services-utilities-and-hooks)
   - [Consume in a project](#consume-in-a-project)
     - [Adding the dependency to an existing mobile application](#adding-the-dependency-to-an-existing-mobile-application)
@@ -41,6 +42,12 @@ Table of content
 - ErrorBoundary, Snackbar notifications, loading spinners, progress indicators
 - various interactive components (dropdowns, bottom sheets, etc.)
 - global theme and light/dark modes support
+
+### Examples
+
+| Vertical Split View | Dialog Ok/Cancel |
+|:-------------------:|:----------------:|
+| <img src="docs/demos/demo-vertical-split-view.gif" width="200" /> | <img src="docs/demos/demo-dialog-ok-cancel.gif" width="200" /> |
 
 ## Services, Utilities and Hooks
 
