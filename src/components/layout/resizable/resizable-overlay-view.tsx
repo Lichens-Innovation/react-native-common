@@ -1,8 +1,9 @@
-import { useState, type FunctionComponent } from 'react';
+import { type FunctionComponent } from 'react';
 import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { isDevelopment } from '../../../utils';
+import { computeResizableOverlayLayoutValues } from './resizable-overlay-view.utils';
 import { VerticalResizableOverlayViewProps } from './vertical-resizable-overlay-view.types';
 import { validateResizableOverlayProps } from './vertical-resizable-overlay-view.utils';
 
@@ -16,7 +17,7 @@ const OVERLAY_ANCHOR_STYLES: Record<NonNullable<VerticalResizableOverlayViewProp
   bottomRight: { bottom: 0, right: 0 },
 };
 
-export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOverlayViewProps> = (props) => {
+export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayViewProps> = (props) => {
   if (isDevelopment()) validateResizableOverlayProps(props);
 
   const {
@@ -31,9 +32,6 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
     hideHandle = false,
     anchorType = 'topRight',
   } = props;
-
-  // Track measured container height
-  const [isReady, setIsReady] = useState(false);
 
   // Anchor styles
   const overlayAnchorStyle = OVERLAY_ANCHOR_STYLES[anchorType];
@@ -51,28 +49,19 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
 
   // Handle container layout measurement
   const handleLayout = (event: LayoutChangeEvent) => {
-    const { height, width } = event.nativeEvent.layout;
-    if (height <= 0) return;
+    const computedValues = computeResizableOverlayLayoutValues({
+      event,
+      initialForegroundRatio,
+      minForegroundRatio,
+      maxForegroundRatio,
+      foregroundContentAspectRatio,
+    });
 
-    // Always keep container & bounds updated (layout can change over time).
-    const computedMinHeight = height * minForegroundRatio;
-    const computedMaxHeightFromContainer = height * maxForegroundRatio;
-    const computedMaxHeightFromAspectRatio =
-      foregroundContentAspectRatio !== undefined ? width / foregroundContentAspectRatio : Number.POSITIVE_INFINITY;
-    const computedMaxHeight = Math.min(computedMaxHeightFromContainer, computedMaxHeightFromAspectRatio);
-
-    containerHeight.value = height;
-    containerWidth.value = width;
-    minHeight.value = computedMinHeight;
-    maxHeight.value = computedMaxHeight;
-
-    if (!isReady) {
-      overlayHeight.value = Math.max(computedMinHeight, Math.min(height * initialForegroundRatio, computedMaxHeight));
-      setIsReady(true);
-    } else {
-      // Clamp current height to updated bounds.
-      overlayHeight.value = Math.max(computedMinHeight, Math.min(overlayHeight.value, computedMaxHeight));
-    }
+    containerHeight.value = computedValues.containerHeight;
+    containerWidth.value = computedValues.containerWidth;
+    minHeight.value = computedValues.minHeight;
+    maxHeight.value = computedValues.maxHeight;
+    overlayHeight.value = computedValues.overlayHeight;
   };
 
   const panGesture = Gesture.Pan()
