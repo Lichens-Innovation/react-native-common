@@ -49,6 +49,8 @@ Table of content
 |:-------------------:|:----------------:|
 | <img src="docs/demos/demo-vertical-split-view.gif" width="200" /> | <img src="docs/demos/demo-dialog-ok-cancel.gif" width="200" /> |
 
+- [Components Catalog](docs/catalog.md)
+
 ## Services, Utilities and Hooks
 
 - `@tanstack/react-query` hooks
