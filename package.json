@@ -3,7 +3,7 @@
   "description": "Lichens Innovation React Native Expo shared components, utilities, hooks and services",
   "repository": "https://github.com/Lichens-Innovation/react-native-common",
   "author": "Lichens Innovation",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@legendapp/list": "^2.0.9",
-    "@lichens-innovation/ts-common": "^1.6.2",
+    "@lichens-innovation/ts-common": "^1.6.3",
     "@noble/hashes": "^2.0.1",
     "@uidotdev/usehooks": "^2.4.1",
     "buffer": "^6.0.3",

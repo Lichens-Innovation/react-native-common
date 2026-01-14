@@ -73,8 +73,8 @@ Depending on your Expo SDK version, here are the compatibility table for `react-
 | Version Family | Expo SDK Version | Description                                           |
 |----------------|------------------|-------------------------------------------------------|
 | 1.x.y          | SDK 52, SDK 53   | Compatible with applications using Expo SDK 52 and 53 |
-| 2.x.y          | SDK 54           | Compatible with applications using Expo SDK 54        |
-| 3.x.y          | SDK 55           | Compatible with applications using Expo SDK 55        |
+| 2.x.y, 3.x.y   | SDK 54           | Compatible with applications using Expo SDK 54        |
+| 4.x.y          | SDK 55           | Compatible with applications using Expo SDK 55        |
 
 ### Adding the dependency to an existing mobile application
 
