@@ -1,5 +1,5 @@
-import { useCallback, useState, type FunctionComponent } from 'react';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import { useState, type FunctionComponent } from 'react';
+import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { isDevelopment } from '../../../utils';
@@ -8,6 +8,13 @@ import { validateResizableOverlayProps } from './vertical-resizable-overlay-view
 
 const DRAG_HANDLE_HEIGHT = 20;
 const DEFAULT_ANIMATION_CONFIG = { damping: 25, stiffness: 300, mass: 0.8 };
+
+const OVERLAY_ANCHOR_STYLES: Record<NonNullable<VerticalResizableOverlayViewProps['anchorType']>, ViewStyle> = {
+  topLeft: { top: 0, left: 0 },
+  topRight: { top: 0, right: 0 },
+  bottomLeft: { bottom: 0, left: 0 },
+  bottomRight: { bottom: 0, right: 0 },
+};
 
 export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOverlayViewProps> = (props) => {
   if (isDevelopment()) validateResizableOverlayProps(props);
@@ -22,13 +29,20 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
     handleContainerStyle,
     handleStyle,
     hideHandle = false,
+    anchorType = 'topRight',
   } = props;
 
   // Track measured container height
   const [isReady, setIsReady] = useState(false);
 
+  // Anchor styles
+  const overlayAnchorStyle = OVERLAY_ANCHOR_STYLES[anchorType];
+  const isBottomAnchored = ['bottomLeft', 'bottomRight'].includes(anchorType);
+  const isLeftAnchored = ['topLeft', 'bottomLeft'].includes(anchorType);
+
   // Shared values for animation
   const overlayHeight = useSharedValue(0);
+  const containerHeight = useSharedValue(0);
   const containerWidth = useSharedValue(0);
   const minHeight = useSharedValue(0);
   const maxHeight = useSharedValue(0);
@@ -36,28 +50,30 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
   const isDragging = useSharedValue(false);
 
   // Handle container layout measurement
-  const handleLayout = useCallback(
-    (event: LayoutChangeEvent) => {
-      const { height, width } = event.nativeEvent.layout;
-      if (height > 0 && !isReady) {
-        minHeight.value = height * minForegroundRatio;
-        maxHeight.value = height * maxForegroundRatio;
-        overlayHeight.value = height * initialForegroundRatio;
-        containerWidth.value = width;
-        setIsReady(true);
-      }
-    },
-    [
-      minForegroundRatio,
-      maxForegroundRatio,
-      initialForegroundRatio,
-      minHeight,
-      maxHeight,
-      overlayHeight,
-      containerWidth,
-      isReady,
-    ]
-  );
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { height, width } = event.nativeEvent.layout;
+    if (height <= 0) return;
+
+    // Always keep container & bounds updated (layout can change over time).
+    const computedMinHeight = height * minForegroundRatio;
+    const computedMaxHeightFromContainer = height * maxForegroundRatio;
+    const computedMaxHeightFromAspectRatio =
+      foregroundContentAspectRatio !== undefined ? width / foregroundContentAspectRatio : Number.POSITIVE_INFINITY;
+    const computedMaxHeight = Math.min(computedMaxHeightFromContainer, computedMaxHeightFromAspectRatio);
+
+    containerHeight.value = height;
+    containerWidth.value = width;
+    minHeight.value = computedMinHeight;
+    maxHeight.value = computedMaxHeight;
+
+    if (!isReady) {
+      overlayHeight.value = Math.max(computedMinHeight, Math.min(height * initialForegroundRatio, computedMaxHeight));
+      setIsReady(true);
+    } else {
+      // Clamp current height to updated bounds.
+      overlayHeight.value = Math.max(computedMinHeight, Math.min(overlayHeight.value, computedMaxHeight));
+    }
+  };
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -65,7 +81,9 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
       isDragging.value = true;
     })
     .onUpdate((event) => {
-      const newHeight = startY.value + event.translationY;
+      // If the overlay is anchored to the bottom, dragging up should INCREASE its height.
+      const direction = isBottomAnchored ? -1 : 1;
+      const newHeight = startY.value + direction * event.translationY;
       overlayHeight.value = Math.max(minHeight.value, Math.min(newHeight, maxHeight.value));
     })
     .onEnd(() => {
@@ -104,12 +122,20 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
       }
     }
 
+    // Always compute an explicit `left` to avoid stale left/right values when `anchorType` changes.
+    const left = isLeftAnchored ? 0 : Math.max(0, containerWidth.value - effectiveWidth);
+    // If anchored at bottom, the handle must attach to the TOP edge of the overlay.
+    // Otherwise (top anchor), it attaches to the BOTTOM edge.
+    const top = isBottomAnchored
+      ? containerHeight.value - effectiveHeight - DRAG_HANDLE_HEIGHT / 2
+      : effectiveHeight - DRAG_HANDLE_HEIGHT / 2;
+
     return {
-      top: effectiveHeight - DRAG_HANDLE_HEIGHT / 2,
-      right: 0,
+      top,
       width: effectiveWidth,
+      left,
     };
-  });
+  }, [foregroundContentAspectRatio, isBottomAnchored, isLeftAnchored]);
 
   const dragHandleAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: withSpring(isDragging.value ? 1.2 : 1, DEFAULT_ANIMATION_CONFIG) }],
@@ -121,7 +147,9 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
       <View style={styles.backgroundSection}>{backgroundContent}</View>
 
       {/* Foreground content - positioned absolutely on top */}
-      <Animated.View style={[styles.overlaySection, overlayAnimatedStyle]}>{foregroundContent}</Animated.View>
+      <Animated.View style={[styles.overlaySection, overlayAnchorStyle, overlayAnimatedStyle]}>
+        {foregroundContent}
+      </Animated.View>
 
       {!hideHandle && (
         <GestureDetector gesture={panGesture}>
@@ -143,8 +171,6 @@ const styles = StyleSheet.create({
   },
   overlaySection: {
     position: 'absolute',
-    top: 0,
-    right: 0,
     overflow: 'hidden',
   },
   handleContainer: {
