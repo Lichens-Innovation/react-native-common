@@ -1,4 +1,3 @@
-import { isNullish } from '@lichens-innovation/ts-common';
 import { ReactNode, useCallback, useState, type FunctionComponent } from 'react';
 import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -82,7 +81,7 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
     let height = overlayHeight.value;
     let width: number | undefined;
 
-    if (!isNullish(topContentAspectRatio)) {
+    if (topContentAspectRatio !== undefined) {
       const calculatedWidth = height * topContentAspectRatio;
       if (calculatedWidth > containerWidth.value) {
         // Width exceeds container, recalculate height to maintain aspect ratio
@@ -93,7 +92,7 @@ export const VerticalResizableOverlayView: FunctionComponent<VerticalResizableOv
       }
     }
 
-    return !isNullish(width) ? { height, width } : { height };
+    return width !== undefined ? { height, width } : { height };
   });
 
   const dragHandleContainerAnimatedStyle = useAnimatedStyle(() => {
