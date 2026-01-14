@@ -1,27 +1,7 @@
 import { isNullish } from '@lichens-innovation/ts-common';
-import { ReactNode } from 'react';
-import { ViewStyle } from 'react-native';
+import { VerticalResizableSplitViewProps } from './vertical-resizable-split-view.types';
 
-export interface VerticalResizableSplitViewProps {
-  /** Content to display in the top section */
-  topContent: ReactNode;
-  /** Content to display in the bottom section */
-  bottomContent: ReactNode;
-  /** Initial proportion for the top section (0 to 1). Default: 0.5 */
-  initialTopRatio?: number;
-  /** Minimum proportion for the top section (0 to 1). Default: 0.15 */
-  minTopRatio?: number;
-  /** Maximum proportion for the top section (0 to 1). Default: 0.85 */
-  maxTopRatio?: number;
-  /** Style for the drag handle container */
-  handleContainerStyle?: ViewStyle;
-  /** Style for the drag handle bar */
-  handleStyle?: ViewStyle;
-  /** Whether to hide the drag handle. Default: false */
-  hideHandle?: boolean;
-}
-
-export const validateProps = (props: VerticalResizableSplitViewProps) => {
+export const validateResizableSplitViewProps = (props: VerticalResizableSplitViewProps) => {
   const { initialTopRatio, minTopRatio, maxTopRatio } = props;
 
   if (!isNullish(initialTopRatio)) {

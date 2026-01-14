@@ -2,13 +2,15 @@ import { useCallback, useState, type FunctionComponent } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { validateProps, VerticalResizableSplitViewProps } from './vertical-resizable-split-view.utils';
+import { isDevelopment } from '../../../utils';
+import { VerticalResizableSplitViewProps } from './vertical-resizable-split-view.types';
+import { validateResizableSplitViewProps } from './vertical-resizable-split-view.utils';
 
 const DRAG_HANDLE_HEIGHT = 20;
 const DEFAULT_ANIMATION_CONFIG = { damping: 25, stiffness: 300, mass: 0.8 };
 
 export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSplitViewProps> = (props) => {
-  validateProps(props);
+  if (isDevelopment()) validateResizableSplitViewProps(props);
 
   const {
     topContent,
@@ -20,6 +22,7 @@ export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSpli
     handleStyle,
     hideHandle = false,
   } = props;
+
   // Track measured container height
   const [isReady, setIsReady] = useState(false);
 
