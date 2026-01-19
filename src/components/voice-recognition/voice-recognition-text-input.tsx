@@ -20,6 +20,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   value,
   onValueChange,
   onValueSubmit,
+  ...rest
 }) => {
   const styles = useStyles();
   const [isRecording, setIsRecording] = useState(false);
@@ -95,6 +96,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   return (
     <View style={styles.container}>
       <TextInput
+        {...rest}
         style={styles.textInput}
         label={label}
         value={finalValue}
@@ -105,6 +107,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
         left={<TextInput.Icon icon={isRecording ? 'stop' : 'microphone-outline'} onPress={toggleRecording} />}
         right={<TextInput.Icon icon="close" onPress={clearValue} disabled={isBlank(finalValue)} />}
       />
+
       <View style={styles.actionsContainer}>
         <IconButton
           icon="send"
