@@ -8,18 +8,18 @@ import { logger } from '../../logger/logger';
 import { useAppTheme } from '../../theme/theme';
 import { buildFinalValue, ensureVoiceRecognitionPermissions } from './voice-recognition.utils';
 
-interface DescriptionInputProps extends TextInputProps {
+interface VoiceRecognitionTextInputProps extends TextInputProps {
   label: string;
-  query: string;
-  onQueryChange: (value: string) => void;
-  onSearch: (value: string) => void;
+  value: string;
+  onValueChange: (value: string) => void;
+  onValueSubmit: (value: string) => void;
 }
 
-export const VoiceRecognitionSearchInput: FunctionComponent<DescriptionInputProps> = ({
+export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextInputProps> = ({
   label,
-  query,
-  onQueryChange,
-  onSearch,
+  value,
+  onValueChange,
+  onValueSubmit,
 }) => {
   const styles = useStyles();
   const [isRecording, setIsRecording] = useState(false);
@@ -28,11 +28,11 @@ export const VoiceRecognitionSearchInput: FunctionComponent<DescriptionInputProp
   const { t } = useTranslation();
   const speechToTextLanguageCode = t('common:speechToTextLanguageCode');
 
-  const finalValue = buildFinalValue({ query, recordingValue });
+  const finalValue = buildFinalValue({ query: value, recordingValue });
 
   const triggerOnSearch = () => {
     Keyboard.dismiss();
-    onSearch(finalValue.trim());
+    onValueSubmit(finalValue.trim());
     setIsRecording(false);
     setRecordingValue('');
   };
@@ -74,7 +74,7 @@ export const VoiceRecognitionSearchInput: FunctionComponent<DescriptionInputProp
     ExpoSpeechRecognitionModule.stop();
 
     if (isNotBlank(recordingValue)) {
-      onQueryChange(buildFinalValue({ query, recordingValue }));
+      onValueChange(buildFinalValue({ query: value, recordingValue }));
     }
     setRecordingValue('');
   };
@@ -87,8 +87,8 @@ export const VoiceRecognitionSearchInput: FunctionComponent<DescriptionInputProp
     }
   };
 
-  const clearSearch = () => {
-    onQueryChange('');
+  const clearValue = () => {
+    onValueChange('');
     setRecordingValue('');
   };
 
@@ -99,11 +99,11 @@ export const VoiceRecognitionSearchInput: FunctionComponent<DescriptionInputProp
         label={label}
         value={finalValue}
         readOnly={isRecording}
-        onChangeText={onQueryChange}
+        onChangeText={onValueChange}
         multiline={true}
         numberOfLines={4}
         left={<TextInput.Icon icon={isRecording ? 'stop' : 'microphone-outline'} onPress={toggleRecording} />}
-        right={<TextInput.Icon icon="close" onPress={clearSearch} disabled={isBlank(finalValue)} />}
+        right={<TextInput.Icon icon="close" onPress={clearValue} disabled={isBlank(finalValue)} />}
       />
       <View style={styles.actionsContainer}>
         <IconButton
