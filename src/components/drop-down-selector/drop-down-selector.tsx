@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
+import { getBorderColor, getLabelColor, getTextColor } from './drop-down-selector.utils';
 
 export interface SelectOption {
   label: string;
@@ -75,34 +76,18 @@ type UseStylesProps = {
 
 const useStyles = ({ isFocused, disabled, isError }: UseStylesProps) => {
   const theme = useAppTheme();
-  const {
-    surface,
-    onSurface,
-    onSurfaceDisabled,
-    surfaceDisabled,
-    primary,
-    outline,
-    secondary,
-    error
-  } = theme.colors;
+  const { surface, surfaceDisabled } = theme.colors;
 
   const isDisabled = disabled === true;
   const isFocusedAndEnabled = isFocused && !isDisabled;
 
   // Priority: error > disabled > focus > normal
-  const labelColor = isError
-    ? error
-    : (isDisabled ? onSurfaceDisabled : (isFocusedAndEnabled ? primary : onSurface));
-
-  const borderColor = isError
-    ? error
-    : (isDisabled ? surfaceDisabled : (isFocused ? primary : outline));
+  const labelColor = getLabelColor({ theme, isError: !!isError, isDisabled, isFocusedAndEnabled });
+  const borderColor = getBorderColor({ theme, isError: !!isError, isDisabled, isFocused });
   const borderWidth = isFocusedAndEnabled ? 2 : 1;
 
   const backgroundColor = isDisabled ? surfaceDisabled : 'transparent';
-  const textColor = isDisabled
-    ? onSurfaceDisabled
-    : (isFocused ? primary : secondary);
+  const textColor = getTextColor({ theme, isFocused, isDisabled });
 
   return StyleSheet.create({
     dropdownTitle: {
