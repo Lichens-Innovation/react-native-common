@@ -26,7 +26,7 @@ export const VoiceRecognitionSearchInput: FunctionComponent<DescriptionInputProp
   const [recordingValue, setRecordingValue] = useState('');
 
   const { t } = useTranslation();
-  const speechToTextLanguageCode = t('app:semanticSearch.speechToTextLanguageCode');
+  const speechToTextLanguageCode = t('common:speechToTextLanguageCode');
 
   const finalValue = buildFinalValue({ query, recordingValue });
 
