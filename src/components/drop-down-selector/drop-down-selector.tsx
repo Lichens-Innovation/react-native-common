@@ -4,7 +4,6 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
 
-
 export interface SelectOption {
   label: string;
   value: string;
@@ -31,20 +30,18 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
   searchPlaceholder,
   disabled,
 }) => {
-  const theme = useAppTheme();
-  const { primary, error } = theme.colors;
-  const [isFocus, setIsFocus] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const hasLabel = !!label;
-  const styles = useStyles({ isFocus, hasLabel });
+  const styles = useStyles({ isFocused, disabled, isError });
 
   return (
     <View>
       {hasLabel && (
-        <Text variant='bodySmall' style={[styles.dropdownTitle, isFocus && { color: primary }, isError && { color: error }]}>{label}</Text>
+        <Text variant='bodySmall' style={styles.dropdownTitle}>{label}</Text>
       )}
 
       <Dropdown
-        style={[styles.dropdown, isFocus && { borderColor: primary }, isError && { borderColor: error }]}
+        style={styles.dropdown}
         autoScroll={false} // @see https://github.com/hoaphantn7604/react-native-element-dropdown/issues/345
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
@@ -55,56 +52,86 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
         maxHeight={300}
         labelField="label"
         valueField="value"
-        placeholder={isFocus ? '' : placeholder}
+        placeholder={isFocused ? '' : placeholder}
         searchPlaceholder={searchPlaceholder}
         value={value}
         disable={disabled}
-        onFocus={() => setIsFocus(true)}
-        onBlur={() => setIsFocus(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         onChange={({ value }) => {
           onChange(value);
-          setIsFocus(false);
+          setIsFocused(false);
         }}
       />
     </View>
   );
 };
 
-type UseStypesProps = {
-  isFocus: boolean;
-  hasLabel: boolean;
+type UseStylesProps = {
+  isFocused: boolean;
+  disabled?: boolean;
+  isError?: boolean;
 };
 
-const useStyles = ({ isFocus, hasLabel }: UseStypesProps) => {
+const useStyles = ({ isFocused, disabled, isError }: UseStylesProps) => {
   const theme = useAppTheme();
+  const {
+    surface,
+    onSurface,
+    onSurfaceDisabled,
+    surfaceDisabled,
+    primary,
+    outline,
+    secondary,
+    error
+  } = theme.colors;
+
+  const isDisabled = disabled === true;
+  const isFocusedAndEnabled = isFocused && !isDisabled;
+
+  // Priority: error > disabled > focus > normal
+  const labelColor = isError
+    ? error
+    : (isDisabled ? onSurfaceDisabled : (isFocusedAndEnabled ? primary : onSurface));
+
+  const borderColor = isError
+    ? error
+    : (isDisabled ? surfaceDisabled : (isFocused ? primary : outline));
+  const borderWidth = isFocusedAndEnabled ? 2 : 1;
+
+  const backgroundColor = isDisabled ? surfaceDisabled : 'transparent';
+  const textColor = isDisabled
+    ? onSurfaceDisabled
+    : (isFocused ? primary : secondary);
 
   return StyleSheet.create({
     dropdownTitle: {
       position: 'absolute',
       top: -theme.spacing(1),
       left: theme.spacing(1),
-      backgroundColor: theme.colors.surface,
+      backgroundColor: surface,
       paddingHorizontal: theme.spacing(0.75),
-      color: theme.colors.onSurface,
+      color: labelColor,
       zIndex: 1,
     },
     dropdown: {
       height: 50,
-      borderColor: isFocus ? theme.colors.primary : theme.colors.outline,
-      borderWidth: isFocus ? 2 : 1,
+      borderColor,
+      borderWidth,
       borderRadius: theme.roundness,
       paddingHorizontal: theme.spacing(1),
+      backgroundColor,
     },
     icon: {
       marginRight: 5,
     },
     placeholderStyle: {
       fontSize: 16,
-      color: isFocus ? theme.colors.primary : theme.colors.secondary,
+      color: textColor,
     },
     selectedTextStyle: {
       fontSize: 16,
-      color: isFocus ? theme.colors.primary : theme.colors.secondary,
+      color: textColor,
       paddingLeft: theme.spacing(1),
     },
     iconStyle: {
