@@ -18,6 +18,7 @@ export type DropDownSelectorProps = {
   options: SelectOption[];
   placeholder?: string;
   searchPlaceholder?: string;
+  disabled?: boolean;
 };
 
 export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
@@ -28,6 +29,7 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
   options,
   placeholder,
   searchPlaceholder,
+  disabled,
 }) => {
   const theme = useAppTheme();
   const { primary, error } = theme.colors;
@@ -56,6 +58,7 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
         placeholder={isFocus ? '' : placeholder}
         searchPlaceholder={searchPlaceholder}
         value={value}
+        disable={disabled}
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
         onChange={({ value }) => {
