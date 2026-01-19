@@ -11,15 +11,20 @@ export const buildFinalValue = ({ query, recordingValue }: BuildFinalValueArgs):
 };
 
 export const ensureVoiceRecognitionPermissions = async (): Promise<boolean> => {
-  const permissions = await ExpoSpeechRecognitionModule.getPermissionsAsync();
-  if (!permissions.granted) {
-    const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+  try {
+    const permissions = await ExpoSpeechRecognitionModule.getPermissionsAsync();
+    if (!permissions.granted) {
+      const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
 
-    if (!result.granted) {
-      logger.warn('[ensureVoiceRecognitionPermissions] Permissions not granted', result);
-      return false;
+      if (!result.granted) {
+        logger.info('[ensureVoiceRecognitionPermissions] Permissions not granted', result);
+        return false;
+      }
     }
-  }
 
-  return true;
+    return true;
+  } catch (e: unknown) {
+    logger.error('[ensureVoiceRecognitionPermissions] Error getting permissions', e);
+    return false;
+  }
 };
