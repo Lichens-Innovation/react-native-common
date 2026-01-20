@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { ViewStyle } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
 
 export interface HorizontalResizableSplitViewProps {
   /** Content to display in the left section */
@@ -13,9 +13,9 @@ export interface HorizontalResizableSplitViewProps {
   /** Maximum proportion for the left section (0 to 1). Default: 0.85 */
   maxLeftRatio?: number;
   /** Style for the drag handle container */
-  handleContainerStyle?: ViewStyle;
+  handleContainerStyle?: StyleProp<ViewStyle>;
   /** Style for the drag handle bar */
-  handleStyle?: ViewStyle;
+  handleStyle?: StyleProp<ViewStyle>;
   /** Whether to hide the drag handle. Default: false */
   hideHandle?: boolean;
 }

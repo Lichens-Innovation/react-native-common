@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { ViewStyle } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
 
 export interface VerticalResizableSplitViewProps {
   /** Content to display in the top section */
@@ -13,9 +13,9 @@ export interface VerticalResizableSplitViewProps {
   /** Maximum proportion for the top section (0 to 1). Default: 0.85 */
   maxTopRatio?: number;
   /** Style for the drag handle container */
-  handleContainerStyle?: ViewStyle;
+  handleContainerStyle?: StyleProp<ViewStyle>;
   /** Style for the drag handle bar */
-  handleStyle?: ViewStyle;
+  handleStyle?: StyleProp<ViewStyle>;
   /** Whether to hide the drag handle. Default: false */
   hideHandle?: boolean;
 }

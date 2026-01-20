@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { ViewStyle } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
 
 export type VerticalResizableOverlayViewAnchorType = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 
@@ -22,9 +22,9 @@ export interface VerticalResizableOverlayViewProps {
   /** Aspect ratio (width/height) for the foreground content. If provided, width will be calculated based on height */
   foregroundContentAspectRatio?: number;
   /** Style for the drag handle container */
-  handleContainerStyle?: ViewStyle;
+  handleContainerStyle?: StyleProp<ViewStyle>;
   /** Style for the drag handle bar */
-  handleStyle?: ViewStyle;
+  handleStyle?: StyleProp<ViewStyle>;
   /** Whether to hide the drag handle. Default: false */
   hideHandle?: boolean;
 }
