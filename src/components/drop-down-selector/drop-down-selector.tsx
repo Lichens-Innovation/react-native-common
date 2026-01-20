@@ -4,10 +4,13 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
 import { getBorderColor, getLabelColor, getTextColor } from './drop-down-selector.utils';
+import { DropDownSelectorItem } from './drop-down-selector-item';
+import { DropDownSelectorLeftIcon } from './drop-down-selector-left-icon';
 
 export interface SelectOption {
   label: string;
   value: string;
+  icon?: string;
 }
 
 export type DropDownSelectorProps = {
@@ -34,6 +37,10 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const hasLabel = !!label;
   const styles = useStyles({ isFocused, disabled, isError });
+  const theme = useAppTheme();
+  const textColor = getTextColor({ theme, isFocused, isDisabled: disabled === true });
+
+  const selectedItem = options.find((option) => option.value === value);
 
   return (
     <View>
@@ -46,15 +53,13 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
         autoScroll={false} // @see https://github.com/hoaphantn7604/react-native-element-dropdown/issues/345
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
         data={options}
         search={false}
+        searchPlaceholder={searchPlaceholder}
         maxHeight={300}
         labelField="label"
         valueField="value"
         placeholder={isFocused ? '' : placeholder}
-        searchPlaceholder={searchPlaceholder}
         value={value}
         disable={disabled}
         onFocus={() => setIsFocused(true)}
@@ -63,6 +68,12 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
           onChange(value);
           setIsFocused(false);
         }}
+        renderItem={(item: SelectOption, selected?: boolean) => (
+          <DropDownSelectorItem item={item} selected={selected} textColor={textColor} />
+        )}
+        renderLeftIcon={() => (
+          <DropDownSelectorLeftIcon icon={selectedItem?.icon} color={textColor} />
+        )}
       />
     </View>
   );
@@ -107,25 +118,12 @@ const useStyles = ({ isFocused, disabled, isError }: UseStylesProps) => {
       paddingHorizontal: theme.spacing(1),
       backgroundColor,
     },
-    icon: {
-      marginRight: 5,
-    },
     placeholderStyle: {
-      fontSize: 16,
       color: textColor,
     },
     selectedTextStyle: {
-      fontSize: 16,
       color: textColor,
       paddingLeft: theme.spacing(1),
-    },
-    iconStyle: {
-      width: 20,
-      height: 20,
-    },
-    inputSearchStyle: {
-      height: 40,
-      fontSize: 16,
     },
   });
 };

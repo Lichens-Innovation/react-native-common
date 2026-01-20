@@ -2,9 +2,9 @@
 
 ## Simple Components
 
-| On/Off Toggle |
-|:-------------:|
-| <img src="demos/demo-on-off-toggle.gif" width="200" /> |
+| On/Off Toggle | Drop Down Selector |
+|:-------------:|:------------------:|
+| <img src="demos/demo-on-off-toggle.gif" width="200" /> | <img src="demos/demo-drop-down-selector.gif" width="200" /> |
 
 ## Common Dialogs
 
