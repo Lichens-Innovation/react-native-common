@@ -67,7 +67,7 @@ const useStyles = () => {
       flex: 1,
     },
     tabList: {
-      backgroundColor: theme.colors.backdrop,
+      backgroundColor: theme.colors.elevation.level1,
       justifyContent: 'space-around',
       flexDirection: isLandscape ? 'column' : 'row',
       paddingBottom: isLandscape ? minPadding : bottom,
