@@ -14,6 +14,6 @@
 
 ## Resizable Views
 
-| Vertical Split View | Vertical Overlay View |
-|:-------------------:|:---------------------:|
-| <img src="demos/demo-vertical-split-view.gif" width="200" /> | <img src="demos/demo-vertical-resizable-overlay-view.gif" width="200" /> |
+| Vertical Split View | Vertical Overlay View | Horizontal Split View |
+|:-------------------:|:---------------------:|:---------------------:|
+| <img src="demos/demo-vertical-split-view.gif" width="200" /> | <img src="demos/demo-vertical-resizable-overlay-view.gif" width="200" /> | <img src="demos/demo-horizontal-split-view.gif" width="200" /> |
