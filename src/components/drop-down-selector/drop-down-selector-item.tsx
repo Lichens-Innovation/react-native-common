@@ -1,8 +1,9 @@
 import { FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Icon, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
 import { SelectOption } from './drop-down-selector';
+import { DropDownSelectorLeftIcon } from './drop-down-selector-left-icon';
 
 export type DropDownSelectorItemProps = {
   item: SelectOption;
@@ -21,7 +22,7 @@ export const DropDownSelectorItem: FunctionComponent<DropDownSelectorItemProps> 
   return (
     <View style={styles.itemContainer}>
       {item.icon && (
-        <Icon source={item.icon} size={20} color={textColor} />
+        <DropDownSelectorLeftIcon icon={item.icon} color={textColor} />
       )}
       <Text>{item.label}</Text>
     </View>
