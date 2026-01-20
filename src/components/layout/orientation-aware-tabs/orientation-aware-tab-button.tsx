@@ -21,15 +21,17 @@ export const OrientationAwareTabButton: FunctionComponent<OrientationAwareTabBut
   isLabelHidden = false,
   ...props
 }) => {
+  const theme = useAppTheme();
   const styles = useStyles();
   const isLabelVisible: boolean = !isLabelHidden;
+  const color = isFocused ? activeColor : theme.colors.onSurfaceDisabled;
 
   return (
     <Pressable {...props} style={[styles.tabButton]} >
-      <TabBarIcon name={icon} color={isFocused ? activeColor : undefined} />
+      <TabBarIcon name={icon} color={color} />
 
       {isLabelVisible && (
-        <Text variant="labelSmall" style={[isFocused && { color: activeColor }]}>
+        <Text variant="bodySmall" style={{ color }}>
           {title}
         </Text>
       )}
@@ -49,7 +51,6 @@ const useStyles = () => {
       justifyContent: 'center',
       paddingLeft: isLandscape ? padding : 0,
       paddingTop: isLandscape ? 0 : padding,
-      gap: theme.spacing(0.5),
     },
   });
 };

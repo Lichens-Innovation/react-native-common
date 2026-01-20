@@ -33,6 +33,7 @@ export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsL
   return (
     <Tabs style={[styles.tabsContainer, containerStyle]}>
       <TabSlot style={styles.tabSlot} />
+
       <TabList style={[styles.tabList, tabListStyle]}>
         {tabs.map((tab) => (
           <TabTrigger key={tab.name} name={tab.name} href={tab.href} asChild>
@@ -54,8 +55,6 @@ const useStyles = () => {
   const { bottom, right } = useSafeAreaInsets();
 
   const minPadding = theme.spacing(0.5);
-  const paddingBottom = Math.max(bottom, minPadding);
-  const paddingRight = Math.max(right, minPadding);
 
   const isLandscape = useIsLandscape();
 
@@ -68,11 +67,15 @@ const useStyles = () => {
       flex: 1,
     },
     tabList: {
-      backgroundColor: theme.colors.surfaceVariant,
+      backgroundColor: theme.colors.backdrop,
       justifyContent: 'space-around',
       flexDirection: isLandscape ? 'column' : 'row',
-      paddingBottom,
-      paddingRight,
+      paddingBottom: isLandscape ? minPadding : bottom,
+      paddingRight: isLandscape ? right : minPadding,
+      borderTopWidth: isLandscape ? undefined : StyleSheet.hairlineWidth,
+      borderTopColor: isLandscape ? undefined : theme.colors.outline,
+      borderLeftWidth: isLandscape ? StyleSheet.hairlineWidth : undefined,
+      borderLeftColor: isLandscape ? theme.colors.outline : undefined,
     }
   });
 };
