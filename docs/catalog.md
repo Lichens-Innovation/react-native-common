@@ -12,8 +12,8 @@
 |:---------:|:----------------:|
 | <img src="demos/demo-dialog-ok.gif" width="200" /> | <img src="demos/demo-dialog-ok-cancel.gif" width="200" /> |
 
-## Resizable Views
+## Layouts & Resizable Views
 
-| Vertical Split View | Vertical Overlay View | Horizontal Split View |
-|:-------------------:|:---------------------:|:---------------------:|
-| <img src="demos/demo-vertical-split-view.gif" width="200" /> | <img src="demos/demo-vertical-resizable-overlay-view.gif" width="200" /> | <img src="demos/demo-horizontal-split-view.gif" width="200" /> |
+| Vertical Split View | Vertical Overlay View | Horizontal Split View | Orientation Tabs Aware |
+|:-------------------:|:---------------------:|:---------------------:|:----------------------:|
+| <img src="demos/demo-vertical-split-view.gif" width="200" /> | <img src="demos/demo-vertical-resizable-overlay-view.gif" width="200" /> | <img src="demos/demo-horizontal-split-view.gif" width="200" /> | <img src="demos/demo-orientation-aware-tabs-layout.gif" width="200" /> |
