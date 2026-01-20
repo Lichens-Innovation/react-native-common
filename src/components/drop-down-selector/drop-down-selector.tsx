@@ -36,9 +36,10 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const hasLabel = !!label;
-  const styles = useStyles({ isFocused, disabled, isError });
   const theme = useAppTheme();
-  const textColor = getTextColor({ theme, isFocused, isDisabled: disabled === true });
+  const isDisabled = disabled === true;
+  const textColor = getTextColor({ theme, isFocused, isDisabled });
+  const styles = useStyles({ isFocused, disabled, isError, textColor });
 
   const selectedItem = options.find((option) => option.value === value);
 
@@ -83,9 +84,10 @@ type UseStylesProps = {
   isFocused: boolean;
   disabled?: boolean;
   isError?: boolean;
+  textColor: string;
 };
 
-const useStyles = ({ isFocused, disabled, isError }: UseStylesProps) => {
+const useStyles = ({ isFocused, disabled, isError, textColor }: UseStylesProps) => {
   const theme = useAppTheme();
   const { surface, surfaceDisabled } = theme.colors;
 
@@ -98,7 +100,6 @@ const useStyles = ({ isFocused, disabled, isError }: UseStylesProps) => {
   const borderWidth = isFocusedAndEnabled ? 2 : 1;
 
   const backgroundColor = isDisabled ? surfaceDisabled : 'transparent';
-  const textColor = getTextColor({ theme, isFocused, isDisabled });
 
   return StyleSheet.create({
     dropdownTitle: {
