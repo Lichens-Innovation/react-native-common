@@ -15,7 +15,7 @@ import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
 import { getAppIdentifier } from '../utils/device.utils';
 import { isDevelopment } from '../utils/env.utils';
-import { LOG_LEVELS, SimpleLogger } from './logger.utils';
+import { LOG_LEVELS, SimpleLogger } from './logger.types';
 
 LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed from function components/]);
 

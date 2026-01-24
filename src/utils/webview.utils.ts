@@ -1,5 +1,5 @@
 import { logger } from '../logger/logger';
-import { LoggerMethods } from '../logger/logger.utils';
+import { LoggerMethods } from '../logger/logger.types';
 
 export const htmlDocumentMessage = (message = {}) => {
   const jsonMessage = JSON.stringify(message ?? {});
