@@ -1,4 +1,3 @@
-import { isString } from '@lichens-innovation/ts-common';
 import * as Sentry from '@sentry/react-native';
 import { InteractionManager, LogBox } from 'react-native';
 import {
@@ -9,7 +8,8 @@ import {
   transportFunctionType,
 } from 'react-native-logs';
 
-import RNFS from 'react-native-fs';
+import { Directory, File, Paths } from 'expo-file-system';
+import * as FileSystemLegacy from 'expo-file-system/legacy';
 import { getSentryDns, isSentryActivated } from '../config/env.config';
 import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
@@ -22,7 +22,10 @@ LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed 
 const appName = getAppIdentifier();
 const logFilenamePrefix = `app-logs-${appName}`;
 const logFilenamePattern = `${logFilenamePrefix}-{date-today}.txt`;
-const filePath = RNFS.DocumentDirectoryPath ?? '';
+const filePath: string = Paths.document.uri;
+if (!filePath) {
+  throw new Error('Failed to initialize logger: document directory path is unavailable');
+}
 
 class LoggerWrapper implements SimpleLogger {
   private _logger: ReturnType<typeof RNLogger.createLogger>;
@@ -102,7 +105,7 @@ export const logger = new LoggerWrapper({
       error: 'error',
     },
     // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#fileasynctransport
-    FS: RNFS,
+    FS: FileSystemLegacy,
     fileNameDateType: 'iso',
     fileName: logFilenamePattern,
     filePath,
@@ -113,34 +116,40 @@ const isLogFile = (fileName: string): boolean => {
   return fileName.startsWith(logFilenamePrefix);
 };
 
+const isLogFileItem = (item: Directory | File): item is File => {
+  return item instanceof File && isLogFile(item.name);
+};
+
+const byMostRecentFirstComparator = (a: FileInfo, b: FileInfo): number => {
+  return (b.modificationTime ?? 0) - (a.modificationTime ?? 0);
+};
+
 export const loadAllLogFilesInfo = async (): Promise<FileInfo[]> => {
   try {
-    const directoryExists = await RNFS.exists(filePath);
-    if (!directoryExists) {
+    const pathInfo = Paths.info(filePath);
+    if (!pathInfo.exists) {
       return [];
     }
 
-    const files = await RNFS.readDir(filePath);
-    const logFiles = files.filter((file) => file.isFile() && isLogFile(file.name));
+    const directory = new Directory(filePath);
+    const items = directory.list();
+    const logFiles = items.filter(isLogFileItem);
 
-    const fileInfos: FileInfo[] = logFiles.map((file) => {
-      const mTime = file.mtime;
-      const isTimestampString = isString(mTime);
-      const modificationTime = isTimestampString ? new Date(mTime).getTime() : mTime?.getTime();
+    const fileInfos: FileInfo[] = logFiles
+      .map((file) => {
+        const info = file.info();
+        return {
+          exists: info.exists,
+          isDirectory: false,
+          size: info.size ?? 0,
+          modificationTime: info.modificationTime ?? 0,
+          uri: file.uri,
+        };
+      })
+      .filter((info) => info.exists);
 
-      return {
-        exists: true,
-        isDirectory: false,
-        size: file.size,
-        modificationTime,
-        uri: file.path,
-      };
-    });
-
-    return fileInfos
-      .filter((info) => !!info?.exists) // only files that exist
-      .sort((a, b) => (b.modificationTime ?? 0) - (a.modificationTime ?? 0)); // most recent logs on top
-  } catch (e) {
+    return fileInfos.sort(byMostRecentFirstComparator);
+  } catch (e: unknown) {
     logger.error('Error loading files:', e);
     return [];
   }
@@ -153,19 +162,29 @@ export const loadCurrentLogsFileUri = async (): Promise<string> => {
 
 export const deleteAllLogFiles = async (): Promise<void> => {
   try {
-    const directoryExists = await RNFS.exists(filePath);
-    if (!directoryExists) {
+    const pathInfo = Paths.info(filePath);
+    if (!pathInfo.exists) {
       return;
     }
 
-    const files = await RNFS.readDir(filePath);
-    const logFiles = files.filter((file) => file.isFile() && isLogFile(file.name));
+    const directory = new Directory(filePath);
+    const items = directory.list();
+    const logFiles: File[] = items.filter(isLogFileItem);
 
-    const deletePromises = logFiles.map((file) => RNFS.unlink(file.path));
+    const errors: Error[] = [];
+    for (const file of logFiles) {
+      try {
+        file.delete();
+      } catch (e: unknown) {
+        errors.push(e instanceof Error ? e : new Error(String(e)));
+      }
+    }
 
-    await Promise.all(deletePromises);
-  } catch (error) {
-    logger.error('Error deleting files:', error);
-    throw error;
+    if (errors.length > 0) {
+      throw new Error(`Failed to delete ${errors.length} log file(s): ${errors.map((e) => e.message).join('; ')}`);
+    }
+  } catch (e: unknown) {
+    logger.error('Error deleting files:', e);
+    throw e;
   }
 };
