@@ -1,7 +1,8 @@
 import { format } from 'date-fns';
 import { commonLogsStore } from '../store/common-logs.store';
 import { notImplementedYet } from '../utils/platform.utils';
-import { SimpleLogger, toLogLevel } from './logger.utils';
+import { SimpleLogger } from './logger.types';
+import { toLogLevel } from './logger.utils';
 
 const WindowsStorage = Windows.Storage;
 const localFolder = WindowsStorage.ApplicationData.current.localFolder;

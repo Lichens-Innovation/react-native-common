@@ -1,11 +1,11 @@
 import { LegendList } from '@legendapp/list';
 import { observer } from 'mobx-react-lite';
-import React, { type FunctionComponent, useEffect } from 'react';
+import { type FunctionComponent, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LogBox, Platform, StyleSheet, View } from 'react-native';
 import { IconButton, TextInput } from 'react-native-paper';
 
-import { LogEntry } from '../../../logger/logger.utils';
+import { LogEntry } from '../../../logger/logger.types';
 import { commonLogsStore } from '../../../store/common-logs.store';
 import { useAppTheme } from '../../../theme/theme';
 import { LogEntryItem } from './log-entry-item';

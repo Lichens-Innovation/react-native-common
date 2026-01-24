@@ -3,7 +3,7 @@ import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { useTranslation } from 'react-i18next';
-import { LogEntry } from '../../../logger/logger.utils';
+import { LogEntry } from '../../../logger/logger.types';
 import { useLogEntryColor } from '../../../logger/use-log-entry-color';
 import { useAppTheme } from '../../../theme/theme';
 import { setClipboardTextContent } from '../../../utils/clipboard.utils';

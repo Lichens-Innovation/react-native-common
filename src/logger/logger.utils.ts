@@ -1,28 +1,8 @@
 import { type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 import { logger } from './logger';
+import { LOG_LEVELS, LogLevel, LogLevelKey } from './logger.types';
 
 const X_REQUEST_START_TIME = 'x-request-start-time';
-
-export const LOG_LEVELS = {
-  debug: 0,
-  log: 1,
-  info: 2,
-  warn: 3,
-  error: 4,
-} as const;
-
-export type LogLevelKey = keyof typeof LOG_LEVELS;
-
-export interface LogLevel {
-  severity: number;
-  text: string;
-}
-
-export interface LogEntry {
-  msg: string;
-  rawMsg: unknown;
-  level: LogLevel;
-}
 
 export const toLogLevel = (type: string): LogLevel => {
   const logLevelKey = type.toLowerCase() as LogLevelKey;
@@ -32,17 +12,6 @@ export const toLogLevel = (type: string): LogLevel => {
     severity: LOG_LEVELS[logLevelKey],
   };
 };
-
-export interface SimpleLogger {
-  debug(message: string, ...args: any[]): void;
-  log(message: string, ...args: any[]): void;
-  info(message: string, ...args: any[]): void;
-  warn(message: string, ...args: any[]): void;
-  error(message: string, ...args: any[]): void;
-}
-
-// extract names of logger methods as a type
-export type LoggerMethods = keyof SimpleLogger;
 
 export const logRequestStart = (request: InternalAxiosRequestConfig) => {
   request.headers.set(X_REQUEST_START_TIME, Date.now().toString());

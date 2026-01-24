@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import { transportFunctionType } from 'react-native-logs';
-import { LogEntry } from '../logger/logger.utils';
+import { LogEntry } from '../logger/logger.types';
 
 const MAX_LOG_ENTRIES = 10 * 1000;
 

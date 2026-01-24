@@ -1,5 +1,5 @@
 import { useIsDarkMode } from '../theme/theme';
-import { LOG_LEVELS } from './logger.utils';
+import { LOG_LEVELS } from './logger.types';
 
 const LOG_COLORS_DARK_MODE = new Map<number, string>([
   [LOG_LEVELS.debug, '#9e9e9e'],
