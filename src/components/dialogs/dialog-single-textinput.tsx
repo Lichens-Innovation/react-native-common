@@ -51,7 +51,7 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
 
   return (
     <Portal>
-      <Dialog style={[styles.dialog, dialogStyleProp]} visible={true} onDismiss={onCancel} {...dialogProps}>
+      <Dialog {...dialogProps} style={[styles.dialog, dialogStyleProp]} visible={true} onDismiss={onCancel}>
         {hasTitle && <Dialog.Title>{hasTitleString ? <Text>{title}</Text> : title}</Dialog.Title>}
 
         {hasDescription && (
