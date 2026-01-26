@@ -8,9 +8,9 @@
 
 ## Common Dialogs
 
-| Dialog Ok | Dialog Ok/Cancel |
-|:---------:|:----------------:|
-| <img src="demos/demo-dialog-ok.gif" width="200" /> | <img src="demos/demo-dialog-ok-cancel.gif" width="200" /> |
+| Dialog Ok | Dialog Ok/Cancel | Dialog Single TextInput |
+|:---------:|:----------------:|:----------------------:|
+| <img src="demos/demo-dialog-ok.gif" width="200" /> | <img src="demos/demo-dialog-ok-cancel.gif" width="200" /> | <img src="demos/demo-dialog-textinput.gif" width="200" /> |
 
 ## Layouts & Resizable Views
 
