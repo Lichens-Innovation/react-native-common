@@ -68,7 +68,7 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
             autoFocus
           />
 
-          {hasError && <Text variant="bodySmall" style={styles.errorText}>{errorMessage}</Text>}
+          {hasError && <Text variant="bodyMedium" style={styles.errorText}>{errorMessage}</Text>}
         </Dialog.Content>
 
         <Dialog.Actions>
