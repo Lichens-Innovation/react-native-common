@@ -67,7 +67,8 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
             error={hasError}
             autoFocus
           />
-          {hasError && <Text style={styles.errorText}>{errorMessage}</Text>}
+
+          {hasError && <Text variant="bodySmall" style={styles.errorText}>{errorMessage}</Text>}
         </Dialog.Content>
 
         <Dialog.Actions>
@@ -95,7 +96,6 @@ const useStyles = () => {
     },
     errorText: {
       marginTop: theme.spacing(1),
-      fontSize: 12,
       color: theme.colors.error,
     },
   });
