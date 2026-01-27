@@ -1,4 +1,4 @@
-import { type ComponentProps, type FunctionComponent, type ReactNode } from 'react';
+import { type ComponentProps, type FunctionComponent, type ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
@@ -7,6 +7,8 @@ import { useDialogStyles } from './use-dialog-styles';
 
 type DialogProps = ComponentProps<typeof Dialog>;
 
+type TextInputSelection = { start: number; end: number };
+
 interface DialogSingleTextInputProps extends Omit<DialogProps, 'children' | 'visible'> {
   title: ReactNode;
   description?: ReactNode;
@@ -14,7 +16,7 @@ interface DialogSingleTextInputProps extends Omit<DialogProps, 'children' | 'vis
   onChange: (value: string) => void;
   errorMessage?: string;
   placeholder?: string;
-  onOk: () => void;
+  onOk: (inputValue: string) => void;
   onCancel: () => void;
   isVisible: boolean;
 }
@@ -35,6 +37,9 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
   const styles = useStyles();
   const { t } = useTranslation();
 
+  const [selection, setSelection] = useState<TextInputSelection>();
+  const [inputValue, setInputValue] = useState(value);
+
   const hasTitle = !!title;
   const hasTitleString = typeof title === 'string';
 
@@ -42,8 +47,13 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
   const hasDescriptionString = typeof description === 'string';
 
   const hasError = !!errorMessage;
-  const isInputPopulated = value.trim().length > 0;
+  const isInputPopulated = inputValue.trim().length > 0;
   const isOkEnabled = !hasError && isInputPopulated;
+
+  const onChangeText = (text: string) => {
+    setInputValue(text);
+    onChange(text);
+  };
 
   if (!isVisible) {
     return null;
@@ -61,11 +71,12 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
         <Dialog.Content>
           <TextInput
             mode="outlined"
-            value={value}
-            onChangeText={onChange}
+            value={inputValue}
+            onChangeText={onChangeText}
+            selection={selection}
+            onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
             placeholder={placeholder}
             error={hasError}
-            autoFocus
           />
 
           {hasError && <Text variant="bodyMedium" style={styles.errorText}>{errorMessage}</Text>}
@@ -73,7 +84,7 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
 
         <Dialog.Actions>
           <Button onPress={onCancel}>{t('common:cancel')}</Button>
-          <Button style={styles.button} mode="contained" onPress={onOk} disabled={!isOkEnabled}>
+          <Button style={styles.button} mode="contained" onPress={() => onOk(inputValue)} disabled={!isOkEnabled}>
             {t('common:ok')}
           </Button>
         </Dialog.Actions>
