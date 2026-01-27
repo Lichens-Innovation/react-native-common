@@ -38,6 +38,9 @@ describe('Tests suite for file utilities', () => {
       ${''}                            | ${false}
       ${'file.txt'}                    | ${true}
       ${'file'}                        | ${false}
+      ${'/path.with.dots/file'}        | ${false}
+      ${'/some.dir/another.dir/file'}  | ${false}
+      ${'file.'}                       | ${true}
     `('should return $expected for $fileUri', ({ fileUri, expected }) => {
       expect(hasExtension(fileUri)).toBe(expected);
     });

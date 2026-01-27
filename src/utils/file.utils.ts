@@ -12,7 +12,10 @@ export const isFileExists = async (fileUri = '') => {
   return exists;
 };
 
-export const hasExtension = (fileUri = '/'): boolean => !!fileUri?.includes('.');
+export const hasExtension = (fileUri = '/'): boolean => {
+  const filename = fileUri.split('/').pop() ?? '';
+  return filename.includes('.');
+};
 
 export const getFilenameOnly = (fileUri = '/') => fileUri.split('/').pop() ?? '';
 
