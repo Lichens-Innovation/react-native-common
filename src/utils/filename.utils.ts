@@ -3,6 +3,53 @@ import { formatInTimeZone } from 'date-fns-tz';
 import Handlebars from 'handlebars';
 import uuid from 'react-native-uuid';
 
+/**
+ * Extracts the filename from a file URI
+ * @param fileUri - The file URI (e.g., '/path/to/file.txt')
+ * @returns The filename only (e.g., 'file.txt')
+ */
+export const getFilenameOnly = (fileUri = '/') => fileUri.split('/').pop() ?? '';
+
+/**
+ * Checks if a file URI has an extension
+ * @param fileUri - The file URI to check
+ * @returns true if the file has an extension, false otherwise
+ */
+export const hasExtension = (fileUri = '/'): boolean => {
+  const filename = getFilenameOnly(fileUri);
+  return filename.includes('.');
+};
+
+/**
+ * Extracts the filename without the extension from a file URI
+ * @param fileUri - The file URI (e.g., '/path/to/my-file.txt')
+ * @returns The filename without the extension (e.g., 'my-file')
+ */
+export const getFilenameWithoutExtension = (fileUri = '/') => {
+  const filename = getFilenameOnly(fileUri);
+  return filename.split('.').slice(0, -1).join('.');
+};
+
+/**
+ * Extracts the file extension from a file URI (lowercase)
+ * @param fileUri - The file URI (e.g., '/path/to/file.TXT')
+ * @returns The extension in lowercase (e.g., 'txt'), or empty string if no extension
+ */
+export const getFileExtensionOnly = (fileUri = '/') => {
+  if (!hasExtension(fileUri)) {
+    return '';
+  }
+
+  return fileUri.split('.').pop()?.toLowerCase() ?? '';
+};
+
+/**
+ * Extracts the directory path from a file URI
+ * @param fileUri - The file URI (e.g., '/path/to/file.txt')
+ * @returns The directory path (e.g., '/path/to'), or empty string if no directory
+ */
+export const getDirectoryOnly = (fileUri = '/') => fileUri.substring(0, fileUri.lastIndexOf('/'));
+
 Handlebars.registerHelper('timestampFormat', (timestamp: Date, dateTimeFormatInput: string) => {
   const dateTimeFormat = Handlebars.escapeExpression(dateTimeFormatInput);
   const formattedDateTime = formatInTimeZone(timestamp, 'UTC', dateTimeFormat);

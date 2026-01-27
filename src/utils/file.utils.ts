@@ -12,23 +12,6 @@ export const isFileExists = async (fileUri = '') => {
   return exists;
 };
 
-export const hasExtension = (fileUri = '/'): boolean => {
-  const filename = fileUri.split('/').pop() ?? '';
-  return filename.includes('.');
-};
-
-export const getFilenameOnly = (fileUri = '/') => fileUri.split('/').pop() ?? '';
-
-export const getFileExtensionOnly = (fileUri = '/') => {
-  if (!hasExtension(fileUri)) {
-    return '';
-  }
-
-  return fileUri.split('.').pop()?.toLowerCase() ?? '';
-};
-
-export const getDirectoryOnly = (fileUri = '/') => fileUri.substring(0, fileUri.lastIndexOf('/'));
-
 export const getDocumentFolderRelativePath = (fileUri = '/') =>
   fileUri.substring(nativeFileSystem.documentDirectory?.length ?? 0);
 
