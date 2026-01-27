@@ -48,14 +48,14 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
   const isInputPopulated = inputValue.trim().length > 0;
   const isOkEnabled = !hasError && isInputPopulated;
 
-  if (!isVisible) {
-    return null;
-  }
-
   const onChangeText = (text: string) => {
     setInputValue(text);
     onChange(text);
   };
+
+  if (!isVisible) {
+    return null;
+  }  
 
   return (
     <Portal>
