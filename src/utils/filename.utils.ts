@@ -3,8 +3,8 @@ import { formatInTimeZone } from 'date-fns-tz';
 import Handlebars from 'handlebars';
 import uuid from 'react-native-uuid';
 
-export const hasFileSeparator = (fileUri = '/'): boolean => {
-  return fileUri.includes('/');
+export const hasFileSeparator = (fileUri = ''): boolean => {
+  return fileUri?.includes('/') ?? false;
 };
 
 /**

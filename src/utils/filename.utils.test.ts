@@ -16,6 +16,8 @@ describe('Tests suite for filename utilities', () => {
       ${'/very/long/path/to/document.pdf'} | ${true}
       ${'/'}                               | ${true}
       ${''}                                | ${false}
+      ${undefined}                         | ${false}
+      ${null}                              | ${false}
       ${'/path/to/file'}                   | ${true}
       ${'file:///path/to/file.txt'}        | ${true}
       ${'file.txt'}                        | ${false}
