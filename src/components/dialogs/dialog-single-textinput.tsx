@@ -57,7 +57,7 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
 
   if (!isVisible) {
     return null;
-  }  
+  }
 
   return (
     <Portal>
@@ -74,7 +74,7 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
             value={inputValue}
             onChangeText={onChangeText}
             selection={selection}
-            onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}          
+            onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
             placeholder={placeholder}
             error={hasError}
           />
