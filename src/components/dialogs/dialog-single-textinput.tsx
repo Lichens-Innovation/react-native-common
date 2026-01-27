@@ -7,6 +7,8 @@ import { useDialogStyles } from './use-dialog-styles';
 
 type DialogProps = ComponentProps<typeof Dialog>;
 
+type TextInputSelection = { start: number; end: number };
+
 interface DialogSingleTextInputProps extends Omit<DialogProps, 'children' | 'visible'> {
   title: ReactNode;
   description?: ReactNode;
@@ -35,8 +37,8 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
   const styles = useStyles();
   const { t } = useTranslation();
 
+  const [selection, setSelection] = useState<TextInputSelection>();
   const [inputValue, setInputValue] = useState(value);
-  useEffect(() => setInputValue(value), [value]);
 
   const hasTitle = !!title;
   const hasTitleString = typeof title === 'string';
@@ -71,9 +73,10 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
             mode="outlined"
             value={inputValue}
             onChangeText={onChangeText}
+            selection={selection}
+            onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}          
             placeholder={placeholder}
             error={hasError}
-            autoFocus
           />
 
           {hasError && <Text variant="bodyMedium" style={styles.errorText}>{errorMessage}</Text>}
