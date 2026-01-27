@@ -5,9 +5,27 @@ import {
   getFilenameOnly,
   getFilenameWithoutExtension,
   hasExtension,
+  hasFileSeparator,
 } from './filename.utils';
 
 describe('Tests suite for filename utilities', () => {
+  describe('hasFileSeparator', () => {
+    it.each`
+      fileUri                              | expected
+      ${'/path/to/file.txt'}               | ${true}
+      ${'/very/long/path/to/document.pdf'} | ${true}
+      ${'/'}                               | ${true}
+      ${''}                                | ${false}
+      ${'/path/to/file'}                   | ${true}
+      ${'file:///path/to/file.txt'}        | ${true}
+      ${'file.txt'}                        | ${false}
+      ${'file'}                            | ${false}
+      ${'relative/path/file.txt'}          | ${true}
+    `('should return $expected for $fileUri', ({ fileUri, expected }) => {
+      expect(hasFileSeparator(fileUri)).toBe(expected);
+    });
+  });
+
   describe('getFilenameOnly', () => {
     it.each`
       fileUri                              | expected
@@ -17,6 +35,9 @@ describe('Tests suite for filename utilities', () => {
       ${''}                                | ${''}
       ${'/path/to/file'}                   | ${'file'}
       ${'file:///path/to/file.txt'}        | ${'file.txt'}
+      ${'file.txt'}                        | ${'file.txt'}
+      ${'file'}                            | ${'file'}
+      ${'relative/path/file.txt'}          | ${'file.txt'}
     `('should return $expected for $fileUri', ({ fileUri, expected }) => {
       expect(getFilenameOnly(fileUri)).toBe(expected);
     });
@@ -58,6 +79,7 @@ describe('Tests suite for filename utilities', () => {
       ${''}                            | ${''}
       ${'file.txt'}                    | ${'txt'}
       ${'file'}                        | ${''}
+      ${'file.'}                       | ${''}
     `('should return $expected for $fileUri', ({ fileUri, expected }) => {
       expect(getFileExtensionOnly(fileUri)).toBe(expected);
     });
@@ -72,11 +94,11 @@ describe('Tests suite for filename utilities', () => {
       ${'/path/to/video.mp4'}          | ${'video'}
       ${'/path/to/file.backup.tar.gz'} | ${'file.backup.tar'}
       ${'/path/to/.hidden'}            | ${''}
-      ${'/path/to/file'}               | ${''}
+      ${'/path/to/file'}               | ${'file'}
       ${'/'}                           | ${''}
       ${''}                            | ${''}
       ${'file.txt'}                    | ${'file'}
-      ${'file'}                        | ${''}
+      ${'file'}                        | ${'file'}
       ${'my.file.txt'}                 | ${'my.file'}
       ${'file.'}                       | ${'file'}
     `('should return $expected for $fileUri', ({ fileUri, expected }) => {
