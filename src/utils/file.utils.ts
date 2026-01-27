@@ -12,9 +12,9 @@ export const isFileExists = async (fileUri = '') => {
   return exists;
 };
 
-export const getFilenameOnly = (fileUri = '/') => fileUri.split('/').pop();
+export const getFilenameOnly = (fileUri = '/') => fileUri.split('/').pop() ?? '';
 
-export const getFileExtensionOnly = (fileUri = '/') => fileUri.split('.').pop()?.toLowerCase();
+export const getFileExtensionOnly = (fileUri = '/') => fileUri.split('.').pop()?.toLowerCase() ?? '';
 
 export const getDirectoryOnly = (fileUri = '/') => fileUri.substring(0, fileUri.lastIndexOf('/'));
 
