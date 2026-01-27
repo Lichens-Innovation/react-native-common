@@ -3,12 +3,22 @@ import { formatInTimeZone } from 'date-fns-tz';
 import Handlebars from 'handlebars';
 import uuid from 'react-native-uuid';
 
+export const hasFileSeparator = (fileUri = ''): boolean => {
+  return fileUri?.includes('/') ?? false;
+};
+
 /**
  * Extracts the filename from a file URI
  * @param fileUri - The file URI (e.g., '/path/to/file.txt')
  * @returns The filename only (e.g., 'file.txt')
  */
-export const getFilenameOnly = (fileUri = '/') => fileUri.split('/').pop() ?? '';
+export const getFilenameOnly = (fileUri = '/') => {
+  if (hasFileSeparator(fileUri)) {
+    return fileUri.split('/').pop() ?? '';
+  } else {
+    return fileUri;
+  }
+};
 
 /**
  * Checks if a file URI has an extension
@@ -27,20 +37,21 @@ export const hasExtension = (fileUri = '/'): boolean => {
  */
 export const getFilenameWithoutExtension = (fileUri = '/') => {
   const filename = getFilenameOnly(fileUri);
-  return filename.split('.').slice(0, -1).join('.');
+
+  if (hasExtension(fileUri)) {
+    return filename.split('.').slice(0, -1).join('.');
+  } else {
+    return filename;
+  }
 };
 
-/**
- * Extracts the file extension from a file URI (lowercase)
- * @param fileUri - The file URI (e.g., '/path/to/file.TXT')
- * @returns The extension in lowercase (e.g., 'txt'), or empty string if no extension
- */
 export const getFileExtensionOnly = (fileUri = '/') => {
-  if (!hasExtension(fileUri)) {
+  const filename = getFilenameOnly(fileUri);
+  if (hasExtension(fileUri)) {
+    return filename.split('.').pop()?.toLowerCase() ?? '';
+  } else {
     return '';
   }
-
-  return fileUri.split('.').pop()?.toLowerCase() ?? '';
 };
 
 /**
