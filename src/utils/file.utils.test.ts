@@ -3,6 +3,7 @@ import {
   getDirectoryOnly,
   getFileExtensionOnly,
   getFilenameOnly,
+  hasExtension,
   isFileUri,
   normalizeFileUri,
   nowAsIsoFilename,
@@ -23,6 +24,25 @@ describe('Tests suite for file utilities', () => {
     });
   });
 
+  describe('hasExtension', () => {
+    it.each`
+      fileUri                          | expected
+      ${'/path/to/file.txt'}           | ${true}
+      ${'/path/to/document.pdf'}       | ${true}
+      ${'/path/to/image.JPG'}          | ${true}
+      ${'/path/to/video.mp4'}          | ${true}
+      ${'/path/to/file.backup.tar.gz'} | ${true}
+      ${'/path/to/.hidden'}            | ${true}
+      ${'/path/to/file'}               | ${false}
+      ${'/'}                           | ${false}
+      ${''}                            | ${false}
+      ${'file.txt'}                    | ${true}
+      ${'file'}                        | ${false}
+    `('should return $expected for $fileUri', ({ fileUri, expected }) => {
+      expect(hasExtension(fileUri)).toBe(expected);
+    });
+  });
+
   describe('getFileExtensionOnly', () => {
     it.each`
       fileUri                          | expected
@@ -30,11 +50,13 @@ describe('Tests suite for file utilities', () => {
       ${'/path/to/document.pdf'}       | ${'pdf'}
       ${'/path/to/image.JPG'}          | ${'jpg'}
       ${'/path/to/video.mp4'}          | ${'mp4'}
-      ${'/path/to/file'}               | ${'/path/to/file'}
-      ${'/'}                           | ${'/'}
-      ${''}                            | ${''}
       ${'/path/to/file.backup.tar.gz'} | ${'gz'}
       ${'/path/to/.hidden'}            | ${'hidden'}
+      ${'/path/to/file'}               | ${''}
+      ${'/'}                           | ${''}
+      ${''}                            | ${''}
+      ${'file.txt'}                    | ${'txt'}
+      ${'file'}                        | ${''}
     `('should return $expected for $fileUri', ({ fileUri, expected }) => {
       expect(getFileExtensionOnly(fileUri)).toBe(expected);
     });
