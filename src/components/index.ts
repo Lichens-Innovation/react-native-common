@@ -8,6 +8,7 @@ export * from './event-logs';
 export * from './header-actions';
 export * from './language-selector';
 export * from './layout';
+export * from './lists';
 export * from './on-off-toggle';
 export * from './score-indicator';
 export * from './snack-bar';
