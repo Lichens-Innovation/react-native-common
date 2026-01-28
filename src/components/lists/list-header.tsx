@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
 
-interface ListHeaderProps {
+export interface ListHeaderProps {
   title: string;
 }
 
