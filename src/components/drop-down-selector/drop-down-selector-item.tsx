@@ -11,19 +11,13 @@ export type DropDownSelectorItemProps = {
   textColor: string;
 };
 
-export const DropDownSelectorItem: FunctionComponent<DropDownSelectorItemProps> = ({
-  item,
-  selected,
-  textColor,
-}) => {
+export const DropDownSelectorItem: FunctionComponent<DropDownSelectorItemProps> = ({ item, selected, textColor }) => {
   const isSelected = selected === true;
   const styles = useStyles({ isSelected });
 
   return (
     <View style={styles.itemContainer}>
-      {item.icon && (
-        <DropDownSelectorLeftIcon icon={item.icon} color={textColor} />
-      )}
+      {item.icon && <DropDownSelectorLeftIcon icon={item.icon} color={textColor} />}
       <Text style={{ color: textColor }}>{item.label}</Text>
     </View>
   );

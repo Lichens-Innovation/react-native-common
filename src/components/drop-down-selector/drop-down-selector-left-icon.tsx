@@ -16,7 +16,5 @@ export const DropDownSelectorLeftIcon: FunctionComponent<DropDownSelectorLeftIco
     return null;
   }
 
-  return (
-    <Icon source={icon} size={size} color={color} />
-  );
+  return <Icon source={icon} size={size} color={color} />;
 };

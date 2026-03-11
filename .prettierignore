@@ -1,0 +1,4 @@
+src/types/winrt
+src/types/*.d.ts
+**/*.windows.ts
+**/*.windows.tsx

@@ -46,7 +46,9 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
   return (
     <View>
       {hasLabel && (
-        <Text variant='bodySmall' style={styles.dropdownTitle}>{label}</Text>
+        <Text variant="bodySmall" style={styles.dropdownTitle}>
+          {label}
+        </Text>
       )}
 
       <Dropdown
@@ -72,9 +74,7 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
         renderItem={(item: SelectOption, selected?: boolean) => (
           <DropDownSelectorItem item={item} selected={selected} textColor={textColor} />
         )}
-        renderLeftIcon={() => (
-          <DropDownSelectorLeftIcon icon={selectedItem?.icon} color={textColor} />
-        )}
+        renderLeftIcon={() => <DropDownSelectorLeftIcon icon={selectedItem?.icon} color={textColor} />}
       />
     </View>
   );

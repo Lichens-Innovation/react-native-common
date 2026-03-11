@@ -22,11 +22,14 @@
     "watch:for:rvdrain": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-rvdrain-app-mobile/node_modules/@lichens-innovation/react-native-common/dist --watch",
     "watch:for:manufacture": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-manufacture-app/node_modules/@lichens-innovation/react-native-common/dist --watch",
     "watch:for:rn-common-demo": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../react-native-common-demo/node_modules/@lichens-innovation/react-native-common/dist --watch",
-    "test": "vitest"
+    "test": "vitest",
+    "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
+    "lint:fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix",
+    "format:fix": "prettier \"**/*.{js,jsx,ts,tsx,json}\" --write"
   },
   "dependencies": {
     "@legendapp/list": "^2.0.9",
-    "@lichens-innovation/ts-common": "^1.6.3",
+    "@lichens-innovation/ts-common": "^1.14.0",
     "@noble/hashes": "^2.0.1",
     "@uidotdev/usehooks": "^2.4.1",
     "buffer": "^6.0.3",
@@ -54,8 +57,10 @@
     "@sentry/react-native": "~7.2.0",
     "@tanstack/react-query": "^5.90.2",
     "@types/react": "~18.3.12",
-    "@typescript-eslint/eslint-plugin": "^8.31.0",
-    "@typescript-eslint/parser": "^8.31.0",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "eslint-plugin-prettier": "^5.4.0",
+    "eslint-plugin-react": "^7.37.3",
     "axios": "^1.12.2",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-plugin-transform-import-meta": "^2.3.3",
@@ -170,10 +175,6 @@
     "react-native-wifi-reborn": ">=4.13.6",
     "react-native-winrt": ">=0.72.2",
     "react-native-zeroconf": ">=0.13.8"
-  },
-  "eslintConfig": {
-    "extends": "universe/native",
-    "root": true
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

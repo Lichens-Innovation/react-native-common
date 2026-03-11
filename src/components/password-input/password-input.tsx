@@ -19,13 +19,7 @@ export const PasswordInput: FunctionComponent<PasswordInputProps> = ({ label, ..
     <TextInput
       label={displayLabel}
       secureTextEntry={!isPasswordVisible}
-      right={
-        <TextInput.Icon
-          icon={icon}
-          onPress={() => toggleShowPassword()}
-          accessibilityLabel={showA11yLabel}
-        />
-      }
+      right={<TextInput.Icon icon={icon} onPress={() => toggleShowPassword()} accessibilityLabel={showA11yLabel} />}
       {...rest}
     />
   );

@@ -39,7 +39,7 @@ export const EventLogsScreen: FunctionComponent = () => {
         data={files}
         renderItem={({ item }: { item: FileInfo }) => {
           const title = item.uri.split('/').pop();
-          const updatedAt = 'modificationTime' in item ? new Date((item.modificationTime ?? 0)) : new Date();
+          const updatedAt = 'modificationTime' in item ? new Date(item.modificationTime ?? 0) : new Date();
           const formattedUpdatedAt = format(updatedAt, 'yyyy-MM-dd HH:mm:ss');
           const size = 'size' in item ? filesize(item.size ?? 0) : '';
           const description = `${formattedUpdatedAt} [ ${size} ]`;
@@ -48,9 +48,7 @@ export const EventLogsScreen: FunctionComponent = () => {
             <List.Item
               title={title}
               description={description}
-              left={(props) => (
-                <List.Icon {...props} icon={(props) => <Icon source="file-document" {...props} />} />
-              )}
+              left={(props) => <List.Icon {...props} icon={(props) => <Icon source="file-document" {...props} />} />}
               right={() => (
                 <IconButton iconColor={theme.colors.primary} icon="share" onPress={() => shareTextFile(item.uri)} />
               )}

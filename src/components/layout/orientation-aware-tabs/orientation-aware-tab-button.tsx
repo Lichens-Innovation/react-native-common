@@ -27,7 +27,7 @@ export const OrientationAwareTabButton: FunctionComponent<OrientationAwareTabBut
   const color = isFocused ? activeColor : theme.colors.onSurfaceDisabled;
 
   return (
-    <Pressable {...props} style={[styles.tabButton]} >
+    <Pressable {...props} style={[styles.tabButton]}>
       <TabBarIcon name={icon} color={color} />
 
       {isLabelVisible && (

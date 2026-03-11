@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { logger } from '../logger/logger';
 
-export const notImplementedYet = (...args: any[]) => {
+export const notImplementedYet = (...args: unknown[]) => {
   logger.debug(`Not implemented yet on "${Platform.OS}" platform`, args);
 };

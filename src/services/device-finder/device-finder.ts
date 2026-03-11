@@ -1,3 +1,4 @@
+import { toError } from '@lichens-innovation/ts-common';
 import Zeroconf from 'react-native-zeroconf';
 import { logger } from '../../logger/logger';
 import { DiscoveredDevice } from './device-finder.types';
@@ -68,11 +69,11 @@ export class DeviceFinder {
     this.onSuccessCallback();
   }
 
-  private onScanFailure(error: Error) {
+  private onScanFailure(e: unknown) {
     this.stop();
     // only log as info because we expect this to happen regularly (wrong network, etc.)
-    logger.info('[DeviceFinder] Failed to scan for cameras:', error);
-    this.onErrorCallback(error);
+    logger.info('[DeviceFinder] Failed to scan for cameras:', e);
+    this.onErrorCallback(toError(e));
   }
 
   private start(timeoutMs: number) {
@@ -88,7 +89,7 @@ export class DeviceFinder {
         () => this.onScanFailure(new Error(`[DeviceFinder] timed out after ${timeoutMs}ms`)),
         timeoutMs
       );
-    } catch (e: any) {
+    } catch (e: unknown) {
       this.onScanFailure(e);
     }
   }
