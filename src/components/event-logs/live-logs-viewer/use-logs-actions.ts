@@ -5,7 +5,6 @@ import { commonLogsStore } from '../../../store/common-logs.store';
 import { setClipboardTextContent } from '../../../utils/clipboard.utils';
 import { useSnackbar } from '../../snack-bar/snackbar-provider';
 
-
 export const useLogsActions = () => {
   const { showSnackbarMessage } = useSnackbar();
   const { t } = useTranslation();

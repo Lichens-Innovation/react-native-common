@@ -130,6 +130,10 @@
     "open": "Open",
     "options": "Options",
     "password": "Password",
+    "passwordInput": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
     "paste": "Paste",
     "preview": "Preview",
     "previous": "Previous",

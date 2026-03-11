@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Sentry from '@sentry/react-native';
 import { InteractionManager, LogBox } from 'react-native';
 import {

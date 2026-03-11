@@ -36,11 +36,7 @@ export const useImagePicker = () => {
     const { uri } = result.assets[0];
     setSelectedImage(uri);
 
-    Image.getSize(
-      uri,
-      (width, height) => setDimensions({ width, height, aspectRatio: width / height }),
-      logger.error
-    );
+    Image.getSize(uri, (width, height) => setDimensions({ width, height, aspectRatio: width / height }), logger.error);
   };
 
   return {

@@ -121,7 +121,7 @@ export class DigestAuth {
     return `Digest username="${this.username}", realm="${this.realm}", nonce="${this.nonce}", uri="${uri}", algorithm=${this.algorithm || 'MD5'}, response="${response}", qop=${qop}, nc=${ncHex}, cnonce="${cnonce}"${this.opaque ? `, opaque="${this.opaque}"` : ''}`;
   }
 
-  async request(config: AxiosRequestConfig): Promise<any> {
+  async request(config: AxiosRequestConfig): Promise<unknown> {
     try {
       const method = config.method?.toUpperCase() ?? 'GET';
       logger.debug(`[DigestAuth] ${method}: ${sanitizeUrl(config.url)}`);
@@ -129,13 +129,14 @@ export class DigestAuth {
       logger.debug(`[DigestAuth] response status: ${response.status}`);
 
       return response;
-    } catch (e: any) {
+    } catch (e: unknown) {
       this.handleNoResponseError(e);
 
       const { authHeader, isDigestChallenge } = this.parseHttpErrorHeaders(e);
 
       if (!isDigestChallenge) {
-        logger.info(`[DigestAuth] error received. Axios error code: "${e.code}" status: "${e.response?.status}"`);
+        const err = e as { code?: string; response?: { status?: number } };
+        logger.info(`[DigestAuth] error received. Axios error code: "${err.code}" status: "${err.response?.status}"`);
         throw e;
       }
 
@@ -151,7 +152,10 @@ export class DigestAuth {
     }
   }
 
-  private handleNoResponseError(e: any) {
+  private handleNoResponseError(e: unknown) {
+    if (typeof e !== 'object' || e === null) return;
+    if (!('code' in e) || !('response' in e)) return;
+
     const hasReceivedResponse = e.response !== undefined;
     if (!hasReceivedResponse) {
       logger.info(`[DigestAuth] no response. Axios error code: "${e.code}"`);
@@ -159,6 +163,7 @@ export class DigestAuth {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- error object shape from axios is not typed
   private parseHttpErrorHeaders(e: any) {
     const isUnauthorized = e.response?.status === 401;
     const authHeader = e.response?.headers?.['www-authenticate'];

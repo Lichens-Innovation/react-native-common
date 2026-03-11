@@ -1,5 +1,5 @@
 import React, { type FunctionComponent, type ReactNode } from 'react';
-import { ScrollView, View, type ViewStyle } from 'react-native';
+import { ScrollView, type ViewStyle } from 'react-native';
 
 interface PreTagProps {
   children: ReactNode;

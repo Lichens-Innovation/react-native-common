@@ -10,6 +10,7 @@ export * from './language-selector';
 export * from './layout';
 export * from './lists';
 export * from './on-off-toggle';
+export * from './password-input';
 export * from './score-indicator';
 export * from './snack-bar';
 export * from './spinner';

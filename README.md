@@ -13,7 +13,6 @@ This repository contains common components, utilities, and services used across 
 
 [![GitHub Package](https://img.shields.io/badge/GitHub%20Package-@Lichens--Innovation%2Freact--native--common-blue.svg?style=flat-square&logo=github)](https://github.com/Lichens-Innovation/react-native-common) [![Version](https://img.shields.io/badge/version-2.7.1-blue.svg?style=flat-square)](https://github.com/Lichens-Innovation/react-native-common)
 
-
 Table of content
 
 - [React Native Common Module](#react-native-common-module)
@@ -35,7 +34,6 @@ Table of content
   - [Project coding guidelines](#project-coding-guidelines)
   - [License](#license)
 
-
 ## Reusable Components
 
 - Safe area containers, centered layouts, tab bar components
@@ -45,8 +43,8 @@ Table of content
 
 ### Examples
 
-| Vertical Split View | Dialog Ok/Cancel |
-|:-------------------:|:----------------:|
+|                        Vertical Split View                        |                        Dialog Ok/Cancel                        |
+| :---------------------------------------------------------------: | :------------------------------------------------------------: |
 | <img src="docs/demos/demo-vertical-split-view.gif" width="200" /> | <img src="docs/demos/demo-dialog-ok-cancel.gif" width="200" /> |
 
 - [Components Catalog](docs/catalog.md)
@@ -71,7 +69,7 @@ Table of content
 Depending on your Expo SDK version, here are the compatibility table for `react-native-common` module:
 
 | Version Family | Expo SDK Version | Description                                           |
-|----------------|------------------|-------------------------------------------------------|
+| -------------- | ---------------- | ----------------------------------------------------- |
 | 1.x.y          | SDK 52, SDK 53   | Compatible with applications using Expo SDK 52 and 53 |
 | 2.x.y, 3.x.y   | SDK 54           | Compatible with applications using Expo SDK 54        |
 | 4.x.y          | SDK 55           | Compatible with applications using Expo SDK 55        |
@@ -108,11 +106,8 @@ export const MyComponent = () => {
 
   return (
     <>
-      <Button 
-        title="Show Dialog" 
-        onPress={() => setShowDialog(true)} 
-      />
-      
+      <Button title="Show Dialog" onPress={() => setShowDialog(true)} />
+
       <DialogOkCancel
         isVisible={showDialog}
         title="Confirm Action"
@@ -145,17 +140,19 @@ yarn install
 
 ### Scripts
 
-| Command                      | Description                                                                 |
-|------------------------------|-----------------------------------------------------------------------------|
-| `yarn build`                 | Cleans the dist folder and compiles TypeScript                              |
-| `yarn clean:node`            | Removes node_modules directories and yarn.lock file                         |
-| `yarn clean:dist`            | Removes the dist directory                                                  |
-| `yarn typecheck`             | Checks TypeScript types without emitting files                              |
-| `yarn watch:for:rvdrain`     | Watches for TS changes and syncs dist files to rvdrain app node_modules     |
-| `yarn watch:for:manufacture` | Watches for TS changes and syncs dist files to manufacture app node_modules |
-| `yarn test`                  | Runs tests using Vitest                                                     |
-| `yarn mirror:to:rinnovision` | Mirrors the package to the Rinnovision repository                           |
-
+| Command                         | Description                                                        |
+| ------------------------------- | ------------------------------------------------------------------ |
+| `yarn build`                    | Cleans the dist folder and compiles TypeScript                     |
+| `yarn clean:node`               | Removes node_modules and yarn.lock                                 |
+| `yarn clean:dist`               | Removes the dist directory                                         |
+| `yarn typecheck`                | Checks TypeScript types without emitting files (`tsc --noEmit`)    |
+| `yarn watch:for:rvdrain`        | Watches TS and syncs dist to rinno-rvdrain-app-mobile node_modules |
+| `yarn watch:for:manufacture`    | Watches TS and syncs dist to rinno-manufacture-app node_modules    |
+| `yarn watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules |
+| `yarn test`                     | Runs tests with Vitest                                             |
+| `yarn lint`                     | Runs ESLint and Prettier check on JS/TS/TSX/JSON                   |
+| `yarn lint:fix`                 | Runs ESLint with auto-fix                                          |
+| `yarn format:fix`               | Formats code with Prettier (write)                                 |
 
 ## Peer Dependencies
 
@@ -188,15 +185,14 @@ This dual approach solves the compilation problem while maintaining clean depend
 
 Interfaces and types are generated by the `react-native-winrt` package at build time of the desktop application. To ensure compatibility and avoid conflicts, the generated types should be placed in the `src/types/winrt` folder of current project. Here's how to do it. Copy all generated types from:
 
-  - `my-app-desktop\node_modules\react-native-winrt\windows\WinRTTurboModule\Generated Files\types\`
-  - to `src\types\winrt\`
+- `my-app-desktop\node_modules\react-native-winrt\windows\WinRTTurboModule\Generated Files\types\`
+- to `src\types\winrt\`
 
 ## Project coding guidelines
 
 Adhering to established coding guidelines is essential for developing efficient, maintainable, and scalable software. These guidelines promote consistency across codebases, making it easier for teams to collaborate and for new developers to understand existing code. By following standardized patterns, such as those outlined in the [Coding guidelines](https://github.com/amwebexpert/chrome-extensions-collection/blob/master/packages/coding-guide-helper/public/markdowns/table-of-content.md), developers can reduce errors and enhance code readability.
 
-* [Coding guidelines](https://github.com/amwebexpert/chrome-extensions-collection/blob/master/packages/coding-guide-helper/public/markdowns/table-of-content.md)
-
+- [Coding guidelines](https://github.com/amwebexpert/chrome-extensions-collection/blob/master/packages/coding-guide-helper/public/markdowns/table-of-content.md)
 
 ## License
 

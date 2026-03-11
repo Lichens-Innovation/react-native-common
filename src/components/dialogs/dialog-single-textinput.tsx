@@ -1,4 +1,4 @@
-import { type ComponentProps, type FunctionComponent, type ReactNode, useEffect, useState } from 'react';
+import { type ComponentProps, type FunctionComponent, type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
@@ -79,7 +79,11 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
             error={hasError}
           />
 
-          {hasError && <Text variant="bodyMedium" style={styles.errorText}>{errorMessage}</Text>}
+          {hasError && (
+            <Text variant="bodyMedium" style={styles.errorText}>
+              {errorMessage}
+            </Text>
+          )}
         </Dialog.Content>
 
         <Dialog.Actions>

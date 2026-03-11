@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface SimpleLogger {
   debug(message: string, ...args: any[]): void;
   log(message: string, ...args: any[]): void;

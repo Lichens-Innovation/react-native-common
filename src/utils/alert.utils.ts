@@ -1,13 +1,13 @@
-import { Alert } from "react-native";
+import { Alert } from 'react-native';
 
 export const askConfirmation = async (question: string) =>
-  new Promise(resolve => {
-    Alert.alert("Confirmation", question, [
+  new Promise((resolve) => {
+    Alert.alert('Confirmation', question, [
       {
-        text: "Cancel",
+        text: 'Cancel',
         onPress: () => resolve(false),
-        style: "cancel",
+        style: 'cancel',
       },
-      { text: "OK", onPress: () => resolve(true) },
+      { text: 'OK', onPress: () => resolve(true) },
     ]);
   });

@@ -38,6 +38,6 @@ class CommonLogsStore {
 
 export const commonLogsStore = new CommonLogsStore();
 
-export const commonLogsStoreTransport: transportFunctionType<{}> = (props: LogEntry) => {
+export const commonLogsStoreTransport: transportFunctionType<object> = (props: LogEntry) => {
   commonLogsStore.addLog(props);
 };

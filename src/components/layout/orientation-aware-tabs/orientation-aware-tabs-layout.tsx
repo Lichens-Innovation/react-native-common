@@ -76,7 +76,6 @@ const useStyles = () => {
       borderTopColor: isLandscape ? undefined : theme.colors.outline,
       borderLeftWidth: isLandscape ? StyleSheet.hairlineWidth : undefined,
       borderLeftColor: isLandscape ? theme.colors.outline : undefined,
-    }
+    },
   });
 };
-

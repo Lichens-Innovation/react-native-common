@@ -1,9 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  dateToISOLikeButLocal,
-  nowToISOLikeButLocal,
-  nowToISOLikeButLocalForFilename,
-} from './date.utils';
+import { dateToISOLikeButLocal, nowToISOLikeButLocal, nowToISOLikeButLocalForFilename } from './date.utils';
 
 describe('Tests suite for date utilities', () => {
   describe('dateToISOLikeButLocal', () => {
