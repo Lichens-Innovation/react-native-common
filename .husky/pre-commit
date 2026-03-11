@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
-# exit immediately if any command fails
+# Exit immediately if any command fails
 set -e
 
+echo "Running typecheck..."
 yarn typecheck
+echo "  -->  ✅ Typecheck completed"
