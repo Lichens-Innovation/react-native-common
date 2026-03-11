@@ -17,19 +17,19 @@ const GIT_COMMANDS = {
 };
 
 const main = async () => {
-  const readLineInterface = readline.createInterface({ 
-    input: process.stdin, 
-    output: process.stdout 
+  const readLineInterface = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
   });
 
   try {
     console.info('\nThis will execute the following git commands:');
     console.info(`\t${GIT_COMMANDS.FETCH}`);
     console.info(`\t${GIT_COMMANDS.PUSH}`);
- 
-    await askConfirmation({ 
-      readLineInterface, 
-      question: '\n→ [Enter] to proceed \n→ [Ctrl-C] to abort\n' 
+
+    await askConfirmation({
+      readLineInterface,
+      question: '\n→ [Enter] to proceed \n→ [Ctrl-C] to abort\n',
     });
 
     console.info('\nFetching all (branches, tags, commits) and pruning remote branches...');
