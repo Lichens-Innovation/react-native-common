@@ -5,7 +5,7 @@ import prettierPlugin from 'eslint-plugin-prettier';
 
 /** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
-  { ignores: ['src/types/winrt/**', 'src/types/*.d.ts', '**/*.windows.ts', '**/*.windows.tsx'] },
+  { ignores: ['dist/', 'src/types/winrt/**', 'src/types/*.d.ts', '**/*.windows.ts', '**/*.windows.tsx'] },
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
@@ -38,6 +38,7 @@ export default [
       'react/prop-types': 'off',
       // React 17+ new JSX transform: no need to import React in every file
       'react/react-in-jsx-scope': 'off',
+      eqeqeq: ['error', 'always'],
     },
     settings: {
       react: {

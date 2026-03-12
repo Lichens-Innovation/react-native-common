@@ -3,10 +3,20 @@
   "description": "Lichens Innovation React Native Expo shared components, utilities, hooks and services",
   "repository": "https://github.com/Lichens-Innovation/react-native-common",
   "author": "Lichens Innovation",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "private": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./rjsf": {
+      "types": "./dist/rjsf.d.ts",
+      "default": "./dist/rjsf.js"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -18,10 +28,10 @@
     "clean:node": "npx rimraf node_modules yarn.lock",
     "clean:dist": "npx rimraf dist",
     "typecheck": "npx tsc --noEmit",
-    "build": "npm run clean:dist && tsc",
-    "watch:for:rvdrain": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-rvdrain-app-mobile/node_modules/@lichens-innovation/react-native-common/dist --watch",
-    "watch:for:manufacture": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-manufacture-app/node_modules/@lichens-innovation/react-native-common/dist --watch",
-    "watch:for:rn-common-demo": "tsc --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../react-native-common-demo/node_modules/@lichens-innovation/react-native-common/dist --watch",
+    "build": "npm run clean:dist && tsup",
+    "watch:for:rvdrain": "tsup --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-rvdrain-app-mobile/node_modules/@lichens-innovation/react-native-common/dist --watch",
+    "watch:for:manufacture": "tsup --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../rinno-manufacture-app/node_modules/@lichens-innovation/react-native-common/dist --watch",
+    "watch:for:rn-common-demo": "tsup --watch & cpx \"dist/**/*\" --watch & cpx \"dist/**/*\" ../react-native-common-demo/node_modules/@lichens-innovation/react-native-common/dist --watch",
     "test": "vitest",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
     "lint:fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix",
@@ -29,7 +39,7 @@
   },
   "dependencies": {
     "@legendapp/list": "^2.0.9",
-    "@lichens-innovation/ts-common": "^1.14.0",
+    "@lichens-innovation/ts-common": "^1.15.0",
     "@noble/hashes": "^2.0.1",
     "@uidotdev/usehooks": "^2.4.1",
     "buffer": "^6.0.3",
@@ -52,15 +62,19 @@
     "@commitlint/config-conventional": "^20.3.0",
     "@gorhom/bottom-sheet": "^5.2.4",
     "@react-native-clipboard/clipboard": "^1.16.3",
+    "@react-native-community/datetimepicker": "^8.6.0",
     "@react-native-community/netinfo": "^11.4.1",
+    "@react-native-community/slider": "^5.1.2",
     "@react-navigation/native": "^7.1.6",
+    "@rjsf/core": "^6.4.1",
+    "@rjsf/utils": "^6.4.1",
+    "@rjsf/validator-ajv8": "^6.4.1",
     "@sentry/react-native": "~7.2.0",
     "@tanstack/react-query": "^5.90.2",
     "@types/react": "~18.3.12",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
-    "eslint-plugin-prettier": "^5.4.0",
-    "eslint-plugin-react": "^7.37.3",
+    "ajv-i18n": "^4.2.0",
     "axios": "^1.12.2",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-plugin-transform-import-meta": "^2.3.3",
@@ -69,6 +83,8 @@
     "cpx": "^1.5.0",
     "eslint": "^9.36.0",
     "eslint-config-universe": "^15.0.3",
+    "eslint-plugin-prettier": "^5.4.0",
+    "eslint-plugin-react": "^7.37.3",
     "expo": "^54.0.12",
     "expo-application": "~7.0.7",
     "expo-asset": "~12.0.9",
@@ -119,16 +135,23 @@
     "react-native-winrt": "^0.72.2",
     "react-native-zeroconf": "^0.13.8",
     "rimraf": "^6.0.1",
+    "tsup": "^8.5.1",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@gorhom/bottom-sheet": ">=5.2.4",
     "@react-native-clipboard/clipboard": ">=1.16.3",
+    "@react-native-community/datetimepicker": ">=8.6.0",
     "@react-native-community/netinfo": ">=11.4.1",
+    "@react-native-community/slider": ">=5.1.2",
     "@react-navigation/native": ">=7.1.6",
+    "@rjsf/core": ">=6.4.1",
+    "@rjsf/utils": ">=6.4.1",
+    "@rjsf/validator-ajv8": ">=6.4.1",
     "@sentry/react-native": ">=7.2.0",
     "@tanstack/react-query": ">=5.90.2",
+    "ajv-i18n": ">=4.2.0",
     "axios": ">=1.12.2",
     "expo": ">=54.0.12",
     "expo-application": ">=7.0.7",
@@ -175,6 +198,20 @@
     "react-native-wifi-reborn": ">=4.13.6",
     "react-native-winrt": ">=0.72.2",
     "react-native-zeroconf": ">=0.13.8"
+  },
+  "peerDependenciesMeta": {
+    "@rjsf/core": {
+      "optional": true
+    },
+    "@rjsf/utils": {
+      "optional": true
+    },
+    "@rjsf/validator-ajv8": {
+      "optional": true
+    },
+    "ajv-i18n": {
+      "optional": true
+    }
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
