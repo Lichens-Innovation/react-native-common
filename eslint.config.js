@@ -38,6 +38,7 @@ export default [
       'react/prop-types': 'off',
       // React 17+ new JSX transform: no need to import React in every file
       'react/react-in-jsx-scope': 'off',
+      eqeqeq: ['error', 'always'],
     },
     settings: {
       react: {
