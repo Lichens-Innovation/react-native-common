@@ -22,6 +22,8 @@ Table of content
   - [Consume in a project](#consume-in-a-project)
     - [Adding the dependency to an existing mobile application](#adding-the-dependency-to-an-existing-mobile-application)
     - [Basic Usage Example](#basic-usage-example)
+  - [Optional modules](#optional-modules)
+    - [RJSF (`@lichens-innovation/react-native-common/rjsf`)](#rjsf-lichens-innovationreact-native-commonrjsf)
   - [Contributions](#contributions)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
@@ -118,6 +120,39 @@ export const MyComponent = () => {
     </>
   );
 };
+```
+
+## Optional modules
+
+This package provides optional subpath modules with external dependencies. Install only the dependencies you need when using a given subpath.
+
+### RJSF (`@lichens-innovation/react-native-common/rjsf`)
+
+[React JSON Schema Form (RJSF)](https://rjsf-team.github.io/react-jsonschema-form/) renderer with React Native Paper: themed form layout, localized validation (ajv-i18n), and widgets (date, datetime, select, checkboxes, etc.). Builds on `@lichens-innovation/ts-common/rjsf` for i18n and validation.
+
+**Install the dependencies:**
+
+```bash
+yarn add @rjsf/core @rjsf/utils @rjsf/validator-ajv8 ajv-i18n
+```
+
+If your app does not already depend on them, you may also need `react-native-paper`, `@react-native-community/datetimepicker`, and `@react-native-community/slider` for the date/datetime and range widgets.
+
+**Exports:** `RjsfPaperRenderer`, `FormSubmitProvider`, `PAPER_TEMPLATES`, `RJSF_PAPER_THEME`, `RjsfPaperButtons`, and widget components (e.g. `CheckboxWidget`, `DateWidget`, `SelectWidget`).
+
+**Usage example:**
+
+```tsx
+import { RjsfPaperRenderer, FormSubmitProvider } from '@lichens-innovation/react-native-common/rjsf';
+import type { RJSFSchema } from '@rjsf/utils';
+
+const schema: RJSFSchema = { type: 'object', properties: { name: { type: 'string', title: 'Name' } } };
+
+export const MyForm = () => (
+  <FormSubmitProvider onSubmit={(data) => console.log(data)}>
+    <RjsfPaperRenderer schema={schema} />
+  </FormSubmitProvider>
+);
 ```
 
 ## Contributions
