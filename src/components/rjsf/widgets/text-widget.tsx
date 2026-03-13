@@ -7,7 +7,7 @@ import {
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { type RecordingTextInputArgs, VoiceRecognitionTextInput } from '~/components/voice-recognition';
 import { useAppTheme } from '~/theme';
 
 export const TextWidget: FunctionComponent<WidgetProps> = ({
@@ -30,19 +30,19 @@ export const TextWidget: FunctionComponent<WidgetProps> = ({
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
 
-  const handleChangeText = (text: string) => {
-    onChange(getRjsfTextChangeValue({ text, emptyValue: options?.emptyValue }));
+  const handleValueChange = ({ value }: RecordingTextInputArgs) => {
+    onChange(getRjsfTextChangeValue({ text: value, emptyValue: options?.emptyValue }));
   };
 
   return (
-    <TextInput
+    <VoiceRecognitionTextInput
       mode="outlined"
       label={displayLabel}
       value={toStringOrEmpty(value)}
       placeholder={placeholder}
       disabled={disabled}
       editable={!readonly}
-      onChangeText={handleChangeText}
+      onValueChange={handleValueChange}
       onBlur={() => onBlur(id, value)}
       onFocus={() => onFocus(id, value)}
       error={hasError}
