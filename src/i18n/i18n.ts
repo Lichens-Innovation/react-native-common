@@ -1,5 +1,4 @@
-import i18nextDefault, { ModuleType, type i18n } from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import { ModuleType, ThirdPartyModule, type i18n } from 'i18next';
 import { storage } from '../utils/storage';
 
 import en from './en/common.json';
@@ -36,15 +35,18 @@ export const languageDetector = {
   cacheUserLanguage: () => {},
 };
 
-export const initCommonI18N = (instance?: i18n): i18n => {
-  const i18next = instance ?? i18nextDefault;
+interface InitCommonI18nArgs {
+  initReactI18next: ThirdPartyModule;
+  instance: i18n;
+}
 
+export const initCommonI18N = ({ initReactI18next, instance }: InitCommonI18nArgs): i18n => {
   const savedLanguage = loadSelectedLanguage();
   if (!savedLanguage) {
     storeSelectedLanguage(DEFAULT_LANGUAGE);
   }
 
-  i18next
+  instance
     .use(languageDetector)
     .use(initReactI18next)
     .init({
@@ -58,5 +60,5 @@ export const initCommonI18N = (instance?: i18n): i18n => {
       },
     });
 
-  return i18next;
+  return instance;
 };
