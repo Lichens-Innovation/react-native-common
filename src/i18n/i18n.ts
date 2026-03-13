@@ -36,7 +36,7 @@ export const languageDetector = {
   cacheUserLanguage: () => {},
 };
 
-export const initCommonI18N = (instance?: i18n) => {
+export const initCommonI18N = (instance?: i18n): i18n => {
   const i18next = instance ?? i18nextDefault;
 
   const savedLanguage = loadSelectedLanguage();
@@ -57,4 +57,6 @@ export const initCommonI18N = (instance?: i18n) => {
         escapeValue: false, // not needed for react as it escapes by default
       },
     });
+
+  return i18next;
 };
