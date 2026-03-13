@@ -1,4 +1,5 @@
 import { ModuleType, ThirdPartyModule, type i18n } from 'i18next';
+import { initReactI18next as initReactI18nextFromCommon } from 'react-i18next';
 import { storage } from '../utils/storage';
 
 import en from './en/common.json';
@@ -48,7 +49,8 @@ export const initCommonI18N = ({ initReactI18next, instance }: InitCommonI18nArg
 
   instance
     .use(languageDetector)
-    .use(initReactI18next)
+    .use(initReactI18nextFromCommon) // register the react-i18next instance provided by this common package
+    .use(initReactI18next) // register the react-i18next instance provided by the app
     .init({
       resources: { fr, en },
       defaultNS: 'common',
