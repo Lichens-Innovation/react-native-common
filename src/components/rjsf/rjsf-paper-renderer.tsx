@@ -22,7 +22,7 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   uiSchema = {},
   ...rest
 }) => {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const customValidator = useRjsfValidator();
   const [localFormData, setLocalFormData] = useState<FormData | undefined>(formDataProp);
 
@@ -44,10 +44,7 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
       templates={PAPER_TEMPLATES as unknown as FormTemplates}
       validator={customValidator}
       translateString={(stringToTranslate, params) => translateRjsfString({ stringToTranslate, params })}
-      uiSchema={{
-        ...uiSchema,
-        'ui:submitButtonOptions': { submitText: t('rjsf:submit') },
-      }}
+      uiSchema={uiSchema}
     />
   );
 };
