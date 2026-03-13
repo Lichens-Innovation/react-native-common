@@ -2193,10 +2193,10 @@
   dependencies:
     use-sync-external-store "^1.5.0"
 
-"@lichens-innovation/ts-common@^1.15.2":
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/@lichens-innovation/ts-common/-/ts-common-1.15.2.tgz#892f90e509870a70d139c3dcc69d4509c17b6310"
-  integrity sha512-HT4hVyl7VqW38GjbjpXdaPD0HxFtCJQos6sQ4CZOlGaTZJebku7U+AF0vhKdVXWgbrUf6oevPxVN6tZDdQPgCw==
+"@lichens-innovation/ts-common@^1.15.3":
+  version "1.15.3"
+  resolved "https://registry.yarnpkg.com/@lichens-innovation/ts-common/-/ts-common-1.15.3.tgz#05e08e314e252cfca89b2d1a1dfedef30074b1f9"
+  integrity sha512-RACu7+O5pJfmSeKEdKKc/gCLQFuFdSDdRzO/9TYeSnYdZiDQ4uufiOstwYSolihXOsTI1PcVjUzoZrSd2Ofa1w==
   dependencies:
     date-fns "^4.1.0"
 
