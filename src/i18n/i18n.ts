@@ -1,10 +1,9 @@
+import i18nextDefault, { ModuleType, type i18n } from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { storage } from '../utils/storage';
 
 import en from './en/common.json';
 import fr from './fr/common.json';
-
-import i18next, { ModuleType } from 'i18next';
-import { storage } from '../utils/storage';
 import { detectLanguage } from './i18n.utils';
 
 const STORAGE_KEY_LANGUAGE = 'appLanguage';
@@ -37,7 +36,9 @@ export const languageDetector = {
   cacheUserLanguage: () => {},
 };
 
-const initI18N = () => {
+export const initCommonI18N = (instance?: i18n) => {
+  const i18next = instance ?? i18nextDefault;
+
   const savedLanguage = loadSelectedLanguage();
   if (!savedLanguage) {
     storeSelectedLanguage(DEFAULT_LANGUAGE);
@@ -57,7 +58,3 @@ const initI18N = () => {
       },
     });
 };
-
-initI18N();
-
-export default i18next;
