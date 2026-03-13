@@ -2,9 +2,9 @@ import { translateRjsfString, useRjsfValidator } from '@lichens-innovation/ts-co
 import type { FormProps, IChangeEvent } from '@rjsf/core';
 import { withTheme } from '@rjsf/core';
 import type { RJSFSchema } from '@rjsf/utils';
+import { i18n } from 'i18next';
 import type { FunctionComponent } from 'react';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { PAPER_TEMPLATES } from './rjsf-paper-templates';
 import { RJSF_PAPER_THEME } from './rjsf-paper-theme';
 
@@ -14,16 +14,18 @@ type FormTemplates = FormProps<FormData, RJSFSchema>['templates'];
 
 export type FormData = Record<string, unknown>;
 
-export type RjsfPaperRendererProps = Omit<FormProps<FormData, RJSFSchema>, 'validator'>;
+export type RjsfPaperRendererProps = Omit<FormProps<FormData, RJSFSchema>, 'validator'> & {
+  i18n: i18n;
+};
 
 export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   formData: formDataProp,
   onChange: onChangeProp,
   uiSchema = {},
+  i18n,
   ...rest
 }) => {
-  const { i18n } = useTranslation();
-  const customValidator = useRjsfValidator();
+  const customValidator = useRjsfValidator(i18n.language);
   const [localFormData, setLocalFormData] = useState<FormData | undefined>(formDataProp);
 
   useEffect(() => {
