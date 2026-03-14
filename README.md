@@ -132,13 +132,17 @@ This package provides optional subpath modules with external dependencies. Insta
 
 **Install the dependencies:**
 
+The RJSF components in `src/components/rjsf` depend on the following packages. Install the **required** ones, then add **optional** ones according to the widgets or features you use.
+
 ```bash
-yarn add @rjsf/core @rjsf/utils @rjsf/validator-ajv8 ajv-i18n
+# Required
+yarn add @rjsf/core @rjsf/utils @rjsf/validator-ajv8 ajv-i18n i18next
+
+# Optional (if not already in your app)
+#  - @react-native-community/datetimepicker — for DateWidget and DateTimeWidget
+#  - @react-native-community/slider — for RangeWidget
+yarn add react-native-paper @react-native-community/datetimepicker @react-native-community/slider
 ```
-
-If your app does not already depend on them, you may also need `react-native-paper`, `@react-native-community/datetimepicker`, and `@react-native-community/slider` for the date/datetime and range widgets.
-
-**Exports:** `RjsfPaperRenderer`, `FormSubmitProvider`, `PAPER_TEMPLATES`, `RJSF_PAPER_THEME`, `RjsfPaperButtons`, and widget components (e.g. `CheckboxWidget`, `DateWidget`, `SelectWidget`).
 
 **Usage example:**
 
@@ -149,7 +153,7 @@ import type { RJSFSchema } from '@rjsf/utils';
 const schema: RJSFSchema = { type: 'object', properties: { name: { type: 'string', title: 'Name' } } };
 
 export const MyForm = () => (
-  <FormSubmitProvider onSubmit={(data) => console.log(data)}>
+  <FormSubmitProvider onSubmit={(data) => console.info(data)}>
     <RjsfPaperRenderer schema={schema} />
   </FormSubmitProvider>
 );
