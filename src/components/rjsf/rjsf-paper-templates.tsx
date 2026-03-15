@@ -6,6 +6,7 @@ import type {
   FieldErrorProps,
   FieldHelpProps,
   FieldTemplateProps,
+  GridTemplateProps,
   ObjectFieldTemplateProps,
 } from '@rjsf/utils';
 import { getTemplate, getUiOptions } from '@rjsf/utils';
@@ -59,7 +60,6 @@ const PaperFieldTemplate = ({ children, errors }: FieldTemplateProps) => {
   return (
     <View style={styles.field}>
       {children}
-
       {errors}
     </View>
   );
@@ -141,6 +141,17 @@ const PaperArrayFieldTemplate = ({ title, items, canAdd, onAddClick, registry, u
   );
 };
 
+const PaperGridTemplate = ({ children, column, style, ...rest }: GridTemplateProps) => {
+  const styles = useStyles();
+  const layoutStyle = column ? styles.gridCol : styles.gridRow;
+
+  return (
+    <View style={[layoutStyle, style]} {...rest}>
+      {children}
+    </View>
+  );
+};
+
 export const PAPER_TEMPLATES = {
   ...defaultTemplates,
   ObjectFieldTemplate: PaperObjectFieldTemplate as ComponentType<ObjectFieldTemplateProps>,
@@ -150,6 +161,7 @@ export const PAPER_TEMPLATES = {
   ArrayFieldTemplate: PaperArrayFieldTemplate as ComponentType<ArrayFieldTemplateProps>,
   ArrayFieldItemTemplate: PaperArrayFieldItemTemplate as ComponentType<ArrayFieldItemTemplateProps>,
   ErrorListTemplate: NoopErrorList as ComponentType<ErrorListProps>,
+  GridTemplate: PaperGridTemplate as ComponentType<GridTemplateProps>,
   ButtonTemplates: {
     ...defaultTemplates.ButtonTemplates,
     AddButton,
@@ -178,6 +190,7 @@ const useStyles = () => {
     },
     field: {
       marginVertical: theme.spacing(0.5),
+      flex: 1,
     },
     errorList: {
       marginTop: theme.spacing(1),
@@ -205,6 +218,16 @@ const useStyles = () => {
       flexDirection: 'row',
       alignItems: 'center',
       marginLeft: theme.spacing(1),
+    },
+    gridRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: theme.spacing(1),
+    },
+    gridCol: {
+      flexDirection: 'column',
+      flex: 1,
+      gap: theme.spacing(1),
     },
   });
 };
