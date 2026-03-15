@@ -19,10 +19,9 @@ export type RjsfPaperRendererProps = Omit<FormProps<FormData, RJSFSchema>, 'vali
 };
 
 export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
+  i18n,
   formData: formDataProp,
   onChange: onChangeProp,
-  uiSchema = {},
-  i18n,
   ...rest
 }) => {
   const customValidator = useRjsfValidator(i18n.language);
@@ -46,7 +45,6 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
       templates={PAPER_TEMPLATES as unknown as FormTemplates}
       validator={customValidator}
       translateString={(stringToTranslate, params) => translateRjsfString({ stringToTranslate, params, i18n })}
-      uiSchema={uiSchema}
     />
   );
 };
