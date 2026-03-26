@@ -4,8 +4,8 @@ import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
 import { TextInput } from 'react-native-paper';
-import { logger } from '~/logger/logger';
-import { useAppTheme } from '~/theme';
+import { logger } from '../../../logger/logger';
+import { useAppTheme } from '../../../theme';
 
 export const NumberWidget: FunctionComponent<WidgetProps> = ({
   id,

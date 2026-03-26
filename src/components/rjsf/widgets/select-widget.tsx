@@ -7,8 +7,8 @@ import {
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { DropDownSelector } from '~/components/drop-down-selector/drop-down-selector';
-import { useAppTheme } from '~/theme';
+import { DropDownSelector } from '../../../components/drop-down-selector/drop-down-selector';
+import { useAppTheme } from '../../../theme';
 
 export const SelectWidget: FunctionComponent<WidgetProps> = ({
   id,

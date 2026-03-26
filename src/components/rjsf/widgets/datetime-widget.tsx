@@ -5,7 +5,7 @@ import { useToggle } from '@uidotdev/usehooks';
 import type { FunctionComponent } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
-import { useAppTheme, useIsDarkMode } from '~/theme';
+import { useAppTheme, useIsDarkMode } from '../../../theme';
 
 import {
   formatDateTimeForDisplay,

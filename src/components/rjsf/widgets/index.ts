@@ -7,6 +7,7 @@ export * from './hidden-widget';
 export * from './number-widget';
 export * from './password-widget';
 export * from './radio-widget';
+export * from './radio-yes-no-widget';
 export * from './range-widget';
 export * from './select-widget';
 export * from './text-widget';

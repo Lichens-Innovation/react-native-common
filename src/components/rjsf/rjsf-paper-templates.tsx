@@ -13,7 +13,7 @@ import { getTemplate, getUiOptions } from '@rjsf/utils';
 import type { ComponentType } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useAppTheme } from '~/theme';
+import { useAppTheme } from '../../theme';
 import {
   AddButton,
   ClearButton,

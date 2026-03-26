@@ -4,7 +4,7 @@ import type { FunctionComponent } from 'react';
 import { useContext } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, IconButton } from 'react-native-paper';
-import { useAppTheme } from '~/theme';
+import { useAppTheme } from '../../theme';
 import { FormSubmitContext } from './form-submit-context';
 
 export interface IconButtonProps {

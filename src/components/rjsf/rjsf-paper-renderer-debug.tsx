@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { SyntaxColoring } from '~/components/syntax/syntax-coloring';
-import { useAppTheme } from '~/theme/theme';
+import { SyntaxColoring } from '../../components/syntax/syntax-coloring';
+import { useAppTheme } from '../../theme/theme';
 import { RjsfPaperRenderer, RjsfPaperRendererProps } from './rjsf-paper-renderer';
 
 export type RjsfPaperRendererDebugProps = RjsfPaperRendererProps;

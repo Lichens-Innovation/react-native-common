@@ -5,7 +5,7 @@ import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Checkbox, Text } from 'react-native-paper';
-import { useAppTheme } from '~/theme';
+import { useAppTheme } from '../../../theme';
 import { RjsfDisplayLabel } from './display-label';
 
 export const CheckboxesWidget: FunctionComponent<WidgetProps> = ({

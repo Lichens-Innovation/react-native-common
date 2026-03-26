@@ -7,8 +7,8 @@ import {
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
-import { PasswordInput } from '~/components/password-input/password-input';
-import { useAppTheme } from '~/theme';
+import { PasswordInput } from '../../../components/password-input/password-input';
+import { useAppTheme } from '../../../theme';
 
 export const PasswordWidget: FunctionComponent<WidgetProps> = ({
   id,

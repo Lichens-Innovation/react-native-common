@@ -7,8 +7,8 @@ import {
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
-import { type RecordingTextInputArgs, VoiceRecognitionTextInput } from '~/components/voice-recognition';
-import { useAppTheme } from '~/theme';
+import { type RecordingTextInputArgs, VoiceRecognitionTextInput } from '../../../components/voice-recognition';
+import { useAppTheme } from '../../../theme';
 
 export const TextWidget: FunctionComponent<WidgetProps> = ({
   id,
