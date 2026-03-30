@@ -20,3 +20,4 @@ export * from './sharing.utils';
 export * from './sqlite.utils';
 export * from './storage';
 export * from './webview.utils';
+export * from './object.utils';

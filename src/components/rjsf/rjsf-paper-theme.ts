@@ -6,6 +6,7 @@ import {
   DateTimeWidget,
   DateWidget,
   HiddenWidget,
+  ImageVideoGalleryWidget,
   NumberWidget,
   PasswordWidget,
   RadioWidget,
@@ -43,6 +44,8 @@ export const RJSF_PAPER_THEME: ThemeProps = {
     CheckboxWidget,
     checkboxes: CheckboxesWidget,
     CheckboxesWidget,
+    imageVideoGallery: ImageVideoGalleryWidget,
+    ImageVideoGalleryWidget,
   },
   // Form passes onSubmit, children, className, etc. Our wrapper accepts View props + onSubmit.
   _internalFormWrapper: RjsfPaperFormWrapper as ThemeProps['_internalFormWrapper'],

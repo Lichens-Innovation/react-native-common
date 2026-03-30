@@ -6,11 +6,55 @@ import {
 } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
-import { StyleSheet } from 'react-native';
-import { RecordingTextInputArgs, VoiceRecognitionTextInput } from '../../../components/voice-recognition';
+import { StyleSheet, View } from 'react-native';
+import { type RecordingTextInputArgs, VoiceRecognitionTextInput } from '../../../components/voice-recognition';
+import { ObjectThumbnailHorizontalList } from '../../objects/object-thumbnail-hozirontal-list';
 import { useAppTheme } from '../../../theme';
 
-export const TextareaWidget: FunctionComponent<WidgetProps> = ({
+type VoiceTextValue = {
+  text?: string;
+  recordings?: string[];
+};
+
+type TextWidgetOptions = {
+  persistRecording?: boolean;
+  emptyValue?: unknown;
+  numberOfLines?: number;
+};
+
+const parseVoiceTextValue = (rawValue: unknown): VoiceTextValue => {
+  if (typeof rawValue !== 'string' || rawValue.trim() === '') {
+    return { text: '', recordings: [] };
+  }
+
+  try {
+    const parsed = JSON.parse(rawValue);
+
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      return {
+        text: typeof parsed.text === 'string' ? parsed.text : '',
+        recordings: Array.isArray(parsed.recordings)
+          ? parsed.recordings.filter((uri: string): uri is string => typeof uri === 'string')
+          : [],
+      };
+    }
+  } catch {
+    return { text: rawValue, recordings: [] };
+  }
+
+  return { text: '', recordings: [] };
+};
+
+const stringifyVoiceTextValue = (value: VoiceTextValue): string => {
+  return JSON.stringify({
+    text: toStringOrEmpty(value.text),
+    recordings: Array.isArray(value.recordings) ? value.recordings : [],
+  });
+};
+
+// Widget for rendering a text input with optional voice recording persistence. When persistRecording is false, value is directly the text string.
+// When persistRecording is true, the value is expected to be a JSON string containing both the text and an array of recording URIs (uris for rendering, but in the real formData the object_uuids should be used)
+export const TextWidget: FunctionComponent<WidgetProps> = ({
   id,
   value,
   disabled,
@@ -29,29 +73,81 @@ export const TextareaWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const numberOfLines = options?.numberOfLines ?? 4;
 
-  const handleValueChange = ({ value }: RecordingTextInputArgs) => {
-    onChange(getRjsfTextChangeValue({ text: value, emptyValue: options?.emptyValue }));
+  const widgetOptions = (options ?? {}) as TextWidgetOptions;
+  const persistRecording = widgetOptions.persistRecording ?? false;
+  const numberOfLines = widgetOptions.numberOfLines ?? 4;
+
+  const parsedValue = persistRecording ? parseVoiceTextValue(value) : { text: toStringOrEmpty(value), recordings: [] };
+
+  const currentText = toStringOrEmpty(parsedValue.text);
+  const recordings = Array.isArray(parsedValue.recordings) ? parsedValue.recordings : [];
+
+  const handleValueChange = ({ value: nextText, recordingUri }: RecordingTextInputArgs) => {
+    const normalizedText = getRjsfTextChangeValue({
+      text: nextText,
+      emptyValue: widgetOptions.emptyValue,
+    });
+
+    if (persistRecording) {
+      const nextRecordings =
+        recordingUri && !recordings.includes(recordingUri) ? [...recordings, recordingUri] : recordings;
+
+      onChange(
+        stringifyVoiceTextValue({
+          text: typeof normalizedText === 'string' ? normalizedText : toStringOrEmpty(normalizedText),
+          recordings: nextRecordings,
+        })
+      );
+      return;
+    }
+
+    onChange(normalizedText);
   };
 
+  const handleObjectRemove = (recordingToRemove: string) => {
+    if (!persistRecording) return;
+
+    const nextValue = stringifyVoiceTextValue({
+      text: currentText,
+      recordings: recordings.filter((recording) => recording !== recordingToRemove),
+    });
+
+    onChange(nextValue);
+    onBlur(id, nextValue);
+  };
+
+  const blurValue = persistRecording
+    ? stringifyVoiceTextValue({
+        text: currentText,
+        recordings: recordings,
+      })
+    : value;
+
   return (
-    <VoiceRecognitionTextInput
-      mode="outlined"
-      label={displayLabel}
-      value={toStringOrEmpty(value)}
-      placeholder={placeholder}
-      disabled={disabled}
-      editable={!readonly}
-      multiline
-      numberOfLines={numberOfLines}
-      onValueChange={handleValueChange}
-      onBlur={() => onBlur(id, value)}
-      onFocus={() => onFocus(id, value)}
-      error={hasError}
-      style={[styles.input, styles.textarea]}
-      outlineColor={theme.colors.outline}
-    />
+    <>
+      <VoiceRecognitionTextInput
+        mode="outlined"
+        label={displayLabel}
+        value={currentText}
+        placeholder={placeholder}
+        disabled={disabled}
+        editable={!readonly}
+        multiline
+        numberOfLines={numberOfLines}
+        onValueChange={handleValueChange}
+        onBlur={() => onBlur(id, blurValue)}
+        onFocus={() => onFocus(id, blurValue)}
+        error={hasError}
+        style={[styles.input, styles.textarea]}
+        outlineColor={theme.colors.outline}
+      />
+      {persistRecording && (
+        <View style={styles.thumbnailsContainer}>
+          <ObjectThumbnailHorizontalList onRemovePress={handleObjectRemove} uris={recordings} />
+        </View>
+      )}
+    </>
   );
 };
 
@@ -60,6 +156,9 @@ const useStyles = () => {
   return StyleSheet.create({
     input: {
       marginVertical: theme.spacing(0.5),
+    },
+    thumbnailsContainer: {
+      marginHorizontal: theme.spacing(1),
     },
     textarea: {
       minHeight: 100,

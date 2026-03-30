@@ -12,6 +12,8 @@ type YesNoWidgetOptions = {
   noColor?: string;
 };
 
+// Widget for rendering a "yes/no" value as two radio button group, any other value will be treated as null/undefined and rendered as no selection
+// Add an option "" to the enum options to allow for an explicit "no answer" option, otherwise the first option will be selected by default
 export const RadioYesNoWidget: FunctionComponent<WidgetProps> = ({
   id,
   value,
