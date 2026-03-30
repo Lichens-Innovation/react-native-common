@@ -5,3 +5,4 @@ export * from './rjsf-paper-renderer-debug';
 export * from './rjsf-paper-templates';
 export * from './rjsf-paper-theme';
 export * from './widgets';
+export * from './fields';

@@ -16,6 +16,7 @@ import {
   TextWidget,
   TextareaWidget,
 } from './widgets';
+import { TextWithVoiceRecordingField } from './fields';
 
 export const RJSF_PAPER_THEME: ThemeProps = {
   widgets: {
@@ -47,6 +48,8 @@ export const RJSF_PAPER_THEME: ThemeProps = {
     imageVideoGallery: ImageVideoGalleryWidget,
     ImageVideoGalleryWidget,
   },
-  // Form passes onSubmit, children, className, etc. Our wrapper accepts View props + onSubmit.
+  fields: {
+    TextWithVoiceRecordingField,
+  },
   _internalFormWrapper: RjsfPaperFormWrapper as ThemeProps['_internalFormWrapper'],
 };

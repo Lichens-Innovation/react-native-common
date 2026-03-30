@@ -4,24 +4,35 @@ import { withTheme } from '@rjsf/core';
 import type { RJSFSchema } from '@rjsf/utils';
 import { i18n } from 'i18next';
 import type { FunctionComponent } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PAPER_TEMPLATES } from './rjsf-paper-templates';
 import { RJSF_PAPER_THEME } from './rjsf-paper-theme';
 
 const ThemedForm = withTheme(RJSF_PAPER_THEME);
 
-type FormTemplates = FormProps<FormData, RJSFSchema>['templates'];
-
 export type FormData = Record<string, unknown>;
 
-export type RjsfPaperRendererProps = Omit<FormProps<FormData, RJSFSchema>, 'validator'> & {
+type FormTemplates = FormProps<FormData, RJSFSchema>['templates'];
+type FormWidgets = FormProps<FormData, RJSFSchema>['widgets'];
+type FormFields = FormProps<FormData, RJSFSchema>['fields'];
+
+export type RjsfPaperRendererProps = Omit<
+  FormProps<FormData, RJSFSchema>,
+  'validator' | 'templates' | 'widgets' | 'fields'
+> & {
   i18n: i18n;
+  templates?: FormTemplates;
+  widgets?: FormWidgets;
+  fields?: FormFields;
 };
 
 export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   i18n,
   formData: formDataProp,
   onChange: onChangeProp,
+  templates,
+  widgets,
+  fields,
   ...rest
 }) => {
   const customValidator = useRjsfValidator(i18n.language);
@@ -30,6 +41,31 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   useEffect(() => {
     setLocalFormData(formDataProp);
   }, [formDataProp]);
+
+  const mergedTemplates = useMemo(
+    () => ({
+      ...(RJSF_PAPER_THEME.templates ?? {}),
+      ...PAPER_TEMPLATES,
+      ...(templates ?? {}),
+    }),
+    [templates]
+  );
+
+  const mergedWidgets = useMemo(
+    () => ({
+      ...(RJSF_PAPER_THEME.widgets ?? {}),
+      ...(widgets ?? {}),
+    }),
+    [widgets]
+  );
+
+  const mergedFields = useMemo(
+    () => ({
+      ...(RJSF_PAPER_THEME.fields ?? {}),
+      ...(fields ?? {}),
+    }),
+    [fields]
+  );
 
   const handleChange = (data: IChangeEvent<FormData, RJSFSchema>, id?: string) => {
     setLocalFormData(data.formData);
@@ -42,7 +78,9 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
       key={i18n.language}
       formData={localFormData}
       onChange={handleChange}
-      templates={PAPER_TEMPLATES as unknown as FormTemplates}
+      templates={mergedTemplates as unknown as FormTemplates}
+      widgets={mergedWidgets as unknown as FormWidgets}
+      fields={mergedFields as unknown as FormFields}
       validator={customValidator}
       translateString={(stringToTranslate, params) => translateRjsfString({ stringToTranslate, params, i18n })}
     />
