@@ -1,22 +1,15 @@
 import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
-import { useState, type FunctionComponent } from 'react';
+import { type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { IconButton } from 'react-native-paper';
 import { useAppTheme } from '../../../theme';
 import { RjsfDisplayLabel } from './display-label';
-import { CameraFullModal } from '../../objects/camera-full-modal';
-import { ObjectThumbnailHorizontalList } from '../../objects/object-thumbnail-hozirontal-list';
+import { CameraAndThumbnails } from '../../objects/camera-and-thumbnails';
 
 type ImageVideoGalleryWidgetOptions = {
   allowMultipleSelection?: boolean;
   enableVideo?: boolean;
 };
-
-interface CameraModalData {
-  visible: boolean;
-  mode: 'image' | 'video';
-}
 
 // Widget for displaying a gallery of images and videos with the ability to add new ones using the camera and remove existing ones. The value is expected to be an array of uris pointing to the media files. (uris for rendering, but in the real formData the object_uuids should be used)
 export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = ({
@@ -39,21 +32,6 @@ export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = ({
   const enableVideo = widgetOptions.enableVideo ?? true;
   const uris = Array.isArray(value) ? value : [];
 
-  const [cameraModal, setCameraModal] = useState<CameraModalData>({
-    visible: false,
-    mode: 'image',
-  });
-
-  const onTakePhoto = () => {
-    if (readonly || disabled) return;
-    setCameraModal({ visible: true, mode: 'image' });
-  };
-
-  const onTakeVideo = () => {
-    if (readonly || disabled) return;
-    setCameraModal({ visible: true, mode: 'video' });
-  };
-
   const handleObjectsTaken = (newUris: string[]) => {
     if (readonly || disabled) return;
     const nextValue = allowMultipleSelection ? [...uris, ...newUris] : newUris;
@@ -72,25 +50,15 @@ export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = ({
   return (
     <View style={styles.widgetBlock}>
       <RjsfDisplayLabel label={displayLabel} style={styles.title} />
-      <View style={styles.thumbnailsContainer}>
-        <ObjectThumbnailHorizontalList onRemovePress={handleObjectRemove} uris={uris} />
-      </View>
-      <View style={styles.actionsRow}>
-        <IconButton mode="contained" icon="camera" onPress={onTakePhoto} disabled={readonly || disabled} />
-
-        {enableVideo ? (
-          <IconButton mode="contained" icon="video" onPress={onTakeVideo} disabled={readonly || disabled} />
-        ) : null}
-      </View>
-
-      {cameraModal.visible ? (
-        <CameraFullModal
-          mode={cameraModal.mode}
-          onClose={() => setCameraModal({ visible: false, mode: 'image' })}
-          handleObjectsTaken={handleObjectsTaken}
-          allowMultipleSelection={allowMultipleSelection}
-        />
-      ) : null}
+      <CameraAndThumbnails
+        uris={uris}
+        disabled={disabled}
+        readonly={readonly}
+        handleObjectRemove={handleObjectRemove}
+        handleObjectsTaken={handleObjectsTaken}
+        allowMultipleSelection={allowMultipleSelection}
+        enableVideo={enableVideo}
+      />
     </View>
   );
 };

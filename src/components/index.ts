@@ -17,3 +17,4 @@ export * from './spinner';
 export * from './syntax';
 export * from './tab-bar-icon';
 export * from './voice-recognition';
+export * from './objects';

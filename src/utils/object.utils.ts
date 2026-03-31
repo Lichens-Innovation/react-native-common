@@ -1,3 +1,5 @@
+import * as VideoThumbnails from 'expo-video-thumbnails';
+
 export type MediaType = 'image' | 'video' | 'audio';
 
 export const IMAGE_EXTENSIONS = new Set([
@@ -48,4 +50,27 @@ export const getMediaTypeFromUri = (uri: string | null | undefined): MediaType |
   if (AUDIO_EXTENSIONS.has(extension)) return 'audio';
 
   return undefined;
+};
+
+async function getVideoThumbnail(uri: string): Promise<{ uri: string }> {
+  const times = [500, 1000, 0]; // ms - try to get thumbnail at 0.5s, then 1s, then 0s (sometimes videos have issues generating thumbnails at 0ms, so we try a few options if necessary)
+  for (const t of times) {
+    try {
+      return await VideoThumbnails.getThumbnailAsync(uri, { time: t, quality: 0.7 });
+    } catch (_) {}
+  }
+  return { uri: '' };
+}
+
+export const getThumbnailUri = async (uri: string | null | undefined, mediaType: MediaType): Promise<string> => {
+  if (!uri) return '';
+  if (mediaType === 'image') {
+    return uri;
+  } else if (mediaType === 'video') {
+    // We need to create a thumbnail from the video
+    const thumbnail = await getVideoThumbnail(uri);
+    return thumbnail.uri;
+  } else {
+    return '';
+  }
 };

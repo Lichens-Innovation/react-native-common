@@ -54,7 +54,7 @@ export const RadioYesNoWidget: FunctionComponent<WidgetProps> = ({
             style={styles.option}
             disabled={disabled || readonly}
           >
-            <RadioButton
+            <RadioButton.Android
               value={yesOption.value}
               status={currentValue === yesOption.value ? 'checked' : 'unchecked'}
               onPress={() => handleSelect(yesOption.value)}
@@ -71,7 +71,7 @@ export const RadioYesNoWidget: FunctionComponent<WidgetProps> = ({
 
         {noOption ? (
           <Pressable onPress={() => handleSelect(noOption.value)} style={styles.option} disabled={disabled || readonly}>
-            <RadioButton
+            <RadioButton.Android
               value={noOption.value}
               status={currentValue === noOption.value ? 'checked' : 'unchecked'}
               onPress={() => handleSelect(noOption.value)}

@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Icon } from 'react-native-paper';
-import { getMediaTypeFromUri } from '../../utils/object.utils';
+import { getMediaTypeFromUri, getThumbnailUri } from '../../utils/object.utils';
 
 interface ObjectThumbnailProps {
   uri: string | undefined;
@@ -13,10 +13,21 @@ interface ObjectThumbnailProps {
 const ObjectThumbnail: React.FC<ObjectThumbnailProps> = ({ uri, onPress, size = 100 }) => {
   const { t } = useTranslation();
   const mediaType = getMediaTypeFromUri(uri);
+  const [thumbnailUri, setThumbnailUri] = React.useState<string>('');
   const showPlayIcon = mediaType === 'video' || mediaType === 'audio';
   const noUriIconName = mediaType === 'video' ? 'video-off' : mediaType === 'audio' ? 'music-off' : 'image-off';
   const playIconName = mediaType === 'video' ? 'play-circle-outline' : 'music-note';
   const styles = createStyles(size);
+
+  useEffect(() => {
+    if (mediaType === 'video' && uri) {
+      const fetchThumbnail = async () => {
+        const tempUri = await getThumbnailUri(uri, mediaType);
+        setThumbnailUri(tempUri);
+      };
+      fetchThumbnail();
+    }
+  }, [mediaType, uri]);
 
   function handleNoUriPress() {
     Alert.alert('', t('app:objects.notCached'), [
@@ -37,7 +48,7 @@ const ObjectThumbnail: React.FC<ObjectThumbnailProps> = ({ uri, onPress, size = 
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
-      <Image source={{ uri: uri }} style={styles.image} resizeMode="cover" />
+      <Image source={{ uri: thumbnailUri || uri }} style={styles.image} resizeMode="cover" />
       {showPlayIcon && (
         <View style={styles.playIconContainer}>
           <Icon source={playIconName} size={size * 0.3} color="white" />
