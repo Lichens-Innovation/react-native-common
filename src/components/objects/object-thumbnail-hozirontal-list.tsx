@@ -7,11 +7,13 @@ import ViewerModal from './media-viewer-modal';
 
 interface ObjectThumbnailHorizontalListProps {
   onRemovePress: (uuid: string) => void;
+  readonly?: boolean;
   uris: string[];
 }
 
 export const ObjectThumbnailHorizontalList: FunctionComponent<ObjectThumbnailHorizontalListProps> = ({
   onRemovePress,
+  readonly,
   uris,
 }) => {
   const styles = useStyles();
@@ -26,10 +28,11 @@ export const ObjectThumbnailHorizontalList: FunctionComponent<ObjectThumbnailHor
           return (
             <View key={`${uri}-${index}`} style={styles.mediaItem}>
               <ObjectThumbnail uri={uri} onPress={() => setViewerUri(uri)} size={styles.thumb.width} />
-
-              <Pressable hitSlop={8} style={styles.deleteButton} onPress={() => onRemovePress(uri)}>
-                <Icon source="close" size={14} color="#d35d4e" />
-              </Pressable>
+              {!readonly && (
+                <Pressable hitSlop={8} style={styles.deleteButton} onPress={() => onRemovePress(uri)}>
+                  <Icon source="close" size={14} color="#d35d4e" />
+                </Pressable>
+              )}
             </View>
           );
         })}

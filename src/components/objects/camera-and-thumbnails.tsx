@@ -50,7 +50,7 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
   return (
     <>
       <View style={styles.thumbnailsContainer}>
-        <ObjectThumbnailHorizontalList onRemovePress={handleObjectRemove} uris={uris} />
+        <ObjectThumbnailHorizontalList onRemovePress={handleObjectRemove} uris={uris} readonly={readonly || disabled} />
       </View>
       <View style={styles.actionsRow}>
         <IconButton mode="contained" icon="camera" onPress={onTakePhoto} disabled={readonly || disabled} />
