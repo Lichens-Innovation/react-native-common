@@ -42,7 +42,15 @@ const { DarkTheme, LightTheme } = navigationAdaptedThemes;
 export const NAVIGATION_DARK = { ...DarkTheme, fonts: { ...DarkNavigationTheme.fonts } };
 export const NAVIGATION_LIGHT = { ...LightTheme, fonts: { ...LightNavigationTheme.fonts } };
 
-export const useAppTheme = () => useTheme() as AppTheme;
+export const useAppTheme = (): AppTheme => {
+  const theme = useTheme() as AppTheme;
+  if (typeof theme.spacing === 'function') {
+    return theme;
+  }
+
+  // edge case when error boundary is rendered while the app is not yet fully initialized
+  return { ...theme, spacing };
+};
 
 export const useIsDarkMode = (): boolean => {
   const theme = useAppTheme();
