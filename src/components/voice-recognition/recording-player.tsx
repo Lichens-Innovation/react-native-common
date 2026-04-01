@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { IconButton } from 'react-native-paper';
 
 export interface RecordingPlayerProps {
-  /** URI of the recording to play. When null, nothing is rendered. */
-  recordingUri: string | null;
+  /** URI of the recording to play. When null or undefined, nothing is rendered. */
+  recordingUri: string | null | undefined;
 }
 
 export const RecordingPlayer: FunctionComponent<RecordingPlayerProps> = ({ recordingUri }) => {

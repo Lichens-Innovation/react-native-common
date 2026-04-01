@@ -36,7 +36,9 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   const [isRecording, setIsRecording] = useState(false);
   const [recordingValue, setRecordingValue] = useState('');
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
+
   const lastFinalValueRef = useRef<string>('');
+  const shouldHandleAudioEndRef = useRef(false);
 
   const effectiveRecordingUri = isNullish(recordingUriProp) ? recordingUri : recordingUriProp;
 
@@ -46,7 +48,10 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   const finalValue = buildFinalValue({ query: value ?? '', recordingValue });
 
   useEffect(() => {
-    onEffectiveValueChange?.({ value: finalValue, recordingUri: effectiveRecordingUri ?? undefined });
+    onEffectiveValueChange?.({
+      value: finalValue,
+      recordingUri: effectiveRecordingUri ?? undefined,
+    });
   }, [finalValue, effectiveRecordingUri, onEffectiveValueChange]);
 
   useSpeechRecognitionEvent('result', (event) => {
@@ -61,14 +66,21 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   useSpeechRecognitionEvent('error', (event) => {
     const { error, message } = event;
     logger.error(`[useSpeechRecognitionEvent] error: ${error} - ${message}`);
+    shouldHandleAudioEndRef.current = false;
     setIsRecording(false);
     setRecordingValue('');
   });
 
   useSpeechRecognitionEvent('audioend', (event) => {
+    if (!shouldHandleAudioEndRef.current) return;
+    shouldHandleAudioEndRef.current = false;
+
     if (event.uri) {
       setRecordingUri(event.uri);
-      onValueChange({ value: lastFinalValueRef.current, recordingUri: event.uri });
+      onValueChange({
+        value: lastFinalValueRef.current,
+        recordingUri: event.uri,
+      });
     }
   });
 
@@ -76,6 +88,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
     const hasPermissions = await ensureVoiceRecognitionPermissions();
     if (!hasPermissions) return;
 
+    shouldHandleAudioEndRef.current = true;
     setIsRecording(true);
     setRecordingValue('');
     setRecordingUri(null);
@@ -94,14 +107,17 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
 
   const handleStopRecording = async () => {
     if (!isRecording) return;
-    setIsRecording(false);
-    ExpoSpeechRecognitionModule.stop();
 
     const finalValueAtStop = buildFinalValue({ query: value ?? '', recordingValue });
     lastFinalValueRef.current = finalValueAtStop;
+
+    setIsRecording(false);
+    ExpoSpeechRecognitionModule.stop();
+
     if (isNotBlank(recordingValue)) {
       onValueChange({ value: finalValueAtStop });
     }
+
     setRecordingValue('');
   };
 
@@ -114,6 +130,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   };
 
   const clearValue = () => {
+    shouldHandleAudioEndRef.current = false;
     onValueChange({ value: '' });
     setRecordingValue('');
     setRecordingUri(null);
