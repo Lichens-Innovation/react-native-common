@@ -144,11 +144,17 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
           style={[styles.textInput, styles.textInputWithRightButtons]}
           label={label}
           value={finalValue}
-          readOnly={isRecording}
+          readOnly={isRecording || !rest.editable}
           onChangeText={(text) => onValueChange({ value: text })}
           multiline={true}
           numberOfLines={4}
-          left={<TextInput.Icon icon={isRecording ? 'stop' : 'microphone-outline'} onPress={toggleRecording} />}
+          left={
+            <TextInput.Icon
+              icon={isRecording ? 'stop' : 'microphone-outline'}
+              onPress={toggleRecording}
+              disabled={!rest.editable}
+            />
+          }
         />
         <View style={styles.rightButtonsOverlay} pointerEvents="box-none">
           <View style={styles.rightButtons} pointerEvents="auto">
@@ -156,7 +162,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
             <IconButton
               icon="close"
               onPress={clearValue}
-              disabled={isBlank(finalValue)}
+              disabled={isBlank(finalValue) || !rest.editable}
               accessibilityLabel={t('common:close')}
             />
           </View>
