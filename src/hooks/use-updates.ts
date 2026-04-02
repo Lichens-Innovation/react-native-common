@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { logger } from '../logger/logger';
 import { getDeviceType, isRealDevice } from '../utils/device.utils';
-import { isProduction } from '../utils/env.utils.windows';
+import { isProduction } from '../utils/env.utils';
 
 const checkForUpdateAsync = async (): Promise<void> => {
   const deviceType = getDeviceType();

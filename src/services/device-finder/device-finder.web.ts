@@ -35,7 +35,7 @@ export class DeviceFinder {
 
   private setupListeners() {
     notImplementedYet(
-      '[DeviceFinder] setupListeners — Zeroconf/Bonjour listeners for ionodes-media discovery are not implemented on Windows desktop',
+      '[DeviceFinder] setupListeners — Zeroconf/Bonjour listeners for ionodes-media discovery are not implemented on web'
     );
   }
 
@@ -47,12 +47,10 @@ export class DeviceFinder {
 
     try {
       logger.info('[DeviceFinder] Starting scan for ionodes-media');
-      notImplementedYet(
-        '[DeviceFinder] start — starting the local network scan for cameras is not implemented on Windows desktop',
-      );
-    } catch (e: any) {
+      notImplementedYet('[DeviceFinder] start — starting the local network scan for cameras is not implemented on web');
+    } catch (e: unknown) {
       logger.error('[DeviceFinder] Error starting scan:', e);
-      this.onErrorCallback(e);
+      this.onErrorCallback(e instanceof Error ? e : new Error(String(e)));
     }
   }
 
@@ -62,9 +60,7 @@ export class DeviceFinder {
     }
 
     try {
-      notImplementedYet(
-        '[DeviceFinder] stop — stopping the local network scan is not implemented on Windows desktop',
-      );
+      notImplementedYet('[DeviceFinder] stop — stopping the local network scan is not implemented on web');
     } catch (e) {
       logger.error('[DeviceFinder] Error stopping scan:', e);
       this.onErrorCallback(e instanceof Error ? e : new Error(String(e)));
