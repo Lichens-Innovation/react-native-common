@@ -37,7 +37,11 @@ export class NativeFileSystemWeb implements INativeFileSystem {
     throw new Error('NativeFileSystemWeb: deleteAsync is not implemented on web');
   }
 
-  async copyContentUriToLocal(_contentUri: string): Promise<string> {
+  async readAsBase64Async(_fileUri: string): Promise<string> {
+    throw new Error('NativeFileSystemWeb: readAsBase64Async is not implemented on web');
+  }
+
+  async copyContentUriToLocal(_contentUri: string, _fileName: string): Promise<string> {
     throw new Error('NativeFileSystemWeb: copyContentUriToLocal is not implemented on web');
   }
 }

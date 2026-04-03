@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Sentry from '@sentry/react-native';
-import { InteractionManager, LogBox } from 'react-native';
+import { InteractionManager, LogBox, Platform } from 'react-native';
 import {
   fileAsyncTransport,
   mapConsoleTransport,
@@ -23,7 +23,7 @@ LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed 
 const appName = getAppIdentifier();
 const logFilenamePrefix = `app-logs-${appName}`;
 const logFilenamePattern = `${logFilenamePrefix}-{date-today}.txt`;
-const filePath: string = Paths.document.uri;
+const filePath: string = Platform.OS === 'web' ? '/' : Paths.document.uri;
 if (!filePath) {
   throw new Error('Failed to initialize logger: document directory path is unavailable');
 }
@@ -57,7 +57,10 @@ class LoggerWrapper implements SimpleLogger {
 }
 
 const getTransports = (): transportFunctionType<any>[] => {
-  const transports: transportFunctionType<any>[] = [fileAsyncTransport, commonLogsStoreTransport];
+  const transports: transportFunctionType<any>[] = [commonLogsStoreTransport];
+  if (Platform.OS !== 'web') {
+    transports.push(fileAsyncTransport);
+  }
 
   if (!isDevelopment() && isSentryActivated()) {
     Sentry.init({

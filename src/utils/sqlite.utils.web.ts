@@ -1,10 +1,9 @@
 import { nowAsDateTimeForFilename } from '@lichens-innovation/ts-common';
-import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { notImplementedYet } from './platform.utils';
 
 interface DbInstance {
-  db: SQLiteDatabase;
+  db: unknown;
   dbFilename: string;
 }
 

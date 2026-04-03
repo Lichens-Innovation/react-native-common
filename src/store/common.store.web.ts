@@ -13,6 +13,7 @@ class CommonStore {
 
   constructor() {
     makeAutoObservable(this);
+
     makePersistable(this, {
       name: 'CommonStore',
       properties: ['isDarkMode'],

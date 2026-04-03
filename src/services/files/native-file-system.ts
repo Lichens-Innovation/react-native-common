@@ -3,6 +3,7 @@ import { Buffer } from 'buffer';
 import { Directory, File, Paths } from 'expo-file-system';
 import * as FileSystemLegacy from 'expo-file-system/legacy';
 
+import { Platform } from 'react-native';
 import { logger } from '../../logger/logger';
 import {
   EncodingType,
@@ -14,8 +15,8 @@ import {
 } from './native-file-system.types';
 
 export class NativeFileSystem implements INativeFileSystem {
-  public readonly documentDirectory: string | null = Paths.document.uri;
-  public readonly cacheDirectory: string | null = Paths.cache.uri;
+  public readonly documentDirectory: string | null = Platform.OS === 'web' ? null : Paths.document.uri;
+  public readonly cacheDirectory: string | null = Platform.OS === 'web' ? null : Paths.cache.uri;
 
   public readonly EncodingType = EncodingType;
 
