@@ -48,6 +48,8 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
   const keyboardType = isInteger ? 'number-pad' : 'decimal-pad';
   const inputMode = isInteger ? 'numeric' : 'decimal';
 
+  const unit = options?.unit as string | undefined;
+
   return (
     <TextInput
       mode="outlined"
@@ -64,6 +66,7 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
       error={hasError}
       style={styles.input}
       outlineColor={theme.colors.outline}
+      right={unit ? <TextInput.Affix text={unit} /> : undefined}
     />
   );
 };
