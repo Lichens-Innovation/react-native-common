@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { DialogOkCancel } from '../dialogs/dialog-ok-cancel';
 import * as ExpoCamera from 'expo-camera';
 import * as FileSystem from 'expo-file-system/legacy';
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Text, Icon } from 'react-native-paper';
 import { AppModal } from '../modal/app-modal';
@@ -29,7 +29,7 @@ export const CameraFullModal = ({
   mode,
   onClose,
   handleObjectsTaken,
-  allowMultipleSelection = false,
+  allowMultipleSelection = true,
 }: CameraFullModalArgs) => {
   const styles = useStyles();
   const [facing, _setFacing] = useState<ExpoCamera.CameraType>('back');
@@ -43,11 +43,25 @@ export const CameraFullModal = ({
   });
   const [torchEnabled, setTorchEnabled] = useState(false);
 
+  const flashAnim = useRef(new Animated.Value(0)).current;
+
+  const triggerCaptureFlash = useCallback(() => {
+    flashAnim.stopAnimation();
+    flashAnim.setValue(1);
+
+    Animated.timing(flashAnim, {
+      toValue: 0,
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+  }, [flashAnim]);
+
   const closeCamera = async () => {
     try {
       if (isRecording && cameraRef.current) {
         cameraRef.current.stopRecording();
         setIsRecording(false);
+        triggerCaptureFlash();
       }
     } finally {
       setTorchEnabled(false);
@@ -84,7 +98,9 @@ export const CameraFullModal = ({
       const newPath = (FileSystem.documentDirectory ?? '') + fileName;
       await FileSystem.copyAsync({ from: picture.uri, to: newPath });
       handleObjectsTaken([newPath]);
-      closeCamera();
+      if (!allowMultipleSelection) {
+        closeCamera();
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to save picture: ' + (error as Error).message);
     }
@@ -98,6 +114,7 @@ export const CameraFullModal = ({
     if (isRecording) {
       cameraRef.current.stopRecording();
       setIsRecording(false);
+      triggerCaptureFlash();
       return;
     }
 
@@ -119,8 +136,10 @@ export const CameraFullModal = ({
       }
     }
     handleObjectsTaken([video.uri]);
-    closeCamera();
     setIsRecording(false);
+    if (!allowMultipleSelection) {
+      closeCamera();
+    }
   }
 
   const selectMedia = async () => {
@@ -263,6 +282,16 @@ export const CameraFullModal = ({
             </View>
           </View>
         </View>
+
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.captureFlashOverlay,
+            {
+              opacity: flashAnim,
+            },
+          ]}
+        />
       </ExpoCamera.CameraView>
     </AppModal>
   );
@@ -332,6 +361,10 @@ const useStyles = () => {
       fontSize: 16,
       fontWeight: 'bold',
       color: 'white',
+    },
+    captureFlashOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'white',
     },
   });
 };
