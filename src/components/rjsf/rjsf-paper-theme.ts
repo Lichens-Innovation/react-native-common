@@ -15,6 +15,7 @@ import {
   SelectWidget,
   TextWidget,
   TextareaWidget,
+  LabelWidget,
 } from './widgets';
 import { TextWithVoiceRecordingField } from './fields';
 
@@ -47,6 +48,8 @@ export const RJSF_PAPER_THEME: ThemeProps = {
     CheckboxesWidget,
     imageVideoGallery: ImageVideoGalleryWidget,
     ImageVideoGalleryWidget,
+    label: LabelWidget,
+    LabelWidget,
   },
   fields: {
     TextWithVoiceRecordingField,
