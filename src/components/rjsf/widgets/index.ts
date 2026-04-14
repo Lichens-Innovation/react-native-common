@@ -13,3 +13,4 @@ export * from './select-widget';
 export * from './text-widget';
 export * from './textarea-widget';
 export * from './image-video-gallery-widget';
+export * from './label-widget';
