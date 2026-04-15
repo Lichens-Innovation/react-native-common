@@ -9,7 +9,7 @@ export const useScreenOrientation = () => {
     const listener = ScreenOrientation.addOrientationChangeListener((event) => {
       const value = event.orientationInfo.orientation;
       setOrientation(value);
-      logger.debug(`[useScreenOrientation] devide orientation changed to ${value}`);
+      logger.debug(`[useScreenOrientation] device orientation changed to ${value}`);
     });
 
     return () => listener.remove();
