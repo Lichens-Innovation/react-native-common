@@ -61,7 +61,7 @@ const useStyles = ({ isLandscape, isLandscapeLeft }: UseOrientationAwareTabsStyl
 
   const minPadding = theme.spacing(0.5);
 
-  const maxHorizontalInset = Math.max(left, right);
+  const maxHorizontalInset = Math.max(left, right, minPadding);
   const landscapeRightPadding = isLandscapeLeft ? maxHorizontalInset : minPadding;
 
   return StyleSheet.create({
