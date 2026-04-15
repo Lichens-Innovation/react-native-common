@@ -6,4 +6,5 @@ export * from './use-single-file-selector';
 export * from './use-timeout-state';
 export * from './use-timeout-toggle';
 export * from './use-updates';
+export * from './use-screen-orientation';
 export * from './use-window-orientation';

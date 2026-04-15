@@ -2,7 +2,7 @@ import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
 import { FunctionComponent } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useIsLandscape } from '../../../hooks/use-window-orientation';
+import { useScreenOrientation } from '../../../hooks/use-screen-orientation';
 import { useAppTheme } from '../../../theme/theme';
 import { OrientationAwareTabButton } from './orientation-aware-tab-button';
 
@@ -27,8 +27,8 @@ export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsL
   tabListStyle,
 }) => {
   const theme = useAppTheme();
-  const styles = useStyles();
-  const isLandscape = useIsLandscape();
+  const { isLandscape, isLandscapeLeft } = useScreenOrientation();
+  const styles = useStyles({ isLandscape, isLandscapeLeft });
 
   return (
     <Tabs style={[styles.tabsContainer, containerStyle]}>
@@ -50,13 +50,19 @@ export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsL
   );
 };
 
-const useStyles = () => {
+type UseOrientationAwareTabsStylesParams = {
+  isLandscape: boolean;
+  isLandscapeLeft: boolean;
+};
+
+const useStyles = ({ isLandscape, isLandscapeLeft }: UseOrientationAwareTabsStylesParams) => {
   const theme = useAppTheme();
-  const { bottom, right } = useSafeAreaInsets();
+  const { bottom, left, right } = useSafeAreaInsets();
 
   const minPadding = theme.spacing(0.5);
 
-  const isLandscape = useIsLandscape();
+  const maxHorizontalInset = Math.max(left, right);
+  const landscapeRightPadding = isLandscapeLeft ? maxHorizontalInset : minPadding;
 
   return StyleSheet.create({
     tabsContainer: {
@@ -71,7 +77,7 @@ const useStyles = () => {
       justifyContent: 'space-around',
       flexDirection: isLandscape ? 'column' : 'row',
       paddingBottom: isLandscape ? minPadding : bottom,
-      paddingRight: isLandscape ? right : minPadding,
+      paddingRight: isLandscape ? landscapeRightPadding : minPadding,
       borderTopWidth: isLandscape ? undefined : StyleSheet.hairlineWidth,
       borderTopColor: isLandscape ? undefined : theme.colors.outline,
       borderLeftWidth: isLandscape ? StyleSheet.hairlineWidth : undefined,

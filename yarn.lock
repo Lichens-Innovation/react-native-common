@@ -5988,6 +5988,11 @@ expo-router@~6.0.10:
     use-latest-callback "^0.2.1"
     vaul "^1.1.2"
 
+expo-screen-orientation@~9.0.8:
+  version "9.0.8"
+  resolved "https://registry.yarnpkg.com/expo-screen-orientation/-/expo-screen-orientation-9.0.8.tgz#15b8f85bd4d183831943fc5a21e3020e17432867"
+  integrity sha512-qRoPi3E893o3vQHT4h1NKo51+7g2hjRSbDeg1fsSo/u2pOW5s6FCeoacLvD+xofOP33cH2MkE4ua54aWWO7Icw==
+
 expo-secure-store@~15.0.7:
   version "15.0.7"
   resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-15.0.7.tgz#f74f928029889b8a32c0eafc2a214abee1e8b71e"
