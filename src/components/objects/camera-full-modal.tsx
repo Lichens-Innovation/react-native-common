@@ -31,6 +31,7 @@ export const CameraFullModal = ({
   handleObjectsTaken,
   allowMultipleSelection = true,
 }: CameraFullModalArgs) => {
+  const [captureCount, setCaptureCount] = useState(0);
   const styles = useStyles();
   const [facing, _setFacing] = useState<ExpoCamera.CameraType>('back');
   const [isRecording, setIsRecording] = useState(false);
@@ -98,6 +99,7 @@ export const CameraFullModal = ({
       const newPath = (FileSystem.documentDirectory ?? '') + fileName;
       await FileSystem.copyAsync({ from: picture.uri, to: newPath });
       handleObjectsTaken([newPath]);
+      setCaptureCount((c) => c + 1);
       if (!allowMultipleSelection) {
         closeCamera();
       }
@@ -136,6 +138,7 @@ export const CameraFullModal = ({
       }
     }
     handleObjectsTaken([video.uri]);
+    setCaptureCount((c) => c + 1);
     setIsRecording(false);
     if (!allowMultipleSelection) {
       closeCamera();
@@ -233,6 +236,14 @@ export const CameraFullModal = ({
         enableTorch={torchEnabled}
         zoom={zoom}
       >
+        <View
+          style={[styles.badgeContainer, { opacity: captureCount > 0 ? 1 : 0 }]}
+          pointerEvents={captureCount > 0 ? 'auto' : 'none'}
+        >
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{captureCount}</Text>
+          </View>
+        </View>
         <View style={styles.overlay}>
           <View style={{ flex: 1 }} />
           <View style={styles.bottomControls}>
@@ -365,6 +376,26 @@ const useStyles = () => {
     captureFlashOverlay: {
       ...StyleSheet.absoluteFillObject,
       backgroundColor: 'white',
+    },
+    badgeContainer: {
+      position: 'absolute',
+      top: 50,
+      right: 16,
+      zIndex: 10,
+    },
+    badge: {
+      minWidth: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: 'red',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 6,
+    },
+    badgeText: {
+      color: 'white',
+      fontWeight: 'bold',
+      fontSize: 16,
     },
   });
 };
