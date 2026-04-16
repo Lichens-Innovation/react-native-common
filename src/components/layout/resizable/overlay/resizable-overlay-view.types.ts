@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
 
-export type VerticalResizableOverlayViewAnchorType = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+export type ResizableOverlayViewAnchorType = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 
-export interface VerticalResizableOverlayViewProps {
+export interface ResizableOverlayViewProps {
   /** Content to display in the overlay section (foreground, on top) */
   foregroundContent: ReactNode;
   /** Content to display in the background section (fills the entire container) */
@@ -12,7 +12,7 @@ export interface VerticalResizableOverlayViewProps {
    * Where the overlay is anchored inside the container.
    * Default: topRight
    */
-  anchorType?: VerticalResizableOverlayViewAnchorType;
+  anchorType?: ResizableOverlayViewAnchorType;
   /** Initial height ratio for the foreground overlay (0 to 1). Default: 0.5 */
   initialForegroundRatio?: number;
   /** Minimum height ratio for the foreground overlay (0 to 1). Default: 0.15 */
@@ -27,4 +27,9 @@ export interface VerticalResizableOverlayViewProps {
   handleStyle?: StyleProp<ViewStyle>;
   /** Whether to hide the drag handle. Default: false */
   hideHandle?: boolean;
+
+  /** When true, obscures the foreground pane content while resizing or before layout is ready. Default: false */
+  shouldObscureForegroundPaneContentWhileResizing?: boolean;
+  /** When true, obscures the background pane content while resizing or before layout is ready. Default: false */
+  shouldObscureBackgroundPaneContentWhileResizing?: boolean;
 }

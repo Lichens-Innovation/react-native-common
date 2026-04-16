@@ -1,24 +1,27 @@
-import { type FunctionComponent } from 'react';
+import { useEffect, type FunctionComponent } from 'react';
 import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { isDevelopment } from '../../../utils';
-import { computeResizableOverlayLayoutValues } from './resizable-overlay-view.utils';
-import { VerticalResizableOverlayViewProps } from './vertical-resizable-overlay-view.types';
-import { validateResizableOverlayProps } from './vertical-resizable-overlay-view.utils';
+import { useAppTheme } from '../../../../theme';
+import { isDevelopment } from '../../../../utils';
+import { ResizablePaneDragChrome } from '../resizable-pane-drag-chrome';
+import { RESIZE_HANDLE } from '../resizable-view.constants';
+import { ResizableOverlayViewProps } from './resizable-overlay-view.types';
+import { computeResizableOverlayLayoutValues, validateResizableOverlayProps } from './resizable-overlay-view.utils';
 
-const DRAG_HANDLE_HEIGHT = 20;
-const DEFAULT_ANIMATION_CONFIG = { damping: 25, stiffness: 300, mass: 0.8 };
-
-const OVERLAY_ANCHOR_STYLES: Record<NonNullable<VerticalResizableOverlayViewProps['anchorType']>, ViewStyle> = {
+const OVERLAY_ANCHOR_STYLES: Record<NonNullable<ResizableOverlayViewProps['anchorType']>, ViewStyle> = {
   topLeft: { top: 0, left: 0 },
   topRight: { top: 0, right: 0 },
   bottomLeft: { bottom: 0, left: 0 },
   bottomRight: { bottom: 0, right: 0 },
 };
 
-export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayViewProps> = (props) => {
-  if (isDevelopment()) validateResizableOverlayProps(props);
+export const ResizableOverlayView: FunctionComponent<ResizableOverlayViewProps> = (props) => {
+  const styles = useStyles();
+
+  useEffect(() => {
+    if (isDevelopment()) validateResizableOverlayProps(props);
+  }, [props]);
 
   const {
     foregroundContent,
@@ -31,6 +34,8 @@ export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayVie
     handleStyle,
     hideHandle = false,
     anchorType = 'topRight',
+    shouldObscureForegroundPaneContentWhileResizing = false,
+    shouldObscureBackgroundPaneContentWhileResizing = false,
   } = props;
 
   // Anchor styles
@@ -46,6 +51,7 @@ export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayVie
   const maxHeight = useSharedValue(0);
   const startY = useSharedValue(0);
   const isDragging = useSharedValue(false);
+  const isLayoutReady = useSharedValue(false);
 
   // Handle container layout measurement
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -62,6 +68,7 @@ export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayVie
     minHeight.value = computedValues.minHeight;
     maxHeight.value = computedValues.maxHeight;
     overlayHeight.value = computedValues.overlayHeight;
+    isLayoutReady.value = true;
   };
 
   const panGesture = Gesture.Pan()
@@ -75,7 +82,7 @@ export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayVie
       const newHeight = startY.value + direction * event.translationY;
       overlayHeight.value = Math.max(minHeight.value, Math.min(newHeight, maxHeight.value));
     })
-    .onEnd(() => {
+    .onFinalize(() => {
       isDragging.value = false;
     });
 
@@ -116,8 +123,8 @@ export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayVie
     // If anchored at bottom, the handle must attach to the TOP edge of the overlay.
     // Otherwise (top anchor), it attaches to the BOTTOM edge.
     const top = isBottomAnchored
-      ? containerHeight.value - effectiveHeight - DRAG_HANDLE_HEIGHT / 2
-      : effectiveHeight - DRAG_HANDLE_HEIGHT / 2;
+      ? containerHeight.value - effectiveHeight - RESIZE_HANDLE.dragTargetCrossAxis / 2
+      : effectiveHeight - RESIZE_HANDLE.dragTargetCrossAxis / 2;
 
     return {
       top,
@@ -127,17 +134,31 @@ export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayVie
   }, [foregroundContentAspectRatio, isBottomAnchored, isLeftAnchored]);
 
   const dragHandleAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(isDragging.value ? 1.2 : 1, DEFAULT_ANIMATION_CONFIG) }],
+    transform: [{ scale: withSpring(isDragging.value ? 1.2 : 1, RESIZE_HANDLE.dragSpringConfig) }],
   }));
 
   return (
-    <View style={[styles.container]} onLayout={handleLayout}>
+    <View style={styles.container} onLayout={handleLayout}>
       {/* Background content - fills entire container */}
-      <View style={styles.backgroundSection}>{backgroundContent}</View>
+      <View style={styles.backgroundSection}>
+        {shouldObscureBackgroundPaneContentWhileResizing ? (
+          <ResizablePaneDragChrome isDragging={isDragging} isLayoutReady={isLayoutReady} greyLevel="primary">
+            {backgroundContent}
+          </ResizablePaneDragChrome>
+        ) : (
+          <>{backgroundContent}</>
+        )}
+      </View>
 
       {/* Foreground content - positioned absolutely on top */}
       <Animated.View style={[styles.overlaySection, overlayAnchorStyle, overlayAnimatedStyle]}>
-        {foregroundContent}
+        {shouldObscureForegroundPaneContentWhileResizing ? (
+          <ResizablePaneDragChrome isDragging={isDragging} isLayoutReady={isLayoutReady} greyLevel="secondary">
+            {foregroundContent}
+          </ResizablePaneDragChrome>
+        ) : (
+          <>{foregroundContent}</>
+        )}
       </Animated.View>
 
       {!hideHandle && (
@@ -151,27 +172,33 @@ export const ResizableOverlayView: FunctionComponent<VerticalResizableOverlayVie
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  backgroundSection: {
-    flex: 1,
-  },
-  overlaySection: {
-    position: 'absolute',
-    overflow: 'hidden',
-  },
-  handleContainer: {
-    position: 'absolute',
-    height: DRAG_HANDLE_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#888888',
-    borderRadius: 4,
-  },
-});
+const useStyles = () => {
+  const theme = useAppTheme();
+
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    backgroundSection: {
+      flex: 1,
+    },
+    overlaySection: {
+      position: 'absolute',
+      overflow: 'hidden',
+    },
+    handleContainer: {
+      position: 'absolute',
+      height: RESIZE_HANDLE.dragTargetCrossAxis,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    handle: {
+      width: RESIZE_HANDLE.length,
+      height: theme.spacing(RESIZE_HANDLE.thicknessSpacing),
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.roundness,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.outline,
+    },
+  });
+};

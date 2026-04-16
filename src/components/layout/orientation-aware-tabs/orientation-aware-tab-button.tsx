@@ -3,7 +3,7 @@ import { FunctionComponent } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useIsLandscape } from '../../../hooks/use-window-orientation';
-import { useAppTheme } from '../../../theme/theme';
+import { useAppTheme } from '../../../theme';
 import { TabBarIcon } from '../../tab-bar-icon';
 
 export type OrientationAwareTabButtonProps = TabTriggerSlotProps & {
@@ -27,7 +27,7 @@ export const OrientationAwareTabButton: FunctionComponent<OrientationAwareTabBut
   const color = isFocused ? activeColor : theme.colors.onSurfaceDisabled;
 
   return (
-    <Pressable {...props} style={[styles.tabButton]}>
+    <Pressable {...props} style={styles.tabButton}>
       <TabBarIcon name={icon} color={color} />
 
       {isLabelVisible && (
