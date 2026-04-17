@@ -1,8 +1,10 @@
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useEffect, useState } from 'react';
 import { logger } from '../logger/logger';
+import { useIsLandscape } from './use-window-orientation';
 
 export const useScreenOrientation = () => {
+  const isLandscape = useIsLandscape();
   const [orientation, setOrientation] = useState<ScreenOrientation.Orientation>(ScreenOrientation.Orientation.UNKNOWN);
 
   useEffect(() => {
@@ -17,11 +19,10 @@ export const useScreenOrientation = () => {
 
   const isLandscapeLeft = orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT;
   const isLandscapeRight = orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT;
-  const isLandscape = isLandscapeLeft || isLandscapeRight;
 
   const isPortraitUp = orientation === ScreenOrientation.Orientation.PORTRAIT_UP;
   const isPortraitDown = orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN;
-  const isPortrait = isPortraitUp || isPortraitDown;
+  const isPortrait = !isLandscape;
 
   return {
     orientation,
