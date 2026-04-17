@@ -3,7 +3,7 @@ import { FunctionComponent } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useScreenOrientation } from '../../../hooks/use-screen-orientation';
-import { useAppTheme } from '../../../theme/theme';
+import { useAppTheme } from '../../../theme';
 import { OrientationAwareTabButton } from './orientation-aware-tab-button';
 
 export type TabItem = {

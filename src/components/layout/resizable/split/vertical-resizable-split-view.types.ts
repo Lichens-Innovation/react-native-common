@@ -18,4 +18,9 @@ export interface VerticalResizableSplitViewProps {
   handleStyle?: StyleProp<ViewStyle>;
   /** Whether to hide the drag handle. Default: false */
   hideHandle?: boolean;
+
+  /** When true, obscures the top pane content while resizing or before layout is ready. Default: false */
+  shouldObscureTopPaneContentWhileResizing?: boolean;
+  /** When true, obscures the bottom pane content while resizing or before layout is ready. Default: false */
+  shouldObscureBottomPaneContentWhileResizing?: boolean;
 }

@@ -18,4 +18,9 @@ export interface HorizontalResizableSplitViewProps {
   handleStyle?: StyleProp<ViewStyle>;
   /** Whether to hide the drag handle. Default: false */
   hideHandle?: boolean;
+
+  /** When true, obscures the left pane content while resizing or before layout is ready. Default: false */
+  shouldObscureLeftPaneContentWhileResizing?: boolean;
+  /** When true, obscures the right pane content while resizing or before layout is ready. Default: false */
+  shouldObscureRightPaneContentWhileResizing?: boolean;
 }
