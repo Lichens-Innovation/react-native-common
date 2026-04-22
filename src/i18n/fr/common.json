@@ -104,6 +104,14 @@
     "language": "Langue",
     "link": "Lien",
     "list": "Liste",
+    "location": {
+      "useGps": "Utiliser GPS",
+      "pickOnMap": "Choisir sur carte",
+      "clearLocation": "Effacer",
+      "noLocationCaptured": "Aucune position capturée",
+      "permissionDenied": "Permission de localisation refusée. Veuillez activer les permissions de localisation dans les paramètres de votre appareil pour utiliser cette fonctionnalité.",
+      "error": "Erreur d'accès à la localisation. Veuillez réessayer et vous assurer d'accorder les permissions de localisation."
+    },
     "lock": "Verrouiller",
     "logout": "Déconnexion",
     "logs": {

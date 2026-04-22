@@ -9,6 +9,7 @@ export * from './header-actions';
 export * from './language-selector';
 export * from './layout';
 export * from './lists';
+export * from './map';
 export * from './on-off-toggle';
 export * from './password-input';
 export * from './score-indicator';

@@ -104,6 +104,14 @@
     "language": "Language",
     "link": "Link",
     "list": "List",
+    "location": {
+      "useGps": "Use GPS",
+      "pickOnMap": "Pick on map",
+      "clearLocation": "Clear",
+      "noLocationCaptured": "No location captured",
+      "permissionDenied": "Location permission denied. Please enable location permissions in your device settings to use this feature.",
+      "error": "Error accessing location. Please try again and make sure to grant location permissions."
+    },
     "lock": "Lock",
     "logout": "Logout",
     "logs": {
