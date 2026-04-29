@@ -95,7 +95,33 @@ export const logger = new LoggerWrapper({
   enabled: true,
   transportOptions: {
     // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#sentrytransport
-    SENTRY: Sentry,
+    // Wrap captureException so string messages become Error objects — prevents Sentry from
+    // grouping all logger.error() calls into one "sentryTransport" issue.
+    SENTRY: {
+      ...Sentry,
+      captureException: (msg: unknown) => {
+        if (typeof msg !== 'string') {
+          Sentry.captureException(msg);
+          return;
+        }
+        // Extract "TIMESTAMP  LEVEL : message" parts from react-native-logs format.
+        // Avoid withScope — known Sentry RN bug causes title to become "withScope$argument_0".
+        const match = msg.match(/^(\S+)\s+(\S+)\s*[:|]\s*([\s\S]*)$/);
+        const timestamp = match?.[1] ?? '';
+        const level = match?.[2] ?? '';
+        const message = match?.[3]?.trim() || msg;
+        const fingerprint = message.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '<uuid>');
+        const err = new Error(message);
+        err.name = `Logger ${level || 'ERROR'}`;
+        Sentry.captureException(err, {
+          fingerprint: [fingerprint],
+          tags: {
+            ...(timestamp && { loggerTimestamp: timestamp }),
+            ...(level && { loggerLevel: level }),
+          },
+        });
+      },
+    },
     errorLevels: 'error',
     // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#mapconsoletransport
     mapLevels: {
