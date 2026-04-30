@@ -88,7 +88,7 @@ export const DropDownMultiSelector: FunctionComponent<DropDownMultiSelectorProps
         <IconButton
           icon="close"
           size={20}
-          iconColor="red"
+          iconColor={theme.colors.onBackground}
           mode="contained"
           onPress={() => onChange([])}
           style={styles.deleteButton}
@@ -165,6 +165,7 @@ const useStyles = ({ isFocused, disabled, isError, textColor, disabledTransparen
       position: 'absolute',
       right: 0,
       top: 0,
+      backgroundColor: theme.colors.background,
     },
   });
 };
