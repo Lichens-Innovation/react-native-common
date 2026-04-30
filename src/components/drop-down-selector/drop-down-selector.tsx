@@ -1,7 +1,7 @@
 import { FunctionComponent, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { Text } from 'react-native-paper';
+import { IconButton, Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
 import { getBorderColor, getLabelColor, getTextColor } from './drop-down-selector.utils';
 import { DropDownSelectorItem } from './drop-down-selector-item';
@@ -22,6 +22,8 @@ export type DropDownSelectorProps = {
   placeholder?: string;
   searchPlaceholder?: string;
   disabled?: boolean;
+  showDeleteButton?: boolean;
+  disabledTransparentBackground?: boolean;
 };
 
 export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
@@ -33,13 +35,15 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
   placeholder,
   searchPlaceholder,
   disabled,
+  showDeleteButton = false,
+  disabledTransparentBackground = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const hasLabel = !!label;
   const theme = useAppTheme();
   const isDisabled = disabled === true;
   const textColor = getTextColor({ theme, isFocused, isDisabled });
-  const styles = useStyles({ isFocused, disabled, isError, textColor });
+  const styles = useStyles({ isFocused, disabled, isError, textColor, disabledTransparentBackground });
 
   const selectedItem = options.find((option) => option.value === value);
 
@@ -76,6 +80,16 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
         )}
         renderLeftIcon={() => <DropDownSelectorLeftIcon icon={selectedItem?.icon} color={textColor} />}
       />
+      {showDeleteButton && value && !disabled ? (
+        <IconButton
+          icon="close"
+          size={20}
+          iconColor="red"
+          mode="contained"
+          onPress={() => onChange('')}
+          style={styles.deleteButton}
+        />
+      ) : null}
     </View>
   );
 };
@@ -85,9 +99,10 @@ type UseStylesProps = {
   disabled?: boolean;
   isError?: boolean;
   textColor: string;
+  disabledTransparentBackground?: boolean;
 };
 
-const useStyles = ({ isFocused, disabled, isError, textColor }: UseStylesProps) => {
+const useStyles = ({ isFocused, disabled, isError, textColor, disabledTransparentBackground }: UseStylesProps) => {
   const theme = useAppTheme();
   const { surface, surfaceDisabled } = theme.colors;
 
@@ -99,7 +114,11 @@ const useStyles = ({ isFocused, disabled, isError, textColor }: UseStylesProps) 
   const borderColor = getBorderColor({ theme, isError: !!isError, isDisabled, isFocused });
   const borderWidth = isFocusedAndEnabled ? 2 : 1;
 
-  const backgroundColor = isDisabled ? surfaceDisabled : 'transparent';
+  const backgroundColor = isDisabled
+    ? disabledTransparentBackground
+      ? 'transparent'
+      : surfaceDisabled
+    : 'transparent';
 
   return StyleSheet.create({
     dropdownTitle: {
@@ -125,6 +144,11 @@ const useStyles = ({ isFocused, disabled, isError, textColor }: UseStylesProps) 
     selectedTextStyle: {
       color: textColor,
       paddingLeft: theme.spacing(1),
+    },
+    deleteButton: {
+      position: 'absolute',
+      right: 0,
+      top: 0,
     },
   });
 };
