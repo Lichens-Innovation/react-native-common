@@ -5,6 +5,7 @@ import type { RJSFSchema } from '@rjsf/utils';
 import { i18n } from 'i18next';
 import type { FunctionComponent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import { SubmitButtonOptionsContext } from './form-submit-context';
 import { PAPER_TEMPLATES } from './rjsf-paper-templates';
 import { RJSF_PAPER_THEME } from './rjsf-paper-theme';
 
@@ -24,6 +25,8 @@ export type RjsfPaperRendererProps = Omit<
   templates?: FormTemplates;
   widgets?: FormWidgets;
   fields?: FormFields;
+  submitButtonAbsolutePosition?: boolean;
+  submitButtonOverrideLabel?: string | null;
 };
 
 export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
@@ -33,6 +36,8 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   templates,
   widgets,
   fields,
+  submitButtonAbsolutePosition = false,
+  submitButtonOverrideLabel = null,
   ...rest
 }) => {
   const customValidator = useRjsfValidator(i18n.language);
@@ -73,16 +78,18 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   };
 
   return (
-    <ThemedForm
-      {...rest}
-      key={i18n.language}
-      formData={localFormData}
-      onChange={handleChange}
-      templates={mergedTemplates as unknown as FormTemplates}
-      widgets={mergedWidgets as unknown as FormWidgets}
-      fields={mergedFields as unknown as FormFields}
-      validator={customValidator}
-      translateString={(stringToTranslate, params) => translateRjsfString({ stringToTranslate, params, i18n })}
-    />
+    <SubmitButtonOptionsContext.Provider value={{ submitButtonAbsolutePosition, submitButtonOverrideLabel }}>
+      <ThemedForm
+        {...rest}
+        key={i18n.language}
+        formData={localFormData}
+        onChange={handleChange}
+        templates={mergedTemplates as unknown as FormTemplates}
+        widgets={mergedWidgets as unknown as FormWidgets}
+        fields={mergedFields as unknown as FormFields}
+        validator={customValidator}
+        translateString={(stringToTranslate, params) => translateRjsfString({ stringToTranslate, params, i18n })}
+      />
+    </SubmitButtonOptionsContext.Provider>
   );
 };

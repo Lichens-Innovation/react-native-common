@@ -20,6 +20,16 @@ export type SubmitHandler = (event?: unknown) => void;
 
 export const FormSubmitContext = createContext<SubmitHandler>(NO_OP);
 
+export interface SubmitButtonOptions {
+  submitButtonAbsolutePosition: boolean;
+  submitButtonOverrideLabel: string | null;
+}
+
+export const SubmitButtonOptionsContext = createContext<SubmitButtonOptions>({
+  submitButtonAbsolutePosition: false,
+  submitButtonOverrideLabel: null,
+});
+
 interface FormWrapperProps extends ViewProps {
   onSubmit?: SubmitHandler;
 }

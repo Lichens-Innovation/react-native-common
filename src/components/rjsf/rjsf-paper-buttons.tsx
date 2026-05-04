@@ -3,9 +3,10 @@ import { getSubmitButtonOptions, getUiOptions, TranslatableString } from '@rjsf/
 import type { FunctionComponent } from 'react';
 import { useContext } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, IconButton } from 'react-native-paper';
+import { IconButton, Button, FAB, Portal } from 'react-native-paper';
 import { useAppTheme } from '../../theme';
-import { FormSubmitContext } from './form-submit-context';
+import { FormSubmitContext, SubmitButtonOptionsContext } from './form-submit-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export interface IconButtonProps {
   id?: string;
@@ -70,7 +71,9 @@ export interface SubmitButtonProps {
  */
 export const SubmitButton: FunctionComponent<SubmitButtonProps> = ({ uiSchema }) => {
   const submit = useContext(FormSubmitContext);
+  const { submitButtonAbsolutePosition, submitButtonOverrideLabel } = useContext(SubmitButtonOptionsContext);
   const { submitText, norender, props: buttonProps } = getSubmitButtonOptions(uiSchema);
+  const label = submitButtonOverrideLabel ?? submitText;
   const styles = useStyles();
 
   if (norender) return null;
@@ -80,10 +83,23 @@ export const SubmitButton: FunctionComponent<SubmitButtonProps> = ({ uiSchema })
     persist: () => {},
   };
 
-  return (
+  return submitButtonAbsolutePosition ? (
+    <Portal>
+      <SafeAreaView style={styles.submitRowAbsolute}>
+        <FAB
+          style={styles.fab}
+          color={styles.fab.color}
+          variant="primary"
+          onPress={() => submit?.(fakeEvent)}
+          label={label ?? 'Submit'}
+          {...buttonProps}
+        />
+      </SafeAreaView>
+    </Portal>
+  ) : (
     <View style={styles.submitRow}>
       <Button mode="contained" onPress={() => submit?.(fakeEvent)} {...buttonProps}>
-        {submitText}
+        {label}
       </Button>
     </View>
   );
@@ -96,6 +112,18 @@ const useStyles = () => {
     submitRow: {
       marginTop: theme.spacing(2),
       alignItems: 'center',
+    },
+    submitRowAbsolute: {
+      position: 'absolute',
+      bottom: theme.spacing(2),
+      right: theme.spacing(2),
+    },
+    fab: {
+      backgroundColor: theme.colors.primary,
+      color: theme.colors.onPrimary,
+      height: 48,
+      borderRadius: 24,
+      justifyContent: 'center',
     },
   });
 };
