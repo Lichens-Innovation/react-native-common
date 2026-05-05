@@ -1,6 +1,6 @@
 import { useAppTheme } from '../../theme/theme';
-import React, { type FunctionComponent, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { type FunctionComponent, useCallback, useState } from 'react';
+import { FlatList, type ListRenderItem, Pressable, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import ObjectThumbnail from './object-thumbnail';
 import ViewerModal from './media-viewer-modal';
@@ -19,26 +19,39 @@ export const ObjectThumbnailHorizontalList: FunctionComponent<ObjectThumbnailHor
   const styles = useStyles();
   const [viewerUri, setViewerUri] = useState<string | null>(null);
 
+  const keyExtractor = useCallback((uri: string, index: number) => `${uri}-${index}`, []);
+
+  const renderItem = useCallback<ListRenderItem<string>>(
+    ({ item: uri }) => (
+      <View style={styles.mediaItem}>
+        <ObjectThumbnail uri={uri} onPress={() => setViewerUri(uri)} size={styles.thumb.width} />
+        {!readonly && (
+          <Pressable hitSlop={8} style={styles.deleteButton} onPress={() => onRemovePress(uri)}>
+            <Icon source="close" size={14} color="#d35d4e" />
+          </Pressable>
+        )}
+      </View>
+    ),
+    [readonly, onRemovePress, styles.mediaItem, styles.deleteButton, styles.thumb.width]
+  );
+
   if (uris.length === 0) return null;
 
   return (
     <>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rowContent}>
-        {uris.map((uri, index) => {
-          return (
-            <View key={`${uri}-${index}`} style={styles.mediaItem}>
-              <ObjectThumbnail uri={uri} onPress={() => setViewerUri(uri)} size={styles.thumb.width} />
-              {!readonly && (
-                <Pressable hitSlop={8} style={styles.deleteButton} onPress={() => onRemovePress(uri)}>
-                  <Icon source="close" size={14} color="#d35d4e" />
-                </Pressable>
-              )}
-            </View>
-          );
-        })}
-
-        <ViewerModal visible={viewerUri !== null} uri={viewerUri} onClose={() => setViewerUri(null)} />
-      </ScrollView>
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.rowContent}
+        data={uris}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        removeClippedSubviews
+        windowSize={5}
+        initialNumToRender={4}
+        maxToRenderPerBatch={4}
+      />
+      <ViewerModal visible={viewerUri !== null} uri={viewerUri} onClose={() => setViewerUri(null)} />
     </>
   );
 };

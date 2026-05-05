@@ -19,11 +19,12 @@ interface CameraFullModalArgs {
   allowMultipleSelection?: boolean;
 }
 
-const PICTURE_PARAMS = { base64: false };
+const PICTURE_PARAMS = { base64: false, quality: 0.8 };
 const VIDEO_PARAMS = {
-  maxDuration: 60,
+  maxDuration: 180,
   codec: 'avc1' as ExpoCamera.VideoCodec,
 };
+const VIDEO_QUALITY: ExpoCamera.VideoQuality = '1080p';
 
 export const CameraFullModal = ({
   mode,
@@ -235,6 +236,7 @@ export const CameraFullModal = ({
         ref={cameraRef}
         enableTorch={torchEnabled}
         zoom={zoom}
+        videoQuality={VIDEO_QUALITY}
       >
         <View
           style={[styles.badgeContainer, { opacity: captureCount > 0 ? 1 : 0 }]}

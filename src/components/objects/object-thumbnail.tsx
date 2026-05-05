@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Image } from 'expo-image';
 import { Icon } from 'react-native-paper';
 import { getMediaTypeFromUri, getThumbnailUri } from '../../utils/object.utils';
 
@@ -48,7 +49,13 @@ const ObjectThumbnail: React.FC<ObjectThumbnailProps> = ({ uri, onPress, size = 
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
-      <Image source={{ uri: thumbnailUri || uri }} style={styles.image} resizeMode="cover" />
+      <Image
+        source={thumbnailUri || uri}
+        style={styles.image}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+        recyclingKey={uri}
+      />
       {showPlayIcon && (
         <View style={styles.playIconContainer}>
           <Icon source={playIconName} size={size * 0.3} color="white" />

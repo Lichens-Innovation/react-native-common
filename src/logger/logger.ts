@@ -187,6 +187,46 @@ export const loadCurrentLogsFileUri = async (): Promise<string> => {
   return fileInfos[0]?.uri ?? '';
 };
 
+/**
+ * Delete log files older than `retentionDays` days. Default 14.
+ * Call once at app startup to bound disk usage. Failures on individual files are logged
+ * but don't abort the sweep, so partial cleanup is still useful.
+ */
+export const deleteOldLogFiles = async (retentionDays: number = 14): Promise<void> => {
+  try {
+    const pathInfo = Paths.info(filePath);
+    if (!pathInfo.exists) return;
+
+    const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+
+    const directory = new Directory(filePath);
+    const items = directory.list();
+    const logFiles: File[] = items.filter(isLogFileItem);
+
+    let deleted = 0;
+    for (const file of logFiles) {
+      try {
+        const info = file.info();
+        const raw = info.modificationTime ?? 0;
+        // expo-file-system has shipped modificationTime as both seconds and ms across versions.
+        // Anything below 1e12 is clearly a seconds-based Unix timestamp (~year 33658 in ms).
+        const mtimeMs = raw > 1e12 ? raw : raw * 1000;
+        if (!info.exists || mtimeMs === 0 || mtimeMs >= cutoff) continue;
+        file.delete();
+        deleted++;
+      } catch (e: unknown) {
+        logger.warn(`Failed to delete old log file ${file.name}:`, e);
+      }
+    }
+
+    if (deleted > 0) {
+      logger.info(`[logger] purged ${deleted} log file(s) older than ${retentionDays} days`);
+    }
+  } catch (e: unknown) {
+    logger.error('Error purging old log files:', e);
+  }
+};
+
 export const deleteAllLogFiles = async (): Promise<void> => {
   try {
     const pathInfo = Paths.info(filePath);

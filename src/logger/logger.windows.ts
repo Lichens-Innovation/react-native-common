@@ -78,3 +78,7 @@ export const loadCurrentLogsFileUri = async (): Promise<string> => {
 export const deleteAllLogFiles = async (): Promise<void> => {
   notImplementedYet('deleteAllLogFiles');
 };
+
+export const deleteOldLogFiles = async (_retentionDays: number = 14): Promise<void> => {
+  notImplementedYet('deleteOldLogFiles');
+};

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet, Dimensions, Text } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Dimensions, Text } from 'react-native';
+import { Image } from 'expo-image';
 import { Icon } from 'react-native-paper';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useVideoPlayer, VideoView } from 'expo-video';
@@ -139,7 +140,15 @@ const ViewerModal: React.FC<ViewerModalProps> = ({ visible, uri, onClose: onRequ
           <Icon source="close" size={32} color="#fff" />
         </TouchableOpacity>
 
-        {type === 'image' && uri && <Image source={{ uri }} style={styles.fullscreenImage} resizeMode="contain" />}
+        {type === 'image' && uri && (
+          <Image
+            source={uri}
+            style={styles.fullscreenImage}
+            contentFit="contain"
+            cachePolicy="memory-disk"
+            recyclingKey={uri}
+          />
+        )}
 
         {type === 'video' && uri && (
           <VideoView player={videoPlayer} style={styles.fullscreenVideo} contentFit="contain" nativeControls />
