@@ -11,6 +11,20 @@ export const SnackbarContext = createContext({
 
 export const useSnackbar = () => useContext(SnackbarContext);
 
+// Module-scoped handle so non-React callers can show a
+// snackbar without holding a hook reference. The SnackbarProvider registers
+// itself on mount; calls before mount are dropped (and warned about).
+let globalShowSnackbar: ((msg: string, duration?: number) => void) | null = null;
+
+export const showSnackbarGlobal = (msg: string, duration: number = DEFAULT_DURATION): void => {
+  if (!globalShowSnackbar) {
+    // eslint-disable-next-line no-console
+    console.warn('[Snackbar] showSnackbarGlobal called before SnackbarProvider mounted; dropping:', msg);
+    return;
+  }
+  globalShowSnackbar(msg, duration);
+};
+
 export const SnackbarProvider = ({ children }: PropsWithChildren): JSX.Element => {
   const [message, setMessage] = useState('');
   const [duration, setDuration] = useState(DEFAULT_DURATION);
@@ -28,6 +42,13 @@ export const SnackbarProvider = ({ children }: PropsWithChildren): JSX.Element =
     },
     [setVisibility]
   );
+
+  useEffect(() => {
+    globalShowSnackbar = showSnackbarMessage;
+    return () => {
+      if (globalShowSnackbar === showSnackbarMessage) globalShowSnackbar = null;
+    };
+  }, [showSnackbarMessage]);
 
   useEffect(() => {
     if (!isVisible) return;
