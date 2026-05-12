@@ -1,5 +1,5 @@
 import { useAppTheme } from '../../theme/theme';
-import React, { type FunctionComponent, useCallback, useState } from 'react';
+import React, { type FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { FlatList, type ListRenderItem, Pressable, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import ObjectThumbnail from './object-thumbnail';
@@ -32,7 +32,7 @@ export const ObjectThumbnailHorizontalList: FunctionComponent<ObjectThumbnailHor
         )}
       </View>
     ),
-    [readonly, onRemovePress, styles.mediaItem, styles.deleteButton, styles.thumb.width]
+    [readonly, onRemovePress, styles]
   );
 
   if (uris.length === 0) return null;
@@ -56,39 +56,43 @@ export const ObjectThumbnailHorizontalList: FunctionComponent<ObjectThumbnailHor
   );
 };
 
+const THUMB = 84;
+
 const useStyles = () => {
   const theme = useAppTheme();
 
-  const THUMB = 84;
-
-  return StyleSheet.create({
-    rowContent: {
-      flexDirection: 'row',
-      gap: theme.spacing(1),
-      paddingVertical: theme.spacing(0.5),
-    },
-    mediaItem: {
-      position: 'relative',
-    },
-    thumb: {
-      width: THUMB,
-      height: THUMB,
-      borderRadius: theme.roundness,
-    },
-    deleteButton: {
-      position: 'absolute',
-      top: 6,
-      right: 6,
-      backgroundColor: '#fff',
-      borderRadius: 12,
-      padding: 2,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.15,
-      shadowRadius: 2,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        rowContent: {
+          flexDirection: 'row',
+          gap: theme.spacing(1),
+          paddingVertical: theme.spacing(0.5),
+        },
+        mediaItem: {
+          position: 'relative',
+        },
+        thumb: {
+          width: THUMB,
+          height: THUMB,
+          borderRadius: theme.roundness,
+        },
+        deleteButton: {
+          position: 'absolute',
+          top: 6,
+          right: 6,
+          backgroundColor: '#fff',
+          borderRadius: 12,
+          padding: 2,
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.15,
+          shadowRadius: 2,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+      }),
+    [theme]
+  );
 };

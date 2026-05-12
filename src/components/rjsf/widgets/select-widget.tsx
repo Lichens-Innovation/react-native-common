@@ -5,7 +5,7 @@ import {
   toStringOrUndefined,
 } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
-import type { FunctionComponent } from 'react';
+import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { DropDownSelector } from '../../../components/drop-down-selector/drop-down-selector';
 import { useAppTheme } from '../../../theme';
@@ -26,13 +26,16 @@ export const SelectWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const selectOptions = mapEnumOptions(options);
+  const selectOptions = useMemo(() => mapEnumOptions(options), [options]);
   const strValue = toStringOrUndefined(value);
 
-  const handleChange = (code: string) => {
-    onChange(code);
-    onBlur(id, code);
-  };
+  const handleChange = useCallback(
+    (code: string) => {
+      onChange(code);
+      onBlur(id, code);
+    },
+    [onChange, onBlur, id]
+  );
 
   return (
     <View style={styles.widgetBlock}>
@@ -51,9 +54,13 @@ export const SelectWidget: FunctionComponent<WidgetProps> = ({
 
 const useStyles = () => {
   const theme = useAppTheme();
-  return StyleSheet.create({
-    widgetBlock: {
-      marginVertical: theme.spacing(0.5),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        widgetBlock: {
+          marginVertical: theme.spacing(0.5),
+        },
+      }),
+    [theme]
+  );
 };

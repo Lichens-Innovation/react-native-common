@@ -1,6 +1,6 @@
 import { isBlank, isNotBlank, isNullish } from '@lichens-innovation/ts-common';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
-import { FunctionComponent, useEffect, useRef, useState } from 'react';
+import { FunctionComponent, RefObject, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { IconButton, TextInput, TextInputProps } from 'react-native-paper';
@@ -12,6 +12,67 @@ export interface RecordingTextInputArgs {
   value: string;
   recordingUri?: string;
 }
+
+interface SpeechRecognitionListenerProps {
+  isRecording: boolean;
+  shouldHandleAudioEndRef: RefObject<boolean>;
+  lastFinalValueRef: RefObject<string>;
+  setRecordingValue: (value: string) => void;
+  setRecordingUri: (value: string | null) => void;
+  setIsRecording: (value: boolean) => void;
+  setIsSessionActive: (value: boolean) => void;
+  onValueChange: (args: RecordingTextInputArgs) => void;
+}
+
+// Mounted only while a speech-recognition session is active so the 3 native
+// listeners don't sit attached on every text field in big forms (perf/memory).
+const SpeechRecognitionListener: FunctionComponent<SpeechRecognitionListenerProps> = ({
+  isRecording,
+  shouldHandleAudioEndRef,
+  lastFinalValueRef,
+  setRecordingValue,
+  setRecordingUri,
+  setIsRecording,
+  setIsSessionActive,
+  onValueChange,
+}) => {
+  useSpeechRecognitionEvent('result', (event) => {
+    if (!isRecording) return;
+
+    const transcript = event.results[0].transcript;
+    if (isNotBlank(transcript)) {
+      setRecordingValue(transcript);
+    }
+  });
+
+  useSpeechRecognitionEvent('error', (event) => {
+    const { error, message } = event;
+    logger.error(`[useSpeechRecognitionEvent] error: ${error} - ${message}`);
+    shouldHandleAudioEndRef.current = false;
+    setIsRecording(false);
+    setRecordingValue('');
+    setIsSessionActive(false);
+  });
+
+  useSpeechRecognitionEvent('audioend', (event) => {
+    if (!shouldHandleAudioEndRef.current) {
+      setIsSessionActive(false);
+      return;
+    }
+    shouldHandleAudioEndRef.current = false;
+
+    if (event.uri) {
+      setRecordingUri(event.uri);
+      onValueChange({
+        value: lastFinalValueRef.current,
+        recordingUri: event.uri,
+      });
+    }
+    setIsSessionActive(false);
+  });
+
+  return null;
+};
 
 interface VoiceRecognitionTextInputProps extends TextInputProps {
   /** Committed value to persist: called when an action completes (typing, stop recording, clear). Source of truth for parent state. */
@@ -34,6 +95,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   ...rest
 }) => {
   const [isRecording, setIsRecording] = useState(false);
+  const [isSessionActive, setIsSessionActive] = useState(false);
   const [recordingValue, setRecordingValue] = useState('');
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
 
@@ -54,41 +116,12 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
     });
   }, [finalValue, effectiveRecordingUri, onEffectiveValueChange]);
 
-  useSpeechRecognitionEvent('result', (event) => {
-    if (!isRecording) return;
-
-    const transcript = event.results[0].transcript;
-    if (isNotBlank(transcript)) {
-      setRecordingValue(transcript);
-    }
-  });
-
-  useSpeechRecognitionEvent('error', (event) => {
-    const { error, message } = event;
-    logger.error(`[useSpeechRecognitionEvent] error: ${error} - ${message}`);
-    shouldHandleAudioEndRef.current = false;
-    setIsRecording(false);
-    setRecordingValue('');
-  });
-
-  useSpeechRecognitionEvent('audioend', (event) => {
-    if (!shouldHandleAudioEndRef.current) return;
-    shouldHandleAudioEndRef.current = false;
-
-    if (event.uri) {
-      setRecordingUri(event.uri);
-      onValueChange({
-        value: lastFinalValueRef.current,
-        recordingUri: event.uri,
-      });
-    }
-  });
-
   const handleStartRecording = async () => {
     const hasPermissions = await ensureVoiceRecognitionPermissions();
     if (!hasPermissions) return;
 
     shouldHandleAudioEndRef.current = true;
+    setIsSessionActive(true);
     setIsRecording(true);
     setRecordingValue('');
     setRecordingUri(null);
@@ -131,6 +164,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
 
   const clearValue = () => {
     shouldHandleAudioEndRef.current = false;
+    setIsSessionActive(false);
     onValueChange({ value: '' });
     setRecordingValue('');
     setRecordingUri(null);
@@ -138,6 +172,18 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
 
   return (
     <View style={styles.container}>
+      {isSessionActive && (
+        <SpeechRecognitionListener
+          isRecording={isRecording}
+          shouldHandleAudioEndRef={shouldHandleAudioEndRef}
+          lastFinalValueRef={lastFinalValueRef}
+          setRecordingValue={setRecordingValue}
+          setRecordingUri={setRecordingUri}
+          setIsRecording={setIsRecording}
+          setIsSessionActive={setIsSessionActive}
+          onValueChange={onValueChange}
+        />
+      )}
       <View style={styles.inputWrapper}>
         <TextInput
           {...rest}
@@ -146,8 +192,6 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
           value={finalValue}
           readOnly={isRecording || !rest.editable}
           onChangeText={(text) => onValueChange({ value: text })}
-          multiline={true}
-          numberOfLines={4}
           left={
             <TextInput.Icon
               icon={isRecording ? 'stop' : 'microphone-outline'}

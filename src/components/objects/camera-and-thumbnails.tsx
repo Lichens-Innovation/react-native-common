@@ -1,4 +1,4 @@
-import { useState, type FunctionComponent } from 'react';
+import { useCallback, useMemo, useState, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useAppTheme } from '../../theme';
@@ -37,15 +37,17 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
     mode: 'image',
   });
 
-  const onTakePhoto = () => {
+  const onTakePhoto = useCallback(() => {
     if (readonly || disabled) return;
     setCameraModal({ visible: true, mode: 'image' });
-  };
+  }, [readonly, disabled]);
 
-  const onTakeVideo = () => {
+  const onTakeVideo = useCallback(() => {
     if (readonly || disabled) return;
     setCameraModal({ visible: true, mode: 'video' });
-  };
+  }, [readonly, disabled]);
+
+  const onCloseCamera = useCallback(() => setCameraModal({ visible: false, mode: 'image' }), []);
 
   return (
     <>
@@ -63,7 +65,7 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
       {cameraModal.visible ? (
         <CameraFullModal
           mode={cameraModal.mode}
-          onClose={() => setCameraModal({ visible: false, mode: 'image' })}
+          onClose={onCloseCamera}
           handleObjectsTaken={handleObjectsTaken}
           allowMultipleSelection={allowMultipleSelection}
         />
@@ -75,19 +77,23 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
 const useStyles = () => {
   const theme = useAppTheme();
 
-  return StyleSheet.create({
-    title: {
-      marginBottom: theme.spacing(1),
-    },
-    actionsRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: theme.spacing(1),
-      marginTop: theme.spacing(1),
-    },
-    thumbnailsContainer: {
-      marginHorizontal: theme.spacing(1),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        title: {
+          marginBottom: theme.spacing(1),
+        },
+        actionsRow: {
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: theme.spacing(1),
+          marginTop: theme.spacing(1),
+        },
+        thumbnailsContainer: {
+          marginHorizontal: theme.spacing(1),
+        },
+      }),
+    [theme]
+  );
 };

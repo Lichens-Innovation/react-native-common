@@ -1,6 +1,6 @@
 import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
-import { type FunctionComponent } from 'react';
+import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useAppTheme } from '../../../theme';
 import { RjsfDisplayLabel } from './display-label';
@@ -32,20 +32,26 @@ export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = ({
   const enableVideo = widgetOptions.enableVideo ?? true;
   const uris = Array.isArray(value) ? value : [];
 
-  const handleObjectsTaken = (newUris: string[]) => {
-    if (readonly || disabled) return;
-    const nextValue = allowMultipleSelection ? [...uris, ...newUris] : newUris;
-    onChange(nextValue);
-    onBlur(id, nextValue);
-  };
+  const handleObjectsTaken = useCallback(
+    (newUris: string[]) => {
+      if (readonly || disabled) return;
+      const nextValue = allowMultipleSelection ? [...uris, ...newUris] : newUris;
+      onChange(nextValue);
+      onBlur(id, nextValue);
+    },
+    [readonly, disabled, allowMultipleSelection, uris, onChange, onBlur, id]
+  );
 
-  const handleObjectRemove = (uriToRemove: string) => {
-    if (readonly || disabled) return;
+  const handleObjectRemove = useCallback(
+    (uriToRemove: string) => {
+      if (readonly || disabled) return;
 
-    const nextValue = uris.filter((uri) => uri !== uriToRemove);
-    onChange(nextValue);
-    onBlur(id, nextValue);
-  };
+      const nextValue = uris.filter((uri) => uri !== uriToRemove);
+      onChange(nextValue);
+      onBlur(id, nextValue);
+    },
+    [readonly, disabled, uris, onChange, onBlur, id]
+  );
 
   return (
     <View style={styles.widgetBlock}>
@@ -66,22 +72,26 @@ export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = ({
 const useStyles = () => {
   const theme = useAppTheme();
 
-  return StyleSheet.create({
-    widgetBlock: {
-      marginVertical: theme.spacing(0.5),
-    },
-    title: {
-      marginBottom: theme.spacing(1),
-    },
-    actionsRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: theme.spacing(1),
-      marginTop: theme.spacing(1),
-    },
-    thumbnailsContainer: {
-      marginHorizontal: theme.spacing(1),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        widgetBlock: {
+          marginVertical: theme.spacing(0.5),
+        },
+        title: {
+          marginBottom: theme.spacing(1),
+        },
+        actionsRow: {
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: theme.spacing(1),
+          marginTop: theme.spacing(1),
+        },
+        thumbnailsContainer: {
+          marginHorizontal: theme.spacing(1),
+        },
+      }),
+    [theme]
+  );
 };

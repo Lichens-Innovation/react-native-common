@@ -1,7 +1,7 @@
 import { isBlank } from '@lichens-innovation/ts-common';
 import { getRjsfDisplayLabel, hasRjsfErrors, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
-import { useEffect, useRef, useState, type FunctionComponent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { logger } from '../../../logger/logger';
@@ -99,9 +99,13 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
 
 const useStyles = () => {
   const theme = useAppTheme();
-  return StyleSheet.create({
-    input: {
-      marginVertical: theme.spacing(0.5),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        input: {
+          marginVertical: theme.spacing(0.5),
+        },
+      }),
+    [theme]
+  );
 };

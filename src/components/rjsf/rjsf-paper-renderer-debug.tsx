@@ -1,7 +1,7 @@
 import type { IChangeEvent } from '@rjsf/core';
 import type { RJSFSchema } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -26,10 +26,13 @@ export const RjsfPaperRendererDebug: FunctionComponent<RjsfPaperRendererDebugPro
     setFormData(initialFormData ?? {});
   }, [initialFormDataJson]);
 
-  const handleChange = (event: IChangeEvent<FormData, RJSFSchema>, id?: string) => {
-    setFormData(event.formData ?? {});
-    onChange?.(event, id);
-  };
+  const handleChange = useCallback(
+    (event: IChangeEvent<FormData, RJSFSchema>, id?: string) => {
+      setFormData(event.formData ?? {});
+      onChange?.(event, id);
+    },
+    [onChange]
+  );
 
   return (
     <View style={styles.container}>

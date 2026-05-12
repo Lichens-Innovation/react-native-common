@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { MultiSelect } from 'react-native-element-dropdown';
 import { IconButton, Text } from 'react-native-paper';
@@ -48,7 +48,32 @@ export const DropDownMultiSelector: FunctionComponent<DropDownMultiSelectorProps
   const styles = useStyles({ isFocused, disabled, isError, textColor, disabledTransparentBackground });
 
   // For left icon, show icon of first selected item if any
-  const selectedItem = options.find((option) => value?.includes(option.value));
+  const selectedItem = useMemo(
+    () => options.find((option) => value?.includes(option.value)),
+    [options, value]
+  );
+
+  const renderItem = useCallback(
+    (item: MultiSelectOption, selected?: boolean) => (
+      <DropDownSelectorItem item={item} selected={selected} textColor={textColor} />
+    ),
+    [textColor]
+  );
+
+  const renderLeftIcon = useCallback(
+    () => <DropDownSelectorLeftIcon icon={selectedItem?.icon} color={textColor} />,
+    [selectedItem?.icon, textColor]
+  );
+
+  const handleFocus = useCallback(() => setIsFocused(true), []);
+  const handleBlur = useCallback(() => setIsFocused(false), []);
+  const handleChange = useCallback(
+    (items: string[]) => {
+      onChange(items);
+      setIsFocused(false);
+    },
+    [onChange]
+  );
 
   return (
     <View>
@@ -72,17 +97,12 @@ export const DropDownMultiSelector: FunctionComponent<DropDownMultiSelectorProps
         placeholder={isFocused ? '' : placeholder}
         value={value}
         disable={disabled}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         selectedStyle={styles.selectedStyle}
-        onChange={(items: string[]) => {
-          onChange(items);
-          setIsFocused(false);
-        }}
-        renderItem={(item: MultiSelectOption, selected?: boolean) => (
-          <DropDownSelectorItem item={item} selected={selected} textColor={textColor} />
-        )}
-        renderLeftIcon={() => <DropDownSelectorLeftIcon icon={selectedItem?.icon} color={textColor} />}
+        onChange={handleChange}
+        renderItem={renderItem}
+        renderLeftIcon={renderLeftIcon}
       />
       {showDeleteButton && value && value.length > 0 && !disabled ? (
         <IconButton
@@ -108,64 +128,67 @@ type UseStylesProps = {
 
 const useStyles = ({ isFocused, disabled, isError, textColor, disabledTransparentBackground }: UseStylesProps) => {
   const theme = useAppTheme();
-  const { surface, surfaceDisabled } = theme.colors;
 
-  const isDisabled = disabled === true;
-  const isFocusedAndEnabled = isFocused && !isDisabled;
+  return useMemo(() => {
+    const { surface, surfaceDisabled } = theme.colors;
 
-  // Priority: error > disabled > focus > normal
-  const labelColor = getLabelColor({ theme, isError: !!isError, isDisabled, isFocusedAndEnabled });
-  const borderColor = getBorderColor({ theme, isError: !!isError, isDisabled, isFocused });
-  const borderWidth = isFocusedAndEnabled ? 2 : 1;
+    const isDisabled = disabled === true;
+    const isFocusedAndEnabled = isFocused && !isDisabled;
 
-  const backgroundColor = isDisabled
-    ? disabledTransparentBackground
-      ? 'transparent'
-      : surfaceDisabled
-    : 'transparent';
+    // Priority: error > disabled > focus > normal
+    const labelColor = getLabelColor({ theme, isError: !!isError, isDisabled, isFocusedAndEnabled });
+    const borderColor = getBorderColor({ theme, isError: !!isError, isDisabled, isFocused });
+    const borderWidth = isFocusedAndEnabled ? 2 : 1;
 
-  return StyleSheet.create({
-    dropdownTitle: {
-      position: 'absolute',
-      top: -theme.spacing(1),
-      left: theme.spacing(1),
-      backgroundColor: surface,
-      paddingHorizontal: theme.spacing(0.75),
-      color: labelColor,
-      zIndex: 1,
-    },
-    dropdown: {
-      height: 50,
-      borderColor,
-      borderWidth,
-      borderRadius: theme.roundness,
-      paddingHorizontal: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-      backgroundColor,
-    },
-    placeholderStyle: {
-      color: textColor,
-    },
-    selectedTextStyle: {
-      color: textColor,
-      paddingLeft: theme.spacing(1),
-      maxWidth: 180,
-      flexShrink: 1,
-      overflow: 'hidden',
-    },
-    selectedStyle: {
-      borderRadius: theme.roundness,
-      maxWidth: 220,
-      flexDirection: 'row',
-      alignItems: 'center',
-      flexShrink: 1,
-      alignSelf: 'flex-start',
-    },
-    deleteButton: {
-      position: 'absolute',
-      right: 0,
-      top: 0,
-      backgroundColor: theme.colors.background,
-    },
-  });
+    const backgroundColor = isDisabled
+      ? disabledTransparentBackground
+        ? 'transparent'
+        : surfaceDisabled
+      : 'transparent';
+
+    return StyleSheet.create({
+      dropdownTitle: {
+        position: 'absolute',
+        top: -theme.spacing(1),
+        left: theme.spacing(1),
+        backgroundColor: surface,
+        paddingHorizontal: theme.spacing(0.75),
+        color: labelColor,
+        zIndex: 1,
+      },
+      dropdown: {
+        height: 50,
+        borderColor,
+        borderWidth,
+        borderRadius: theme.roundness,
+        paddingHorizontal: theme.spacing(1),
+        marginBottom: theme.spacing(1),
+        backgroundColor,
+      },
+      placeholderStyle: {
+        color: textColor,
+      },
+      selectedTextStyle: {
+        color: textColor,
+        paddingLeft: theme.spacing(1),
+        maxWidth: 180,
+        flexShrink: 1,
+        overflow: 'hidden',
+      },
+      selectedStyle: {
+        borderRadius: theme.roundness,
+        maxWidth: 220,
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexShrink: 1,
+        alignSelf: 'flex-start',
+      },
+      deleteButton: {
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        backgroundColor: theme.colors.background,
+      },
+    });
+  }, [theme, isFocused, disabled, isError, textColor, disabledTransparentBackground]);
 };

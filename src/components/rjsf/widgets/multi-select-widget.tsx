@@ -1,6 +1,6 @@
 import { getRjsfDisplayLabel, hasRjsfErrors, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
-import type { FunctionComponent } from 'react';
+import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { DropDownMultiSelector } from '../../../components/drop-down-selector/drop-down-multi-selector';
 import { useAppTheme } from '../../../theme';
@@ -21,18 +21,21 @@ export const MultiSelectWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const selectOptions = mapEnumOptions(options);
+  const selectOptions = useMemo(() => mapEnumOptions(options), [options]);
 
   // Ensure value is always an array of strings (or empty array)
-  const arrValue = Array.isArray(value) ? value.map(String) : [];
+  const arrValue = useMemo(() => (Array.isArray(value) ? value.map(String) : []), [value]);
 
   // Prefer options.placeholder, then options["ui:placeholder"], then schema placeholder, then fallback
   const effectivePlaceholder = (options && (options.placeholder || options['ui:placeholder'])) || placeholder || '...';
 
-  const handleChange = (codes: string[]) => {
-    onChange(codes);
-    onBlur(id, codes);
-  };
+  const handleChange = useCallback(
+    (codes: string[]) => {
+      onChange(codes);
+      onBlur(id, codes);
+    },
+    [onChange, onBlur, id]
+  );
 
   return (
     <View style={styles.widgetBlock}>
@@ -51,9 +54,13 @@ export const MultiSelectWidget: FunctionComponent<WidgetProps> = ({
 
 const useStyles = () => {
   const theme = useAppTheme();
-  return StyleSheet.create({
-    widgetBlock: {
-      marginVertical: theme.spacing(0.5),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        widgetBlock: {
+          marginVertical: theme.spacing(0.5),
+        },
+      }),
+    [theme]
+  );
 };

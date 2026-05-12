@@ -5,7 +5,7 @@ import {
   toStringOrEmpty,
 } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
-import type { FunctionComponent } from 'react';
+import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
 import { RecordingTextInputArgs, VoiceRecognitionTextInput } from '../../../components/voice-recognition';
 import { useAppTheme } from '../../../theme';
@@ -31,9 +31,12 @@ export const TextareaWidget: FunctionComponent<WidgetProps> = ({
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
   const numberOfLines = options?.numberOfLines ?? 4;
 
-  const handleValueChange = ({ value }: RecordingTextInputArgs) => {
-    onChange(getRjsfTextChangeValue({ text: value, emptyValue: options?.emptyValue }));
-  };
+  const handleValueChange = useCallback(
+    ({ value }: RecordingTextInputArgs) => {
+      onChange(getRjsfTextChangeValue({ text: value, emptyValue: options?.emptyValue }));
+    },
+    [onChange, options?.emptyValue]
+  );
 
   return (
     <VoiceRecognitionTextInput
@@ -57,12 +60,16 @@ export const TextareaWidget: FunctionComponent<WidgetProps> = ({
 
 const useStyles = () => {
   const theme = useAppTheme();
-  return StyleSheet.create({
-    input: {
-      marginVertical: theme.spacing(0.5),
-    },
-    textarea: {
-      minHeight: 100,
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        input: {
+          marginVertical: theme.spacing(0.5),
+        },
+        textarea: {
+          minHeight: 100,
+        },
+      }),
+    [theme]
+  );
 };

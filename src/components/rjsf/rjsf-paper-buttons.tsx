@@ -1,7 +1,7 @@
 import type { RjsfRegistryWithTranslate } from '@lichens-innovation/ts-common/rjsf';
 import { getSubmitButtonOptions, getUiOptions, TranslatableString } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IconButton, Button, FAB, Portal } from 'react-native-paper';
 import { useAppTheme } from '../../theme';
@@ -108,22 +108,26 @@ export const SubmitButton: FunctionComponent<SubmitButtonProps> = ({ uiSchema })
 const useStyles = () => {
   const theme = useAppTheme();
 
-  return StyleSheet.create({
-    submitRow: {
-      marginTop: theme.spacing(2),
-      alignItems: 'center',
-    },
-    submitRowAbsolute: {
-      position: 'absolute',
-      bottom: theme.spacing(2),
-      right: theme.spacing(2),
-    },
-    fab: {
-      backgroundColor: theme.colors.primary,
-      color: theme.colors.onPrimary,
-      height: 48,
-      borderRadius: 24,
-      justifyContent: 'center',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        submitRow: {
+          marginTop: theme.spacing(2),
+          alignItems: 'center',
+        },
+        submitRowAbsolute: {
+          position: 'absolute',
+          bottom: theme.spacing(2),
+          right: theme.spacing(2),
+        },
+        fab: {
+          backgroundColor: theme.colors.primary,
+          color: theme.colors.onPrimary,
+          height: 48,
+          borderRadius: 24,
+          justifyContent: 'center',
+        },
+      }),
+    [theme]
+  );
 };

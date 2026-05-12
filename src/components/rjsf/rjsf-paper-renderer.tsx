@@ -4,7 +4,7 @@ import { withTheme } from '@rjsf/core';
 import type { RJSFSchema } from '@rjsf/utils';
 import { i18n } from 'i18next';
 import type { FunctionComponent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SubmitButtonOptionsContext } from './form-submit-context';
 import { PAPER_TEMPLATES } from './rjsf-paper-templates';
 import { RJSF_PAPER_THEME } from './rjsf-paper-theme';
@@ -72,10 +72,13 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
     [fields]
   );
 
-  const handleChange = (data: IChangeEvent<FormData, RJSFSchema>, id?: string) => {
-    setLocalFormData(data.formData);
-    onChangeProp?.(data, id);
-  };
+  const handleChange = useCallback(
+    (data: IChangeEvent<FormData, RJSFSchema>, id?: string) => {
+      setLocalFormData(data.formData);
+      onChangeProp?.(data, id);
+    },
+    [onChangeProp]
+  );
 
   return (
     <SubmitButtonOptionsContext.Provider value={{ submitButtonAbsolutePosition, submitButtonOverrideLabel }}>

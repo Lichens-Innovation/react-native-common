@@ -10,7 +10,7 @@ import type {
   ObjectFieldTemplateProps,
 } from '@rjsf/utils';
 import { getTemplate, getUiOptions } from '@rjsf/utils';
-import type { ComponentType } from 'react';
+import { useMemo, type ComponentType } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme';
@@ -177,57 +177,61 @@ export const PAPER_TEMPLATES = {
 const useStyles = () => {
   const theme = useAppTheme();
 
-  return StyleSheet.create({
-    fieldSet: {
-      marginVertical: theme.spacing(2),
-    },
-    title: {
-      marginBottom: theme.spacing(1),
-    },
-    description: {
-      marginBottom: theme.spacing(2),
-      opacity: 0.8,
-    },
-    field: {
-      marginVertical: theme.spacing(0.5),
-      flex: 1,
-    },
-    errorList: {
-      marginTop: theme.spacing(1),
-      gap: theme.spacing(0.5),
-    },
-    fieldError: {
-      color: theme.colors.error,
-    },
-    help: {
-      marginTop: theme.spacing(1),
-      opacity: 0.8,
-    },
-    arrayItem: {
-      marginVertical: theme.spacing(1),
-    },
-    arrayItemRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginVertical: theme.spacing(1),
-    },
-    arrayItemContent: {
-      flex: 1,
-    },
-    arrayItemToolbar: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginLeft: theme.spacing(1),
-    },
-    gridRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: theme.spacing(1),
-    },
-    gridCol: {
-      flexDirection: 'column',
-      flex: 1,
-      gap: theme.spacing(1),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        fieldSet: {
+          marginVertical: theme.spacing(2),
+        },
+        title: {
+          marginBottom: theme.spacing(1),
+        },
+        description: {
+          marginBottom: theme.spacing(2),
+          opacity: 0.8,
+        },
+        field: {
+          marginVertical: theme.spacing(0.5),
+          flex: 1,
+        },
+        errorList: {
+          marginTop: theme.spacing(1),
+          gap: theme.spacing(0.5),
+        },
+        fieldError: {
+          color: theme.colors.error,
+        },
+        help: {
+          marginTop: theme.spacing(1),
+          opacity: 0.8,
+        },
+        arrayItem: {
+          marginVertical: theme.spacing(1),
+        },
+        arrayItemRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginVertical: theme.spacing(1),
+        },
+        arrayItemContent: {
+          flex: 1,
+        },
+        arrayItemToolbar: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginLeft: theme.spacing(1),
+        },
+        gridRow: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: theme.spacing(1),
+        },
+        gridCol: {
+          flexDirection: 'column',
+          flex: 1,
+          gap: theme.spacing(1),
+        },
+      }),
+    [theme]
+  );
 };

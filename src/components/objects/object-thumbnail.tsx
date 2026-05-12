@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Image } from 'expo-image';
 import { Icon } from 'react-native-paper';
@@ -18,7 +18,7 @@ const ObjectThumbnail: React.FC<ObjectThumbnailProps> = ({ uri, onPress, size = 
   const showPlayIcon = mediaType === 'video' || mediaType === 'audio';
   const noUriIconName = mediaType === 'video' ? 'video-off' : mediaType === 'audio' ? 'music-off' : 'image-off';
   const playIconName = mediaType === 'video' ? 'play-circle-outline' : 'music-note';
-  const styles = createStyles(size);
+  const styles = useMemo(() => createStyles(size), [size]);
 
   useEffect(() => {
     if (mediaType === 'video' && uri) {
@@ -30,14 +30,14 @@ const ObjectThumbnail: React.FC<ObjectThumbnailProps> = ({ uri, onPress, size = 
     }
   }, [mediaType, uri]);
 
-  function handleNoUriPress() {
+  const handleNoUriPress = useCallback(() => {
     Alert.alert('', t('app:objects.notCached'), [
       {
         text: t('app:environment.cancel', 'Cancel'),
         style: 'cancel',
       },
     ]);
-  }
+  }, [t]);
 
   if (!uri) {
     return (

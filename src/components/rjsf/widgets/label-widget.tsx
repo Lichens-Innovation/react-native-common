@@ -1,5 +1,5 @@
 import type { WidgetProps } from '@rjsf/utils';
-import type { FunctionComponent } from 'react';
+import { useMemo, type FunctionComponent } from 'react';
 import { Text, Divider } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
 import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
@@ -29,16 +29,20 @@ export const LabelWidget: FunctionComponent<WidgetProps> = ({ label, required, h
 
 const useStyles = () => {
   const theme = useAppTheme();
-  return StyleSheet.create({
-    container: {
-      marginVertical: theme.spacing(0.5),
-    },
-    sectionLabel: {
-      marginBottom: theme.spacing(0.5),
-      marginTop: theme.spacing(2),
-    },
-    divider: {
-      marginBottom: theme.spacing(0.5),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          marginVertical: theme.spacing(0.5),
+        },
+        sectionLabel: {
+          marginBottom: theme.spacing(0.5),
+          marginTop: theme.spacing(2),
+        },
+        divider: {
+          marginBottom: theme.spacing(0.5),
+        },
+      }),
+    [theme]
+  );
 };

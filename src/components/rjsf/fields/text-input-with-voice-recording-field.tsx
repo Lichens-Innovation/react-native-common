@@ -1,6 +1,6 @@
 import { getRjsfDisplayLabel, hasRjsfErrors, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
-import type { FunctionComponent } from 'react';
+import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { type RecordingTextInputArgs, VoiceRecognitionTextInput } from '../../voice-recognition';
 import { ObjectThumbnailHorizontalList } from '../../objects/object-thumbnail-hozirontal-list';
@@ -64,30 +64,39 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
   const baseId = fieldPathId?.$id ?? id ?? 'textWithVoiceRecordingField';
   const fieldPath = fieldPathId?.path ?? [];
 
-  const updateValue = (next: Partial<Required<TextWithVoiceRecordingValue>>) => {
-    const nextValue = {
-      text: 'text' in next ? toStringOrEmpty(next.text) : text,
-      recordings: 'recordings' in next ? (next.recordings ?? []) : recordings,
-    };
+  const updateValue = useCallback(
+    (next: Partial<Required<TextWithVoiceRecordingValue>>) => {
+      const nextValue = {
+        text: 'text' in next ? toStringOrEmpty(next.text) : text,
+        recordings: 'recordings' in next ? (next.recordings ?? []) : recordings,
+      };
 
-    onChange(nextValue as unknown as Record<string, unknown>, fieldPath, undefined, baseId);
-  };
+      onChange(nextValue as unknown as Record<string, unknown>, fieldPath, undefined, baseId);
+    },
+    [onChange, text, recordings, fieldPath, baseId]
+  );
 
-  const handleValueChange = ({ value: nextText, recordingUri }: RecordingTextInputArgs) => {
-    const nextRecordings =
-      recordingUri && !recordings.includes(recordingUri) ? [...recordings, recordingUri] : recordings;
+  const handleValueChange = useCallback(
+    ({ value: nextText, recordingUri }: RecordingTextInputArgs) => {
+      const nextRecordings =
+        recordingUri && !recordings.includes(recordingUri) ? [...recordings, recordingUri] : recordings;
 
-    updateValue({
-      text: nextText,
-      recordings: nextRecordings,
-    });
-  };
+      updateValue({
+        text: nextText,
+        recordings: nextRecordings,
+      });
+    },
+    [recordings, updateValue]
+  );
 
-  const handleObjectRemove = (recordingToRemove: string) => {
-    updateValue({
-      recordings: recordings.filter((recording) => recording !== recordingToRemove),
-    });
-  };
+  const handleObjectRemove = useCallback(
+    (recordingToRemove: string) => {
+      updateValue({
+        recordings: recordings.filter((recording) => recording !== recordingToRemove),
+      });
+    },
+    [recordings, updateValue]
+  );
 
   return (
     <View style={styles.container}>
@@ -119,15 +128,19 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
 const useStyles = () => {
   const theme = useAppTheme();
 
-  return StyleSheet.create({
-    container: {
-      marginVertical: theme.spacing(0.5),
-    },
-    input: {
-      marginVertical: theme.spacing(0.5),
-    },
-    thumbnailsContainer: {
-      marginHorizontal: theme.spacing(1),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          marginVertical: theme.spacing(0.5),
+        },
+        input: {
+          marginVertical: theme.spacing(0.5),
+        },
+        thumbnailsContainer: {
+          marginHorizontal: theme.spacing(1),
+        },
+      }),
+    [theme]
+  );
 };
