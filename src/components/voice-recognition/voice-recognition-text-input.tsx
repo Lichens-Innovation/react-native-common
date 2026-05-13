@@ -1,11 +1,12 @@
 import { isBlank, isNotBlank, isNullish } from '@lichens-innovation/ts-common';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
-import { FunctionComponent, RefObject, useEffect, useRef, useState } from 'react';
+import { FunctionComponent, RefObject, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { IconButton, TextInput, TextInputProps } from 'react-native-paper';
 import { logger } from '../../logger/logger';
 import { RecordingPlayer } from './recording-player';
+import { clearOwner, requestStart } from './voice-recognition-coordinator';
 import { buildFinalValue, ensureVoiceRecognitionPermissions } from './voice-recognition.utils';
 
 export interface RecordingTextInputArgs {
@@ -39,7 +40,7 @@ const SpeechRecognitionListener: FunctionComponent<SpeechRecognitionListenerProp
   useSpeechRecognitionEvent('result', (event) => {
     if (!isRecording) return;
 
-    const transcript = event.results[0].transcript;
+    const transcript = event.results?.[0]?.transcript ?? '';
     if (isNotBlank(transcript)) {
       setRecordingValue(transcript);
     }
@@ -47,7 +48,9 @@ const SpeechRecognitionListener: FunctionComponent<SpeechRecognitionListenerProp
 
   useSpeechRecognitionEvent('error', (event) => {
     const { error, message } = event;
-    logger.error(`[useSpeechRecognitionEvent] error: ${error} - ${message}`);
+    if (error !== 'aborted') {
+      logger.error(`[useSpeechRecognitionEvent] error: ${error} - ${message}`);
+    }
     shouldHandleAudioEndRef.current = false;
     setIsRecording(false);
     setRecordingValue('');
@@ -101,6 +104,8 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
 
   const lastFinalValueRef = useRef<string>('');
   const shouldHandleAudioEndRef = useRef(false);
+  const ownerId = useId();
+  const preemptRef = useRef<() => void>(() => {});
 
   const effectiveRecordingUri = isNullish(recordingUriProp) ? recordingUri : recordingUriProp;
 
@@ -116,25 +121,49 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
     });
   }, [finalValue, effectiveRecordingUri, onEffectiveValueChange]);
 
+  useEffect(() => {
+    return () => {
+      clearOwner(ownerId);
+    };
+  }, [ownerId]);
+
+  const preemptInstance = () => {
+    const finalValueAtPreempt = buildFinalValue({ query: value ?? '', recordingValue });
+    lastFinalValueRef.current = finalValueAtPreempt;
+    shouldHandleAudioEndRef.current = false;
+    if (isNotBlank(recordingValue)) {
+      onValueChange({ value: finalValueAtPreempt });
+    }
+    setRecordingValue('');
+    setIsRecording(false);
+    setIsSessionActive(false);
+  };
+
+  useEffect(() => {
+    preemptRef.current = preemptInstance;
+  });
+
   const handleStartRecording = async () => {
     const hasPermissions = await ensureVoiceRecognitionPermissions();
     if (!hasPermissions) return;
 
-    shouldHandleAudioEndRef.current = true;
-    setIsSessionActive(true);
-    setIsRecording(true);
-    setRecordingValue('');
-    setRecordingUri(null);
+    await requestStart({ id: ownerId, preempt: () => preemptRef.current() }, () => {
+      shouldHandleAudioEndRef.current = true;
+      setIsSessionActive(true);
+      setIsRecording(true);
+      setRecordingValue('');
+      setRecordingUri(null);
 
-    Keyboard.dismiss();
-    const supportsPersist = ExpoSpeechRecognitionModule.supportsRecording();
-    ExpoSpeechRecognitionModule.start({
-      lang: speechToTextLanguageCode,
-      interimResults: true,
-      continuous: true,
-      ...(supportsPersist && {
-        recordingOptions: { persist: true },
-      }),
+      Keyboard.dismiss();
+      const supportsPersist = ExpoSpeechRecognitionModule.supportsRecording();
+      ExpoSpeechRecognitionModule.start({
+        lang: speechToTextLanguageCode,
+        interimResults: true,
+        continuous: true,
+        ...(supportsPersist && {
+          recordingOptions: { persist: true },
+        }),
+      });
     });
   };
 
@@ -152,6 +181,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
     }
 
     setRecordingValue('');
+    clearOwner(ownerId);
   };
 
   const toggleRecording = () => {
@@ -163,11 +193,16 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   };
 
   const clearValue = () => {
-    shouldHandleAudioEndRef.current = false;
+    if (isSessionActive) {
+      shouldHandleAudioEndRef.current = false;
+      ExpoSpeechRecognitionModule.abort();
+    }
     setIsSessionActive(false);
+    setIsRecording(false);
     onValueChange({ value: '' });
     setRecordingValue('');
     setRecordingUri(null);
+    clearOwner(ownerId);
   };
 
   return (
