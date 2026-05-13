@@ -35,6 +35,9 @@
       "level": "Niveau de la pile: {{batteryLevel}}%"
     },
     "browse": "Parcourir",
+    "camera": {
+      "videoLengthLimitReached": "La durée de la vidéo est limitée à {{seconds}}s par vidéo."
+    },
     "cancel": "Annuler",
     "check": "Vérifier",
     "clear": "Effacer",

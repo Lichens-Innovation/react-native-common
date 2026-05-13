@@ -35,6 +35,9 @@
       "level": "Battery level: {{batteryLevel}}%"
     },
     "browse": "Browse",
+    "camera": {
+      "videoLengthLimitReached": "Video length is limited to {{seconds}}s per video."
+    },
     "cancel": "Cancel",
     "check": "Check",
     "clear": "Clear",

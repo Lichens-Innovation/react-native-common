@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { DialogOkCancel } from '../dialogs/dialog-ok-cancel';
 import * as ExpoCamera from 'expo-camera';
 import * as FileSystem from 'expo-file-system/legacy';
-import { Alert, Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Text, Icon } from 'react-native-paper';
 import { AppModal } from '../modal/app-modal';
@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
 import { VolumeManager } from 'react-native-volume-manager';
+import { useTranslation } from 'react-i18next';
 
 interface CameraFullModalArgs {
   mode?: 'image' | 'video';
@@ -20,8 +21,9 @@ interface CameraFullModalArgs {
 }
 
 const PICTURE_PARAMS = { base64: false, quality: 0.8 };
+const VIDEO_MAX_DURATION_S = 10;
 const VIDEO_PARAMS = {
-  maxDuration: 180,
+  maxDuration: VIDEO_MAX_DURATION_S,
   codec: 'avc1' as ExpoCamera.VideoCodec,
 };
 const VIDEO_QUALITY: ExpoCamera.VideoQuality = '1080p';
@@ -34,8 +36,44 @@ export const CameraFullModal = ({
 }: CameraFullModalArgs) => {
   const [captureCount, setCaptureCount] = useState(0);
   const styles = useStyles();
+  const { t } = useTranslation();
   const [facing, _setFacing] = useState<ExpoCamera.CameraType>('back');
   const [isRecording, setIsRecording] = useState(false);
+  const manualStopRef = useRef(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+  const snackbarAnim = useRef(new Animated.Value(0)).current;
+  const snackbarHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showInCameraSnackbar = useCallback(
+    (message: string) => {
+      if (snackbarHideTimerRef.current) {
+        clearTimeout(snackbarHideTimerRef.current);
+        snackbarHideTimerRef.current = null;
+      }
+      setSnackbarMessage(message);
+      snackbarAnim.stopAnimation();
+      Animated.timing(snackbarAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => {
+        snackbarHideTimerRef.current = setTimeout(() => {
+          Animated.timing(snackbarAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => setSnackbarMessage(null));
+        }, 3000);
+      });
+    },
+    [snackbarAnim]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (snackbarHideTimerRef.current) clearTimeout(snackbarHideTimerRef.current);
+    };
+  }, []);
   const [permission, requestPermission] = ExpoCamera.useCameraPermissions();
   const [audioPermission, requestAudioPermission] = ExpoCamera.useMicrophonePermissions();
   const cameraRef = useRef<ExpoCamera.CameraView | null>(null);
@@ -61,6 +99,7 @@ export const CameraFullModal = ({
   const closeCamera = async () => {
     try {
       if (isRecording && cameraRef.current) {
+        manualStopRef.current = true;
         cameraRef.current.stopRecording();
         setIsRecording(false);
         triggerCaptureFlash();
@@ -85,6 +124,9 @@ export const CameraFullModal = ({
       if (!picture) {
         Alert.alert('Error', 'Failed to take picture.');
         return;
+      }
+      if (Platform.OS === 'ios') {
+        triggerCaptureFlash();
       }
 
       // Copy picture in user image gallery as an additional backup
@@ -115,18 +157,28 @@ export const CameraFullModal = ({
     }
     if (!cameraRef.current) return;
     if (isRecording) {
+      manualStopRef.current = true;
       cameraRef.current.stopRecording();
       setIsRecording(false);
       triggerCaptureFlash();
       return;
     }
 
+    manualStopRef.current = false;
     setIsRecording(true);
     const video = await cameraRef.current.recordAsync(VIDEO_PARAMS);
+    const wasAutoStopped = !manualStopRef.current;
+    manualStopRef.current = false;
     if (!video) {
       Alert.alert('Error', 'Failed to record video.');
       setIsRecording(false);
       return;
+    }
+    if (wasAutoStopped) {
+      logger.info('Video recording stopped automatically after reaching time limit');
+      showInCameraSnackbar(t('common:camera.videoLengthLimitReached', { seconds: VIDEO_MAX_DURATION_S }));
+      setIsRecording(false);
+      triggerCaptureFlash();
     }
 
     // Copy video in user gallery as an additional backup
@@ -229,15 +281,16 @@ export const CameraFullModal = ({
 
   return (
     <AppModal visible={true} onDismiss={closeCamera} style={styles.container}>
-      <ExpoCamera.CameraView
-        mode={mode === 'video' ? 'video' : 'picture'}
-        style={styles.camera}
-        facing={facing}
-        ref={cameraRef}
-        enableTorch={torchEnabled}
-        zoom={zoom}
-        videoQuality={VIDEO_QUALITY}
-      >
+      <View style={styles.container}>
+        <ExpoCamera.CameraView
+          mode={mode === 'video' ? 'video' : 'picture'}
+          style={StyleSheet.absoluteFill}
+          facing={facing}
+          ref={cameraRef}
+          enableTorch={torchEnabled}
+          zoom={zoom}
+          videoQuality={VIDEO_QUALITY}
+        />
         <View
           style={[styles.badgeContainer, { opacity: captureCount > 0 ? 1 : 0 }]}
           pointerEvents={captureCount > 0 ? 'auto' : 'none'}
@@ -246,6 +299,9 @@ export const CameraFullModal = ({
             <Text style={styles.badgeText}>{captureCount}</Text>
           </View>
         </View>
+        <Animated.View pointerEvents="none" style={[styles.inCameraSnackbar, { opacity: snackbarAnim }]}>
+          <Text style={styles.inCameraSnackbarText}>{snackbarMessage ?? ''}</Text>
+        </Animated.View>
         <View style={styles.overlay}>
           <View style={{ flex: 1 }} />
           <View style={styles.bottomControls}>
@@ -305,7 +361,7 @@ export const CameraFullModal = ({
             },
           ]}
         />
-      </ExpoCamera.CameraView>
+      </View>
     </AppModal>
   );
 };
@@ -398,6 +454,22 @@ const useStyles = () => {
       color: 'white',
       fontWeight: 'bold',
       fontSize: 16,
+    },
+    inCameraSnackbar: {
+      position: 'absolute',
+      top: insets.top + 16,
+      left: 16,
+      right: 16,
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      borderRadius: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      zIndex: 20,
+    },
+    inCameraSnackbarText: {
+      color: 'white',
+      fontSize: 14,
+      textAlign: 'center',
     },
   });
 };
