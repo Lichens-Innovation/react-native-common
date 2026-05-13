@@ -9,6 +9,7 @@ export const MultiSelectWidget: FunctionComponent<WidgetProps> = ({
   id,
   value,
   disabled,
+  readonly,
   placeholder,
   onChange,
   onBlur,
@@ -45,7 +46,7 @@ export const MultiSelectWidget: FunctionComponent<WidgetProps> = ({
         onChange={handleChange}
         options={selectOptions}
         placeholder={effectivePlaceholder}
-        disabled={disabled}
+        disabled={disabled || readonly}
         isError={hasError}
       />
     </View>

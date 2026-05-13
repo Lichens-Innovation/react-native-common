@@ -14,6 +14,7 @@ export const SelectWidget: FunctionComponent<WidgetProps> = ({
   id,
   value,
   disabled,
+  readonly,
   placeholder,
   onChange,
   onBlur,
@@ -45,7 +46,7 @@ export const SelectWidget: FunctionComponent<WidgetProps> = ({
         onChange={handleChange}
         options={selectOptions}
         placeholder={placeholder}
-        disabled={disabled}
+        disabled={disabled || readonly}
         isError={hasError}
       />
     </View>
