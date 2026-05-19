@@ -1,12 +1,31 @@
 import type { RjsfRegistryWithTranslate } from '@lichens-innovation/ts-common/rjsf';
 import { getSubmitButtonOptions, getUiOptions, TranslatableString } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IconButton, Button, FAB, Portal } from 'react-native-paper';
+import { NavigationContext } from '@react-navigation/native';
 import { useAppTheme } from '../../theme';
 import { FormSubmitContext, SubmitButtonOptionsContext } from './form-submit-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const useScreenFocused = (): boolean => {
+  const navigation = useContext(NavigationContext);
+  const [focused, setFocused] = useState<boolean>(() => navigation?.isFocused() ?? true);
+
+  useEffect(() => {
+    if (!navigation) return;
+    setFocused(navigation.isFocused());
+    const unsubFocus = navigation.addListener('focus', () => setFocused(true));
+    const unsubBlur = navigation.addListener('blur', () => setFocused(false));
+    return () => {
+      unsubFocus();
+      unsubBlur();
+    };
+  }, [navigation]);
+
+  return focused;
+};
 
 export interface IconButtonProps {
   id?: string;
@@ -75,6 +94,7 @@ export const SubmitButton: FunctionComponent<SubmitButtonProps> = ({ uiSchema })
   const { submitText, norender, props: buttonProps } = getSubmitButtonOptions(uiSchema);
   const label = submitButtonOverrideLabel ?? submitText;
   const styles = useStyles();
+  const focused = useScreenFocused();
 
   if (norender) return null;
 
@@ -83,20 +103,25 @@ export const SubmitButton: FunctionComponent<SubmitButtonProps> = ({ uiSchema })
     persist: () => {},
   };
 
-  return submitButtonAbsolutePosition ? (
-    <Portal>
-      <SafeAreaView style={styles.submitRowAbsolute}>
-        <FAB
-          style={styles.fab}
-          color={styles.fab.color}
-          variant="primary"
-          onPress={() => submit?.(fakeEvent)}
-          label={label ?? 'Submit'}
-          {...buttonProps}
-        />
-      </SafeAreaView>
-    </Portal>
-  ) : (
+  if (submitButtonAbsolutePosition) {
+    if (!focused) return null;
+    return (
+      <Portal>
+        <SafeAreaView style={styles.submitRowAbsolute}>
+          <FAB
+            style={styles.fab}
+            color={styles.fab.color}
+            variant="primary"
+            onPress={() => submit?.(fakeEvent)}
+            label={label ?? 'Submit'}
+            {...buttonProps}
+          />
+        </SafeAreaView>
+      </Portal>
+    );
+  }
+
+  return (
     <View style={styles.submitRow}>
       <Button mode="contained" onPress={() => submit?.(fakeEvent)} {...buttonProps}>
         {label}
