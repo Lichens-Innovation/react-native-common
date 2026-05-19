@@ -21,7 +21,7 @@ interface CameraFullModalArgs {
 }
 
 const PICTURE_PARAMS = { base64: false, quality: 0.8 };
-const VIDEO_MAX_DURATION_S = 10;
+const VIDEO_MAX_DURATION_S = 180;
 const VIDEO_PARAMS = {
   maxDuration: VIDEO_MAX_DURATION_S,
   codec: 'avc1' as ExpoCamera.VideoCodec,
