@@ -18,7 +18,7 @@ import {
   LabelWidget,
   MultiSelectWidget,
 } from './widgets';
-import { LocationField, TextWithVoiceRecordingField } from './fields';
+import { ComputedField, LocationField, TextWithVoiceRecordingField } from './fields';
 
 export const RJSF_PAPER_THEME: ThemeProps = {
   widgets: {
@@ -57,6 +57,7 @@ export const RJSF_PAPER_THEME: ThemeProps = {
   fields: {
     TextWithVoiceRecordingField,
     LocationField,
+    ComputedField,
   },
   _internalFormWrapper: RjsfPaperFormWrapper as ThemeProps['_internalFormWrapper'],
 };
