@@ -20,7 +20,7 @@ const SLUG_PATTERN = /\{([a-zA-Z_$][a-zA-Z0-9_$]*)\}/g;
 const mexp = new Mexp();
 
 type VarStatus = 'ok' | 'missing' | 'rejected';
-type UsedVar = { name: string; value: number | null; status: VarStatus };
+type UsedVar = { name: string; title: string | null; value: number | null; status: VarStatus };
 
 type ResolveResult = {
   expression: string;
@@ -40,20 +40,22 @@ const resolveFormula = (
   const properties = (rootSchema?.properties ?? {}) as Record<string, RJSFSchema>;
 
   const expression = formula.replace(SLUG_PATTERN, (_match, slug: string) => {
-    const propType = properties[slug]?.type;
+    const propSchema = properties[slug];
+    const title = typeof propSchema?.title === 'string' ? propSchema.title : null;
+    const propType = propSchema?.type;
     const isNumericSchema = propType === 'number' || propType === 'integer';
     if (!isNumericSchema) {
       rejected.push(slug);
-      if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, value: null, status: 'rejected' });
+      if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, title, value: null, status: 'rejected' });
       return '0';
     }
     const raw = rootData?.[slug];
     if (typeof raw !== 'number' || !Number.isFinite(raw)) {
       missing.push(slug);
-      if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, value: null, status: 'missing' });
+      if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, title, value: null, status: 'missing' });
       return '0';
     }
-    if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, value: raw, status: 'ok' });
+    if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, title, value: raw, status: 'ok' });
     return `(${raw})`;
   });
 
@@ -172,9 +174,10 @@ export const ComputedField: FunctionComponent<FieldProps<unknown, RJSFSchema>> =
                   const isBad = v.status !== 'ok';
                   const valueText =
                     v.status === 'rejected' ? 'not a number field' : v.value === null ? 'null' : String(v.value);
+                  const nameLabel = v.title ? `${v.name}: ${v.title}` : v.name;
                   return (
                     <Text key={v.name} variant="bodyMedium" style={[styles.mono, isBad ? styles.varBad : undefined]}>
-                      {v.name} = {valueText}
+                      {nameLabel} = {valueText}
                     </Text>
                   );
                 })}
