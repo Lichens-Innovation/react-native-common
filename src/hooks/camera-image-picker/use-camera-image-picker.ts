@@ -2,11 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '../../components/snack-bar/snackbar-provider';
 import { logger } from '../../logger/logger';
-import {
-  requestMediaLibPermissions,
-  requestTakePhotoPermissions,
-  toSinglePictureUri,
-} from './camera-image-picker.utils';
+import { requestTakePhotoPermissions, toSinglePictureUri } from './camera-image-picker.utils';
 
 const DEFAULT_OPTIONS: ImagePicker.ImagePickerOptions = {
   allowsEditing: true,
@@ -29,9 +25,8 @@ export const useCameraImagePicker = (options = DEFAULT_OPTIONS) => {
   };
 
   const pickImage = async () => {
-    const hasPermission = await requestMediaLibPermissions();
-    if (!hasPermission) return handlePermissionDenied();
-
+    // No media-library permission requested: launchImageLibraryAsync uses the
+    // Android Photo Picker (and iOS limited picker), which need no READ permission.
     try {
       const result = await ImagePicker.launchImageLibraryAsync(options);
       return toSinglePictureUri(result);

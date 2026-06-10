@@ -200,11 +200,8 @@ export const CameraFullModal = ({
 
   const selectMedia = async () => {
     try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permissionResult.granted) {
-        Alert.alert('Permission required', 'Permission to access the media library is required.');
-        return;
-      }
+      // No media-library permission requested: launchImageLibraryAsync uses the
+      // Android Photo Picker (and iOS limited picker), which need no READ permission.
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: mode === 'video' ? ['videos'] : ['images'],
         allowsEditing: false,
