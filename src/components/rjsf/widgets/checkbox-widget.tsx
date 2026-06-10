@@ -1,5 +1,5 @@
 import { isBlank } from '@lichens-innovation/ts-common';
-import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -17,9 +17,11 @@ export const CheckboxWidget: FunctionComponent<WidgetProps> = ({
   label,
   hideLabel,
   required,
+  options,
 }) => {
   const styles = useStyles();
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColor = getRjsfLabelColor(options);
   const checked = value === true;
 
   const handleValueChange = (newValue: boolean) => {
@@ -38,7 +40,7 @@ export const CheckboxWidget: FunctionComponent<WidgetProps> = ({
 
       {!isBlank(displayLabel) ? (
         <Pressable onPress={handleLabelPress} style={styles.checkboxLabel}>
-          <RjsfDisplayLabel label={displayLabel} />
+          <RjsfDisplayLabel label={displayLabel} color={labelColor} />
         </Pressable>
       ) : null}
     </View>

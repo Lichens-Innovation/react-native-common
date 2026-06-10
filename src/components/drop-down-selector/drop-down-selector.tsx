@@ -24,6 +24,8 @@ export type DropDownSelectorProps = {
   disabled?: boolean;
   showDeleteButton?: boolean;
   disabledTransparentBackground?: boolean;
+  /** Overrides the resting label color (ignored while in error/disabled state). */
+  labelColor?: string;
 };
 
 export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
@@ -37,13 +39,14 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
   disabled,
   showDeleteButton = false,
   disabledTransparentBackground = false,
+  labelColor,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const hasLabel = !!label;
   const theme = useAppTheme();
   const isDisabled = disabled === true;
   const textColor = getTextColor({ theme, isFocused, isDisabled });
-  const styles = useStyles({ isFocused, disabled, isError, textColor, disabledTransparentBackground });
+  const styles = useStyles({ isFocused, disabled, isError, textColor, disabledTransparentBackground, labelColor });
 
   const selectedItem = useMemo(() => options.find((option) => option.value === value), [options, value]);
 
@@ -117,9 +120,17 @@ type UseStylesProps = {
   isError?: boolean;
   textColor: string;
   disabledTransparentBackground?: boolean;
+  labelColor?: string;
 };
 
-const useStyles = ({ isFocused, disabled, isError, textColor, disabledTransparentBackground }: UseStylesProps) => {
+const useStyles = ({
+  isFocused,
+  disabled,
+  isError,
+  textColor,
+  disabledTransparentBackground,
+  labelColor: labelColorOverride,
+}: UseStylesProps) => {
   const theme = useAppTheme();
 
   return useMemo(() => {
@@ -128,8 +139,11 @@ const useStyles = ({ isFocused, disabled, isError, textColor, disabledTransparen
     const isDisabled = disabled === true;
     const isFocusedAndEnabled = isFocused && !isDisabled;
 
-    // Priority: error > disabled > focus > normal
-    const labelColor = getLabelColor({ theme, isError: !!isError, isDisabled, isFocusedAndEnabled });
+    // Priority: error > disabled > focus > labelColor override > normal
+    const labelColor =
+      labelColorOverride && !isError && !isDisabled
+        ? labelColorOverride
+        : getLabelColor({ theme, isError: !!isError, isDisabled, isFocusedAndEnabled });
     const borderColor = getBorderColor({ theme, isError: !!isError, isDisabled, isFocused });
     const borderWidth = isFocusedAndEnabled ? 2 : 1;
 
@@ -171,5 +185,5 @@ const useStyles = ({ isFocused, disabled, isError, textColor, disabledTransparen
         backgroundColor: theme.colors.background,
       },
     });
-  }, [theme, isFocused, disabled, isError, textColor, disabledTransparentBackground]);
+  }, [theme, isFocused, disabled, isError, textColor, disabledTransparentBackground, labelColorOverride]);
 };

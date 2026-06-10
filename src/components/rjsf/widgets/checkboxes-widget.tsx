@@ -1,6 +1,6 @@
 import { isNullish } from '@lichens-innovation/ts-common';
 import type { EnumOptionDisplay } from '@lichens-innovation/ts-common/rjsf';
-import { getRjsfDisplayLabel, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -23,6 +23,7 @@ export const CheckboxesWidget: FunctionComponent<WidgetProps> = ({
 }) => {
   const styles = useStyles();
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColor = getRjsfLabelColor(options);
   const enumOptions = mapEnumOptions(options);
   const isArrayValue = Array.isArray(value);
   const currentSet = isArrayValue ? value : [];
@@ -43,7 +44,7 @@ export const CheckboxesWidget: FunctionComponent<WidgetProps> = ({
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} style={styles.checkboxesTitle} />
+      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.checkboxesTitle} />
 
       {enumOptions.map((opt: EnumOptionDisplay) => {
         const isOptionChecked = currentSet.includes(opt.value);

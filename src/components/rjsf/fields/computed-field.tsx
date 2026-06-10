@@ -1,10 +1,11 @@
-import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 import Mexp from 'math-expression-evaluator';
 import { useEffect, useMemo, useState, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IconButton, Text, TextInput } from 'react-native-paper';
 import { useAppTheme } from '../../../theme';
+import { mergeLabelColorTheme } from '../label-color-theme';
 import { DialogCloseOnly } from '../../dialogs/dialog-close-only';
 import { useRootFormData } from '../root-form-data-context';
 
@@ -13,6 +14,7 @@ type ComputedFieldOptions = {
   precision?: number;
   unit?: string;
   showInfoButton?: boolean;
+  labelColor?: string;
 };
 
 const SLUG_PATTERN = /\{([a-zA-Z_$][a-zA-Z0-9_$]*)\}/g;
@@ -86,6 +88,7 @@ export const ComputedField: FunctionComponent<FieldProps<unknown, RJSFSchema>> =
   const label = typeof schema.title === 'string' ? schema.title : '';
   const hideLabel = uiSchema?.['ui:options']?.label === false;
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
 
   const contextRootData = useRootFormData();
   const rootData =
@@ -143,6 +146,7 @@ export const ComputedField: FunctionComponent<FieldProps<unknown, RJSFSchema>> =
           editable={false}
           style={styles.input}
           outlineColor={theme.colors.outline}
+          theme={labelColorTheme}
           right={unit ? <TextInput.Affix text={unit} /> : undefined}
         />
         {showInfoButton && formula ? (

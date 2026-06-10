@@ -1,5 +1,5 @@
 import type { EnumOptionDisplay } from '@lichens-innovation/ts-common/rjsf';
-import { getRjsfDisplayLabel, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -29,6 +29,7 @@ export const RadioYesNoWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
 
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColor = getRjsfLabelColor(options);
   const enumOptions = mapEnumOptions(options);
   const widgetOptions = (options ?? {}) as YesNoWidgetOptions;
 
@@ -45,7 +46,7 @@ export const RadioYesNoWidget: FunctionComponent<WidgetProps> = ({
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} style={styles.title} />
+      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.title} />
 
       <View style={styles.row}>
         {yesOption ? (

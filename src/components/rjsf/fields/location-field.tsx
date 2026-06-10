@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 import { StyleSheet, View } from 'react-native';
 import { Button, Divider, Text } from 'react-native-paper';
@@ -25,6 +25,7 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
   formData,
   onChange,
   schema,
+  uiSchema,
   required,
   disabled,
   readonly,
@@ -39,6 +40,7 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
   const current = (formData as LocationFieldValue | undefined)?.coordinates ?? null;
   const label = typeof schema.title === 'string' ? schema.title : '';
   const displayLabel = getRjsfDisplayLabel({ label, required });
+  const labelColor = getRjsfLabelColor(uiSchema?.['ui:options']);
   const baseId = fieldPathId?.$id ?? id ?? 'locationField';
   const fieldPath = fieldPathId?.path ?? [];
   const actionsDisabled = disabled || readonly;
@@ -72,7 +74,11 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
 
   return (
     <View style={styles.container}>
-      {displayLabel ? <Text variant="titleMedium">{displayLabel}</Text> : null}
+      {displayLabel ? (
+        <Text variant="titleMedium" style={labelColor ? { color: labelColor } : undefined}>
+          {displayLabel}
+        </Text>
+      ) : null}
 
       <CoordinatePreview point={current} onClear={clear} disabled={actionsDisabled} />
 

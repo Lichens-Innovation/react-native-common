@@ -10,6 +10,7 @@ import type {
   ObjectFieldTemplateProps,
 } from '@rjsf/utils';
 import { getTemplate, getUiOptions } from '@rjsf/utils';
+import { getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import { useMemo, type ComponentType } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -29,13 +30,14 @@ const defaultTemplates = getDefaultRegistry().templates;
 /** No-op error list: we omit the top "Erreurs" block; field-level errors still show per field. */
 const NoopErrorList = () => null;
 
-const PaperObjectFieldTemplate = ({ title, description, properties }: ObjectFieldTemplateProps) => {
+const PaperObjectFieldTemplate = ({ title, description, properties, uiSchema }: ObjectFieldTemplateProps) => {
   const styles = useStyles();
+  const labelColor = getRjsfLabelColor(getUiOptions(uiSchema));
 
   return (
     <View style={styles.fieldSet}>
       {title ? (
-        <Text variant="titleMedium" style={styles.title}>
+        <Text variant="titleMedium" style={[styles.title, labelColor ? { color: labelColor } : null]}>
           {title}
         </Text>
       ) : null}
@@ -119,11 +121,12 @@ const PaperArrayFieldItemTemplate = ({
 
 const PaperArrayFieldTemplate = ({ title, items, canAdd, onAddClick, registry, uiSchema }: ArrayFieldTemplateProps) => {
   const styles = useStyles();
+  const labelColor = getRjsfLabelColor(getUiOptions(uiSchema));
 
   return (
     <View style={styles.fieldSet}>
       {title ? (
-        <Text variant="titleMedium" style={styles.title}>
+        <Text variant="titleMedium" style={[styles.title, labelColor ? { color: labelColor } : null]}>
           {title}
         </Text>
       ) : null}

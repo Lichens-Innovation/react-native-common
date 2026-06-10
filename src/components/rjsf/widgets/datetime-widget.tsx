@@ -6,10 +6,12 @@ import type { FunctionComponent } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { useAppTheme, useIsDarkMode } from '../../../theme';
+import { mergeLabelColorTheme } from '../label-color-theme';
 
 import {
   formatDateTimeForDisplay,
   getRjsfDisplayLabel,
+  getRjsfLabelColor,
   hasRjsfErrors,
   parseDateOrNull,
 } from '@lichens-innovation/ts-common/rjsf';
@@ -27,6 +29,7 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
   hideLabel,
   required,
   rawErrors,
+  options,
 }) => {
   const theme = useAppTheme();
   const isDarkMode = useIsDarkMode();
@@ -34,6 +37,7 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
   const [showPicker, togglePickerVisibility] = useToggle(false);
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
   const date = parseDateOrNull(value as string) ?? new Date();
   const strValue = formatDateTimeForDisplay(value as string);
   const pickerDisplay = Platform.OS === 'ios' ? 'spinner' : 'default';
@@ -53,6 +57,7 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
           error={hasError}
           style={styles.input}
           outlineColor={theme.colors.outline}
+          theme={labelColorTheme}
           onFocus={() => onFocus(id, value)}
           pointerEvents="auto"
         />
@@ -82,6 +87,7 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
           error={hasError}
           style={styles.input}
           outlineColor={theme.colors.outline}
+          theme={labelColorTheme}
           right={<TextInput.Icon icon="clock-outline" onPress={() => togglePickerVisibility()} />}
           onFocus={() => onFocus(id, value)}
           pointerEvents="none"

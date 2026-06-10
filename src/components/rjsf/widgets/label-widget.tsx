@@ -2,7 +2,7 @@ import type { WidgetProps } from '@rjsf/utils';
 import { useMemo, type FunctionComponent } from 'react';
 import { Text, Divider } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
-import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import { useAppTheme } from '../../../theme';
 
 type LabelWidgetOptions = {
@@ -17,9 +17,13 @@ export const LabelWidget: FunctionComponent<WidgetProps> = ({ label, required, h
   if (!displayLabel) return null;
   const optionsTyped = options as LabelWidgetOptions;
   const isSection = optionsTyped && typeof optionsTyped.isSection === 'boolean' ? optionsTyped.isSection : false;
+  const labelColor = getRjsfLabelColor(options);
   return (
     <View style={styles.container}>
-      <Text variant={isSection ? 'headlineSmall' : 'bodyMedium'} style={isSection ? styles.sectionLabel : undefined}>
+      <Text
+        variant={isSection ? 'headlineSmall' : 'bodyMedium'}
+        style={[isSection ? styles.sectionLabel : null, labelColor ? { color: labelColor } : null]}
+      >
         {displayLabel}
       </Text>
       {isSection ? <Divider style={styles.divider} /> : null}

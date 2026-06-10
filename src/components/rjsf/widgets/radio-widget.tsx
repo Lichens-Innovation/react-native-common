@@ -1,5 +1,5 @@
 import type { EnumOptionDisplay } from '@lichens-innovation/ts-common/rjsf';
-import { getRjsfDisplayLabel, mapEnumOptions, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor, mapEnumOptions, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -21,12 +21,13 @@ export const RadioWidget: FunctionComponent<WidgetProps> = ({
 }) => {
   const styles = useStyles();
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColor = getRjsfLabelColor(options);
   const enumOptions = mapEnumOptions(options);
   const strValue = toStringOrEmpty(value);
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} style={styles.radioTitle} />
+      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.radioTitle} />
       <RadioButton.Group
         onValueChange={(v) => {
           onChange(v);

@@ -1,5 +1,6 @@
 import {
   getRjsfDisplayLabel,
+  getRjsfLabelColor,
   getRjsfTextChangeValue,
   hasRjsfErrors,
   toStringOrEmpty,
@@ -9,6 +10,7 @@ import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
 import { RecordingTextInputArgs, VoiceRecognitionTextInput } from '../../../components/voice-recognition';
 import { useAppTheme } from '../../../theme';
+import { mergeLabelColorTheme } from '../label-color-theme';
 
 export const TextareaWidget: FunctionComponent<WidgetProps> = ({
   id,
@@ -29,6 +31,7 @@ export const TextareaWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
   const numberOfLines = options?.numberOfLines ?? 4;
 
   const handleValueChange = useCallback(
@@ -54,6 +57,7 @@ export const TextareaWidget: FunctionComponent<WidgetProps> = ({
       error={hasError}
       style={[styles.input, styles.textarea]}
       outlineColor={theme.colors.outline}
+      theme={labelColorTheme}
     />
   );
 };

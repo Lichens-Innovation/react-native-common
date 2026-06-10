@@ -1,10 +1,11 @@
-import { getRjsfDisplayLabel, hasRjsfErrors, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor, hasRjsfErrors, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { type RecordingTextInputArgs, VoiceRecognitionTextInput } from '../../voice-recognition';
 import { ObjectThumbnailHorizontalList } from '../../objects/object-thumbnail-hozirontal-list';
 import { useAppTheme } from '../../../theme';
+import { mergeLabelColorTheme } from '../label-color-theme';
 
 type TextWithVoiceRecordingValue = {
   text?: string;
@@ -48,6 +49,7 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
   const label = typeof schema.title === 'string' ? schema.title : '';
   const hideLabel = uiSchema?.['ui:options']?.label === false;
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(uiSchema?.['ui:options']));
 
   const textErrors =
     errorSchema &&
@@ -113,6 +115,7 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
         error={hasError}
         style={styles.input}
         outlineColor={theme.colors.outline}
+        theme={labelColorTheme}
       />
 
       <View style={styles.thumbnailsContainer}>

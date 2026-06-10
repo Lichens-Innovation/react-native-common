@@ -1,4 +1,4 @@
-import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -27,6 +27,7 @@ export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
 
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColor = getRjsfLabelColor(options);
   const widgetOptions = (options ?? {}) as ImageVideoGalleryWidgetOptions;
   const allowMultipleSelection = widgetOptions.allowMultipleSelection ?? true;
   const enableVideo = widgetOptions.enableVideo ?? true;
@@ -55,7 +56,7 @@ export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = ({
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} style={styles.title} />
+      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.title} />
       <CameraAndThumbnails
         uris={uris}
         disabled={disabled}

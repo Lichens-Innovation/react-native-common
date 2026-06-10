@@ -1,5 +1,6 @@
 import {
   getRjsfDisplayLabel,
+  getRjsfLabelColor,
   hasRjsfErrors,
   mapEnumOptions,
   toStringOrUndefined,
@@ -27,6 +28,7 @@ export const SelectWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColor = getRjsfLabelColor(options);
   const selectOptions = useMemo(() => mapEnumOptions(options), [options]);
   const strValue = toStringOrUndefined(value);
 
@@ -48,6 +50,7 @@ export const SelectWidget: FunctionComponent<WidgetProps> = ({
         placeholder={placeholder}
         disabled={disabled || readonly}
         isError={hasError}
+        labelColor={labelColor}
       />
     </View>
   );

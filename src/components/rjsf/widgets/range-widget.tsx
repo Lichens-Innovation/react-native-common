@@ -1,4 +1,4 @@
-import { getRjsfDisplayLabel } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import Slider from '@react-native-community/slider';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
@@ -19,10 +19,12 @@ export const RangeWidget: FunctionComponent<WidgetProps> = ({
   required,
   rawErrors: _rawErrors,
   schema,
+  options,
 }) => {
   const theme = useAppTheme();
   const styles = useStyles();
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColor = getRjsfLabelColor(options);
   const hasSchemaMin = typeof schema?.minimum === 'number';
   const min = hasSchemaMin ? schema.minimum : 0;
   const hasSchemaMax = typeof schema?.maximum === 'number';
@@ -39,7 +41,7 @@ export const RangeWidget: FunctionComponent<WidgetProps> = ({
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} style={styles.rangeLabel} />
+      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.rangeLabel} />
 
       <View style={styles.rangeRow}>
         <Slider

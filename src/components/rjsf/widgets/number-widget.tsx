@@ -1,11 +1,12 @@
 import { isBlank } from '@lichens-innovation/ts-common';
-import { getRjsfDisplayLabel, hasRjsfErrors, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor, hasRjsfErrors, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import { useEffect, useMemo, useRef, useState, type FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { logger } from '../../../logger/logger';
 import { useAppTheme } from '../../../theme';
+import { mergeLabelColorTheme } from '../label-color-theme';
 
 // Reject keystrokes that would produce an invalid number-in-progress, so a
 // valid intermediate state ("1.", "-", "") is allowed but "1.2.3" is not.
@@ -33,6 +34,7 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
   const externalStr = toStringOrEmpty(value);
   const isInteger = schema?.type === 'integer';
 
@@ -92,6 +94,7 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
       error={hasError}
       style={styles.input}
       outlineColor={theme.colors.outline}
+      theme={labelColorTheme}
       right={unit ? <TextInput.Affix text={unit} /> : undefined}
     />
   );

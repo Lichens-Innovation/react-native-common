@@ -1,4 +1,5 @@
 export * from './form-submit-context';
+export * from './label-color-theme';
 export * from './rjsf-paper-buttons';
 export * from './rjsf-paper-renderer';
 export * from './rjsf-paper-renderer-debug';

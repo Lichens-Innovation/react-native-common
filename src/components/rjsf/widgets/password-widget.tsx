@@ -1,5 +1,6 @@
 import {
   getRjsfDisplayLabel,
+  getRjsfLabelColor,
   getRjsfTextChangeValue,
   hasRjsfErrors,
   toStringOrEmpty,
@@ -9,6 +10,7 @@ import type { FunctionComponent } from 'react';
 import { StyleSheet } from 'react-native';
 import { PasswordInput } from '../../../components/password-input/password-input';
 import { useAppTheme } from '../../../theme';
+import { mergeLabelColorTheme } from '../label-color-theme';
 
 export const PasswordWidget: FunctionComponent<WidgetProps> = ({
   id,
@@ -29,6 +31,7 @@ export const PasswordWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
 
   const handleChangeText = (text: string) => {
     onChange(getRjsfTextChangeValue({ text, emptyValue: options?.emptyValue }));
@@ -48,6 +51,7 @@ export const PasswordWidget: FunctionComponent<WidgetProps> = ({
       error={hasError}
       style={styles.input}
       outlineColor={theme.colors.outline}
+      theme={labelColorTheme}
     />
   );
 };

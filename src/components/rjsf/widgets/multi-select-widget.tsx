@@ -1,4 +1,4 @@
-import { getRjsfDisplayLabel, hasRjsfErrors, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfDisplayLabel, getRjsfLabelColor, hasRjsfErrors, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -22,6 +22,7 @@ export const MultiSelectWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const labelColor = getRjsfLabelColor(options);
   const selectOptions = useMemo(() => mapEnumOptions(options), [options]);
 
   // Ensure value is always an array of strings (or empty array)
@@ -48,6 +49,7 @@ export const MultiSelectWidget: FunctionComponent<WidgetProps> = ({
         placeholder={effectivePlaceholder}
         disabled={disabled || readonly}
         isError={hasError}
+        labelColor={labelColor}
       />
     </View>
   );

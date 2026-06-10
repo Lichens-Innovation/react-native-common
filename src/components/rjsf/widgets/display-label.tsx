@@ -5,13 +5,14 @@ import { Text } from 'react-native-paper';
 export interface RjsfDisplayLabelProps {
   label?: string;
   style?: StyleProp<TextStyle>;
+  color?: string;
 }
 
-export const RjsfDisplayLabel = ({ label, style }: RjsfDisplayLabelProps) => {
+export const RjsfDisplayLabel = ({ label, style, color }: RjsfDisplayLabelProps) => {
   if (isBlank(label)) return null;
 
   return (
-    <Text variant="bodyLarge" style={style}>
+    <Text variant="bodyLarge" style={[color ? { color } : null, style]}>
       {label}
     </Text>
   );
