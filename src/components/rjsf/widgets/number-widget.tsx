@@ -2,7 +2,7 @@ import { isBlank } from '@lichens-innovation/ts-common';
 import { getRjsfDisplayLabel, getRjsfLabelColor, hasRjsfErrors, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import { useEffect, useMemo, useRef, useState, type FunctionComponent } from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { logger } from '../../../logger/logger';
 import { useAppTheme } from '../../../theme';
@@ -54,7 +54,9 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
     if (!validPattern.test(text)) return;
     setLocalText(text);
 
-    if (isBlank(text)) {
+    // Digitless intermediates ("-", ".", ",") are regex-valid mid-type states
+    // but don't parse to a number — treat as empty, keep the text visible.
+    if (isBlank(text) || !/\d/.test(text)) {
       onChange(options?.emptyValue);
       return;
     }
@@ -67,8 +69,14 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
     onChange(isInteger ? Math.round(floatValue) : floatValue);
   };
 
-  const keyboardType = isInteger ? 'number-pad' : 'decimal-pad';
-  const inputMode = isInteger ? 'numeric' : 'decimal';
+  // Default numeric keyboards lack a minus key, so negatives can't be typed:
+  // iOS number-pad / decimal-pad have none, and some Android skins (e.g.
+  // Samsung) hide it on number-pad too. Use signed-capable keyboards instead —
+  // numbers-and-punctuation on iOS, numeric (FLAG_SIGNED|FLAG_DECIMAL) on
+  // Android. inputMode must stay undefined: when set it takes precedence over
+  // keyboardType and no inputMode maps to a signed numeric keyboard.
+  const keyboardType = Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'numeric';
+  const inputMode = undefined;
 
   const unit = options?.unit as string | undefined;
 
