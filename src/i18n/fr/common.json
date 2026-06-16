@@ -108,8 +108,8 @@
     "link": "Lien",
     "list": "Liste",
     "location": {
-      "useGps": "Utiliser GPS",
-      "pickOnMap": "Choisir sur carte",
+      "useGps": "GPS",
+      "pickOnMap": "Carte",
       "clearLocation": "Effacer",
       "noLocationCaptured": "Aucune position capturée",
       "permissionDenied": "Permission de localisation refusée. Veuillez activer les permissions de localisation dans les paramètres de votre appareil pour utiliser cette fonctionnalité.",

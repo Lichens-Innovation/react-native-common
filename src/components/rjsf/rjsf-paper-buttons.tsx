@@ -107,7 +107,12 @@ export const SubmitButton: FunctionComponent<SubmitButtonProps> = ({ uiSchema })
     if (!focused) return null;
     return (
       <Portal>
-        <SafeAreaView style={styles.submitRowAbsolute}>
+        {/* box-none: the absolute container (padded by safe-area insets) must
+            not intercept touches in its transparent area — otherwise it covers
+            the bottom-right of the form and swallows taps meant for fields
+            underneath (e.g. the location "pick on map" button). Only the FAB
+            itself should be tappable. */}
+        <SafeAreaView style={styles.submitRowAbsolute} pointerEvents="box-none">
           <FAB
             style={styles.fab}
             color={styles.fab.color}

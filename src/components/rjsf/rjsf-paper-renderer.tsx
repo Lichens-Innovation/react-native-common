@@ -5,6 +5,8 @@ import type { RJSFSchema } from '@rjsf/utils';
 import { i18n } from 'i18next';
 import type { FunctionComponent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SubmitButtonOptionsContext } from './form-submit-context';
 import { PAPER_TEMPLATES } from './rjsf-paper-templates';
 import { RJSF_PAPER_THEME } from './rjsf-paper-theme';
@@ -43,6 +45,7 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   ...rest
 }) => {
   const customValidator = useRjsfValidator(i18n.language);
+  const insets = useSafeAreaInsets();
   const [localFormData, setLocalFormData] = useState<FormData | undefined>(formDataProp);
 
   useEffect(() => {
@@ -105,6 +108,11 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
           validator={customValidator}
           translateString={(stringToTranslate, params) => translateRjsfString({ stringToTranslate, params, i18n })}
         />
+        {/* The submit button floats over the form as an absolutely-positioned
+            FAB, so it no longer reserves space in the scroll flow. Add a footer
+            spacer (FAB height + its bottom offset + safe-area inset) so the last
+            fields can scroll clear of the FAB instead of sitting under it. */}
+        {submitButtonAbsolutePosition ? <View style={{ height: insets.bottom + 96 }} /> : null}
       </RootFormDataContext.Provider>
     </SubmitButtonOptionsContext.Provider>
   );
