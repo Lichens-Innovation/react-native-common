@@ -227,13 +227,6 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
           value={finalValue}
           readOnly={isRecording || !rest.editable}
           onChangeText={(text) => onValueChange({ value: text })}
-          left={
-            <TextInput.Icon
-              icon={isRecording ? 'stop' : 'microphone-outline'}
-              onPress={toggleRecording}
-              disabled={!rest.editable}
-            />
-          }
         />
         <View style={styles.rightButtonsOverlay} pointerEvents="box-none">
           <View style={styles.rightButtons} pointerEvents="auto">
@@ -247,6 +240,15 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
           </View>
         </View>
       </View>
+      <IconButton
+        mode="contained"
+        size={28}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        icon={isRecording ? 'stop' : 'microphone-outline'}
+        onPress={toggleRecording}
+        disabled={!rest.editable}
+        style={styles.micButton}
+      />
     </View>
   );
 };
@@ -256,10 +258,16 @@ const RIGHT_BUTTONS_WIDTH = 64;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   inputWrapper: {
     position: 'relative',
     flex: 1,
+  },
+  micButton: {
+    marginLeft: 4,
+    marginRight: -4,
   },
   textInput: {
     flex: 1,
