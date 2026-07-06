@@ -220,9 +220,15 @@ const useStyles = () => {
           flex: 1,
         },
         arrayItemToolbar: {
-          flexDirection: 'row',
+          flexDirection: 'column',
           alignItems: 'center',
           marginLeft: theme.spacing(1),
+          borderLeftWidth: 1,
+          borderTopWidth: 1,
+          borderLeftColor: theme.colors.surfaceVariant,
+          borderTopColor: theme.colors.surfaceVariant,
+          height: '100%',
+          width: 32,
         },
         gridRow: {
           flexDirection: 'row',
