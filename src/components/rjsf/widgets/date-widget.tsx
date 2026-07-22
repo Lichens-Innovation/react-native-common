@@ -4,7 +4,7 @@ import type { WidgetProps } from '@rjsf/utils';
 import { useToggle } from '@uidotdev/usehooks';
 import type { FunctionComponent } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { IconButton, TextInput } from 'react-native-paper';
 import { useAppTheme, useIsDarkMode } from '../../../theme';
 import { mergeLabelColorTheme } from '../label-color-theme';
 
@@ -39,7 +39,9 @@ export const DateWidget: FunctionComponent<WidgetProps> = ({
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
   const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
-  const date = parseDateOnlyToLocalDate(value as string) ?? new Date();
+  const parsedDate = parseDateOnlyToLocalDate(value as string);
+  const date = parsedDate ?? new Date();
+  const hasValue = !isNullish(parsedDate);
   const strValue = formatDateOnlyForDisplay(value as string);
   const pickerDisplay = Platform.OS === 'ios' ? 'spinner' : 'default';
   const themeVariant = isDarkMode ? 'dark' : 'light';
@@ -75,9 +77,26 @@ export const DateWidget: FunctionComponent<WidgetProps> = ({
     }
   };
 
+  // On iOS the spinner only fires onChange when the user scrolls to a different
+  // value, so opening on an empty field would leave it empty. Commit the default
+  // (current) date immediately so the shown value is actually entered.
+  const handleOpen = () => {
+    if (!showPicker && !hasValue) {
+      const dateOnly = dateToDateOnlyString(date);
+      onChange(dateOnly);
+      onBlur(id, dateOnly);
+    }
+    togglePickerVisibility();
+  };
+
+  const handleClear = () => {
+    onChange(undefined);
+    onBlur(id, undefined);
+  };
+
   return (
     <View style={styles.widgetBlock}>
-      <Pressable onPress={() => togglePickerVisibility()}>
+      <Pressable onPress={handleOpen}>
         <TextInput
           mode="outlined"
           label={displayLabel}
@@ -89,11 +108,15 @@ export const DateWidget: FunctionComponent<WidgetProps> = ({
           style={styles.input}
           outlineColor={theme.colors.outline}
           theme={labelColorTheme}
-          right={<TextInput.Icon icon="calendar" onPress={() => togglePickerVisibility()} />}
+          right={hasValue ? undefined : <TextInput.Icon icon="calendar" />}
           onFocus={() => onFocus(id, value)}
           pointerEvents="none"
         />
       </Pressable>
+
+      {hasValue && (
+        <IconButton icon="close" size={20} onPress={handleClear} style={styles.clearButton} />
+      )}
 
       {showPicker && (
         <DateTimePicker
@@ -118,6 +141,11 @@ const useStyles = () => {
     },
     input: {
       marginVertical: theme.spacing(0.5),
+    },
+    clearButton: {
+      position: 'absolute',
+      right: theme.spacing(0.5),
+      top: theme.spacing(1.5),
     },
   });
 };

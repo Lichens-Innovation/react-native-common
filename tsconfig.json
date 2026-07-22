@@ -12,9 +12,10 @@
     "noEmit": false,
     "outDir": "dist",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": ["src/*"],
+      "@lichens-innovation/ts-common/*": ["../ts-common/src/*"],
+      "@lichens-innovation/ts-common": ["../ts-common/src"]
     },
-    "rootDir": "src",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
