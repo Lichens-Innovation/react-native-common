@@ -1,4 +1,4 @@
-import { translateRjsfString, useRjsfValidator } from '@lichens-innovation/ts-common/rjsf';
+import { createRjsfValidator, translateRjsfString } from '@lichens-innovation/ts-common/rjsf';
 import type { FormProps, IChangeEvent } from '@rjsf/core';
 import { withTheme } from '@rjsf/core';
 import type { RJSFSchema } from '@rjsf/utils';
@@ -44,7 +44,10 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   submitButtonOverrideLabel = null,
   ...rest
 }) => {
-  const customValidator = useRjsfValidator(i18n.language);
+  // Memoize the AJV validator here (React layer) so ts-common stays React-free.
+  // A stable validator keeps AJV's schema cache and RJSF's schemaUtils/retrieveSchema
+  // cache warm across keystrokes — critical for forms with conditional (if/then) fields.
+  const customValidator = useMemo(() => createRjsfValidator(i18n.language), [i18n.language]);
   const insets = useSafeAreaInsets();
   const [localFormData, setLocalFormData] = useState<FormData | undefined>(formDataProp);
 
