@@ -70,7 +70,6 @@ export const ComputedField: FunctionComponent<FieldProps<unknown, RJSFSchema>> =
   schema,
   uiSchema,
   registry,
-  formContext,
   required,
   fieldPathId,
   id,
@@ -90,11 +89,7 @@ export const ComputedField: FunctionComponent<FieldProps<unknown, RJSFSchema>> =
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
   const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
 
-  const contextRootData = useRootFormData();
-  const rootData =
-    contextRootData ??
-    (formContext as { rootFormData?: Record<string, unknown> } | undefined)?.rootFormData ??
-    undefined;
+  const rootData = useRootFormData();
   const rootSchema = registry?.rootSchema as RJSFSchema | undefined;
 
   const { computed, displayText, usedVars } = useMemo(() => {

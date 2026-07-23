@@ -85,13 +85,12 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
     [onChangeProp]
   );
 
-  const mergedFormContext = useMemo(
-    () => ({
-      ...(formContextProp ?? {}),
-      rootFormData: localFormData,
-    }),
-    [formContextProp, localFormData]
-  );
+  // Root form data is delivered to the fields that need it (e.g. ComputedField)
+  // via RootFormDataContext below — deliberately kept OUT of formContext so this
+  // object stays referentially stable across keystrokes. Injecting the changing
+  // formData here would hand a fresh registry to the entire field tree on every
+  // change and defeat any per-widget memoization.
+  const mergedFormContext = useMemo(() => ({ ...(formContextProp ?? {}) }), [formContextProp]);
 
   return (
     <SubmitButtonOptionsContext.Provider value={{ submitButtonAbsolutePosition, submitButtonOverrideLabel }}>
