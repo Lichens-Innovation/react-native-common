@@ -2,7 +2,6 @@ import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { logger } from '../../logger';
 import { DialogOkCancel } from '../dialogs/dialog-ok-cancel';
 import * as ExpoCamera from 'expo-camera';
-import * as FileSystem from 'expo-file-system/legacy';
 import { Alert, Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Text, Icon } from 'react-native-paper';
@@ -12,6 +11,7 @@ import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
 import { VolumeManager } from 'react-native-volume-manager';
 import { useTranslation } from 'react-i18next';
+import { normalizeImageToJpeg, normalizeImagesToJpeg } from '../../utils/image-convert.utils';
 
 interface CameraFullModalArgs {
   mode?: 'image' | 'video';
@@ -138,10 +138,8 @@ export const CameraFullModal = ({
           logger.warn('Gallery backup failed:', e);
         }
       }
-      const fileName = picture.uri.split('/').pop() || 'photo.jpg';
-      const newPath = (FileSystem.documentDirectory ?? '') + fileName;
-      await FileSystem.copyAsync({ from: picture.uri, to: newPath });
-      handleObjectsTaken([newPath]);
+      const jpegUri = await normalizeImageToJpeg(picture.uri);
+      handleObjectsTaken([jpegUri]);
       setCaptureCount((c) => c + 1);
       if (!allowMultipleSelection) {
         closeCamera();
@@ -209,7 +207,9 @@ export const CameraFullModal = ({
         allowsMultipleSelection: allowMultipleSelection,
       });
       if (!result.canceled && result?.assets?.length > 0) {
-        handleObjectsTaken(result.assets.map((asset) => asset.uri));
+        const uris = result.assets.map((asset) => asset.uri);
+        const finalUris = mode === 'video' ? uris : await normalizeImagesToJpeg(uris);
+        handleObjectsTaken(finalUris);
         closeCamera();
       }
     } catch (e) {
