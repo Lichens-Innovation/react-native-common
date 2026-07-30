@@ -3,7 +3,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import type { WidgetProps } from '@rjsf/utils';
 import { useToggle } from '@uidotdev/usehooks';
 import type { FunctionComponent } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { IconButton, TextInput } from 'react-native-paper';
 import { useAppTheme, useIsDarkMode } from '../../../theme';
 import { mergeLabelColorTheme } from '../label-color-theme';
@@ -35,6 +36,7 @@ export const DateWidget: FunctionComponent<WidgetProps> = ({
   const theme = useAppTheme();
   const isDarkMode = useIsDarkMode();
   const styles = useStyles();
+  const { t } = useTranslation();
   const [showPicker, togglePickerVisibility] = useToggle(false);
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
@@ -118,16 +120,36 @@ export const DateWidget: FunctionComponent<WidgetProps> = ({
         <IconButton icon="close" size={20} onPress={handleClear} style={styles.clearButton} />
       )}
 
-      {showPicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display={pickerDisplay}
-          onChange={handlePick}
-          onTouchCancel={() => togglePickerVisibility(false)}
-          themeVariant={themeVariant}
-          {...(Platform.OS === 'ios' && { textColor: theme.colors.onSurface })}
-        />
+      {Platform.OS === 'ios' ? (
+        <Modal visible={showPicker} transparent animationType="slide">
+          <Pressable style={styles.backdrop} onPress={() => togglePickerVisibility(false)} />
+          <View style={styles.iosContainer}>
+            <View style={styles.iosHeader}>
+              <Pressable onPress={() => togglePickerVisibility(false)} style={styles.doneButton}>
+                <Text style={styles.doneText}>{t('app:general.done')}</Text>
+              </Pressable>
+            </View>
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="spinner"
+              onChange={handlePick}
+              themeVariant={themeVariant}
+              textColor={theme.colors.onSurface}
+            />
+          </View>
+        </Modal>
+      ) : (
+        showPicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display={pickerDisplay}
+            onChange={handlePick}
+            onTouchCancel={() => togglePickerVisibility(false)}
+            themeVariant={themeVariant}
+          />
+        )
       )}
     </View>
   );
@@ -146,6 +168,30 @@ const useStyles = () => {
       position: 'absolute',
       right: theme.spacing(0.5),
       top: theme.spacing(1.5),
+    },
+    backdrop: {
+      flex: 1,
+    },
+    iosContainer: {
+      backgroundColor: theme.colors.surface,
+      borderTopLeftRadius: theme.spacing(1.5),
+      borderTopRightRadius: theme.spacing(1.5),
+    },
+    iosHeader: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      padding: theme.spacing(1.5),
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.outline,
+    },
+    doneButton: {
+      paddingHorizontal: theme.spacing(1),
+      paddingVertical: theme.spacing(0.5),
+    },
+    doneText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.primary,
     },
   });
 };
