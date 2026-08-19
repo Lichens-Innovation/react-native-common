@@ -57,6 +57,9 @@ export const initCommonI18N = ({ initReactI18next, instance }: InitCommonI18nArg
       fallbackLng: DEFAULT_LANGUAGE,
       lng: savedLanguage || DEFAULT_LANGUAGE,
       debug: false,
+      // Suppresses i18next's console.info promo for locize on every init — noise in the dev logs, and a
+      // console write the test suite treats as a failure.
+      showSupportNotice: false,
       interpolation: {
         escapeValue: false, // not needed for react as it escapes by default
       },
