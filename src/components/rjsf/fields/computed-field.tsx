@@ -41,6 +41,14 @@ type ResolveArgs = {
   idSeparator: string;
 };
 
+/**
+ * Whether a value is a DynamicFetchField answer: an object wrapper — `{ data, fetched_at,
+ * manually_edited, feature_uuid }` — because a fetched value has to carry the moment and the entity
+ * it was read from. The number a formula wants is inside it.
+ */
+const isFetchedAnswer = (value: unknown): value is { data: unknown } =>
+  value !== null && typeof value === 'object' && !Array.isArray(value) && 'data' in value;
+
 const resolveFormula = ({ formula, rootData, rootSchema, live, idPrefix, idSeparator }: ResolveArgs): ResolveResult => {
   const missing: string[] = [];
   const rejected: string[] = [];
@@ -51,17 +59,24 @@ const resolveFormula = ({ formula, rootData, rootSchema, live, idPrefix, idSepar
     const propSchema = properties[slug];
     const title = typeof propSchema?.title === 'string' ? propSchema.title : null;
     const propType = propSchema?.type;
-    const isNumericSchema = propType === 'number' || propType === 'integer';
-    if (!isNumericSchema) {
-      rejected.push(slug);
-      if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, title, value: null, status: 'rejected' });
-      return '0';
-    }
     // A live entry is the value the widget just parsed, one rjsf cycle ahead of rootData. Read it by
     // presence, not by `??`: a cleared field publishes an entry holding `undefined`, and falling back
     // to rootData there would keep showing a number for a field the user just emptied (SPOTD-621).
     const liveEntry = live.get([idPrefix, slug].join(idSeparator));
-    const raw = liveEntry ? liveEntry.value : rootData?.[slug];
+    const rawValue = liveEntry ? liveEntry.value : rootData?.[slug];
+    const raw = isFetchedAnswer(rawValue) ? rawValue.data : rawValue;
+    const isNumericSchema = propType === 'number' || propType === 'integer';
+    // An object-typed property counts as a source when it is a fetched answer, or is not answered at
+    // all yet — a field waiting on its fetch has a MISSING value, which is what the info dialog
+    // should say. An object that is answered and is not a wrapper (a compliance row, a repeatable
+    // section) really is the wrong kind of field, and is still reported as such.
+    const isFetchedSource =
+      propType === 'object' && (isFetchedAnswer(rawValue) || rawValue === undefined || rawValue === null);
+    if (!isNumericSchema && !isFetchedSource) {
+      rejected.push(slug);
+      if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, title, value: null, status: 'rejected' });
+      return '0';
+    }
     if (typeof raw !== 'number' || !Number.isFinite(raw)) {
       missing.push(slug);
       if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, title, value: null, status: 'missing' });
