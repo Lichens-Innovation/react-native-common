@@ -18,6 +18,10 @@ export const RjsfPaperRendererDebug: FunctionComponent<RjsfPaperRendererDebugPro
 }) => {
   const { t } = useTranslation();
   const styles = useStyles();
+  // Mirrors the data for the JSON dump ONLY. It is deliberately not fed back as the renderer's
+  // `formData`: doing that made the underlying rjsf Form controlled, which doubled the whole-schema
+  // state derivations per keystroke and reset the live-value cache on every change — so switching
+  // this debug view on would have shown the pre-SPOTD-621 lag rather than what ships.
   const [formData, setFormData] = useState<FormData>(initialFormData ?? {});
 
   const initialFormDataJson = useMemo(() => JSON.stringify(initialFormData ?? {}), [initialFormData]);
@@ -36,7 +40,7 @@ export const RjsfPaperRendererDebug: FunctionComponent<RjsfPaperRendererDebugPro
 
   return (
     <View style={styles.container}>
-      <RjsfPaperRenderer {...rest} formData={formData} onChange={handleChange} />
+      <RjsfPaperRenderer {...rest} formData={initialFormData} onChange={handleChange} />
 
       <View style={styles.debugSection}>
         <Text>{t('app:formDemo.formDataLabel')}</Text>

@@ -1,13 +1,13 @@
 import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
-import type { FieldProps, RJSFSchema } from '@rjsf/utils';
+import { DEFAULT_ID_PREFIX, DEFAULT_ID_SEPARATOR, type FieldProps, type RJSFSchema } from '@rjsf/utils';
 import Mexp from 'math-expression-evaluator';
-import { useEffect, useMemo, useState, type FunctionComponent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IconButton, Text, TextInput } from 'react-native-paper';
 import { useAppTheme } from '../../../theme';
 import { mergeLabelColorTheme } from '../label-color-theme';
 import { DialogCloseOnly } from '../../dialogs/dialog-close-only';
-import { useRootFormData } from '../root-form-data-context';
+import { useRootFormSnapshot, type LiveEntry } from '../root-form-data-context';
 
 type ComputedFieldOptions = {
   formula?: string;
@@ -31,11 +31,17 @@ type ResolveResult = {
   usedVars: UsedVar[];
 };
 
-const resolveFormula = (
-  formula: string,
-  rootData: Record<string, unknown> | undefined,
-  rootSchema: RJSFSchema | undefined
-): ResolveResult => {
+type ResolveArgs = {
+  formula: string;
+  rootData: Record<string, unknown> | undefined;
+  rootSchema: RJSFSchema | undefined;
+  /** Values a widget has published ahead of rjsf's change cycle, keyed by rjsf field id. */
+  live: ReadonlyMap<string, LiveEntry>;
+  idPrefix: string;
+  idSeparator: string;
+};
+
+const resolveFormula = ({ formula, rootData, rootSchema, live, idPrefix, idSeparator }: ResolveArgs): ResolveResult => {
   const missing: string[] = [];
   const rejected: string[] = [];
   const usedVarsMap = new Map<string, UsedVar>();
@@ -51,7 +57,11 @@ const resolveFormula = (
       if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, title, value: null, status: 'rejected' });
       return '0';
     }
-    const raw = rootData?.[slug];
+    // A live entry is the value the widget just parsed, one rjsf cycle ahead of rootData. Read it by
+    // presence, not by `??`: a cleared field publishes an entry holding `undefined`, and falling back
+    // to rootData there would keep showing a number for a field the user just emptied (SPOTD-621).
+    const liveEntry = live.get([idPrefix, slug].join(idSeparator));
+    const raw = liveEntry ? liveEntry.value : rootData?.[slug];
     if (typeof raw !== 'number' || !Number.isFinite(raw)) {
       missing.push(slug);
       if (!usedVarsMap.has(slug)) usedVarsMap.set(slug, { name: slug, title, value: null, status: 'missing' });
@@ -89,14 +99,18 @@ export const ComputedField: FunctionComponent<FieldProps<unknown, RJSFSchema>> =
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
   const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
 
-  const rootData = useRootFormData();
+  const { data: rootData, live } = useRootFormSnapshot();
   const rootSchema = registry?.rootSchema as RJSFSchema | undefined;
+  // Optional like the rootSchema read above: a field rendered outside a Form (a unit test with a
+  // hand-built registry) must not crash on a missing globalFormOptions.
+  const idPrefix = registry?.globalFormOptions?.idPrefix ?? DEFAULT_ID_PREFIX;
+  const idSeparator = registry?.globalFormOptions?.idSeparator ?? DEFAULT_ID_SEPARATOR;
 
   const { computed, displayText, usedVars } = useMemo(() => {
     if (!formula) {
       return { computed: null as number | null, displayText: '—', usedVars: [] as UsedVar[] };
     }
-    const resolved = resolveFormula(formula, rootData, rootSchema);
+    const resolved = resolveFormula({ formula, rootData, rootSchema, live, idPrefix, idSeparator });
     if (resolved.missing.length > 0 || resolved.rejected.length > 0) {
       return {
         computed: null as number | null,
@@ -114,18 +128,29 @@ export const ComputedField: FunctionComponent<FieldProps<unknown, RJSFSchema>> =
     } catch {
       return { computed: null as number | null, displayText: '—', usedVars: resolved.usedVars };
     }
-  }, [formula, rootData, rootSchema, precision]);
+  }, [formula, rootData, live, rootSchema, precision, idPrefix, idSeparator]);
 
   const baseId = fieldPathId?.$id ?? id ?? 'computedField';
   const fieldPath = fieldPathId?.path ?? [];
 
+  // Writing back on mount marked a form dirty with no user action — the screen diffs rjsf's formData
+  // against the baseline it captured at open — and cost a full rjsf change cycle while the form was
+  // still appearing. A stored value that is already a finite number therefore stands until a
+  // dependency actually changes; only a genuinely absent one is seeded (SPOTD-621).
+  const hasSettledFirstPassRef = useRef(false);
+
   useEffect(() => {
+    const isFirstPass = !hasSettledFirstPassRef.current;
+    hasSettledFirstPassRef.current = true;
+    const storedIsUsable = typeof formData === 'number' && Number.isFinite(formData);
+
     if (computed === null) {
-      if (formData === undefined) return;
+      if (formData === undefined || isFirstPass) return;
       onChange(undefined as unknown, fieldPath, undefined, baseId);
       return;
     }
     if (computed === formData) return;
+    if (isFirstPass && storedIsUsable) return;
     onChange(computed as unknown, fieldPath, undefined, baseId);
     // fieldPath/baseId derived from stable id; intentionally omitted from deps to avoid loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
