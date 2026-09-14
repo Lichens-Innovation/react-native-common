@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Dimensions, Text } from 'react-native';
 import { Image } from 'expo-image';
-import { Icon } from 'react-native-paper';
+import { ActivityIndicator, Icon } from 'react-native-paper';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { AppModal } from '../modal/app-modal';
@@ -11,13 +11,26 @@ import { getMediaTypeFromUri } from '../../utils/object.utils';
 
 const { width, height } = Dimensions.get('window');
 
+/**
+ * An action offered on top of the media currently on screen. Deliberately generic: the viewer knows
+ * only that someone handed it an icon, a label and something to run. An app that passes nothing gets
+ * no button, so consumers that never set it are unaffected.
+ */
+export interface ViewerFabAction {
+  icon: string;
+  label: string;
+  onPress: () => void;
+  busy?: boolean;
+}
+
 interface ViewerModalProps {
   visible: boolean;
   uri: string | null;
   onClose: () => void;
+  fabAction?: ViewerFabAction | null;
 }
 
-const ViewerModal: React.FC<ViewerModalProps> = ({ visible, uri, onClose: onRequestClose }) => {
+const ViewerModal: React.FC<ViewerModalProps> = ({ visible, uri, onClose: onRequestClose, fabAction }) => {
   const [audioError, setAudioError] = useState<string | null>(null);
   const type = getMediaTypeFromUri(uri);
   // Only provide a source when we actually want audio loaded.
@@ -178,6 +191,24 @@ const ViewerModal: React.FC<ViewerModalProps> = ({ visible, uri, onClose: onRequ
             )}
           </View>
         )}
+
+        {fabAction && (
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={fabAction.onPress}
+            disabled={fabAction.busy}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={fabAction.label}
+          >
+            {fabAction.busy ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Icon source={fabAction.icon} size={22} color="#fff" />
+            )}
+            <Text style={styles.fabLabel}>{fabAction.label}</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </AppModal>
   );
@@ -199,6 +230,23 @@ const styles = StyleSheet.create({
   fullscreenVideo: {
     width: width * 0.9,
     height: height * 0.5,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  fabLabel: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '500',
   },
   closeButton: {
     position: 'absolute',

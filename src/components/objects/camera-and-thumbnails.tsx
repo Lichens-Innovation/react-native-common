@@ -4,6 +4,7 @@ import { IconButton } from 'react-native-paper';
 import { useAppTheme } from '../../theme';
 import { CameraFullModal } from './camera-full-modal';
 import { ObjectThumbnailHorizontalList } from './object-thumbnail-hozirontal-list';
+import type { ViewerFabAction } from './media-viewer-modal';
 
 interface CameraAndThumbnailsProps {
   uris: string[];
@@ -13,6 +14,8 @@ interface CameraAndThumbnailsProps {
   handleObjectsTaken: (newUris: string[]) => void;
   allowMultipleSelection?: boolean;
   enableVideo?: boolean;
+  /** Forwarded to the gallery: an optional per-uri action for the fullscreen viewer. */
+  getFabAction?: (uri: string) => ViewerFabAction | null;
 }
 
 interface CameraModalData {
@@ -29,6 +32,7 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
   handleObjectsTaken,
   allowMultipleSelection,
   enableVideo,
+  getFabAction,
 }) => {
   const styles = useStyles();
 
@@ -52,7 +56,12 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
   return (
     <>
       <View style={styles.thumbnailsContainer}>
-        <ObjectThumbnailHorizontalList onRemovePress={handleObjectRemove} uris={uris} readonly={readonly || disabled} />
+        <ObjectThumbnailHorizontalList
+          onRemovePress={handleObjectRemove}
+          uris={uris}
+          readonly={readonly || disabled}
+          getFabAction={getFabAction}
+        />
       </View>
       <View style={styles.actionsRow}>
         <IconButton mode="contained" icon="camera" onPress={onTakePhoto} disabled={readonly || disabled} />
