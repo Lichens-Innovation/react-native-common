@@ -2,7 +2,7 @@ import { FunctionComponent, useState } from 'react';
 import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 import { StyleSheet, View } from 'react-native';
-import { Button, Divider, Text } from 'react-native-paper';
+import { Button, Divider, Icon, Text } from 'react-native-paper';
 import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../theme';
@@ -50,7 +50,9 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
   };
 
   const writePoint = (lat: number, lng: number) => writeValue({ coordinates: createGeoJsonPoint(lat, lng) });
-  const clear = () => writeValue({ coordinates: null });
+  // Absence, not `{ coordinates: null }`: the generated schema types `coordinates` as a plain object,
+  // so a null failed validation and blocked Save for anyone who cleared a captured point (SPOTD-893).
+  const clear = () => writeValue({});
 
   const captureViaGps = async () => {
     try {
@@ -83,8 +85,10 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
       <CoordinatePreview point={current} onClear={clear} disabled={actionsDisabled} />
 
       <View style={styles.buttonRow}>
+        {/* Outlined like the map button: a filled button read as "a position is stored here" rather
+            than as an action to take (SPOTD-893). Neither capture route is the primary one. */}
         <Button
-          mode="contained-tonal"
+          mode="outlined"
           icon="crosshairs-gps"
           style={styles.button}
           onPress={captureViaGps}
@@ -124,11 +128,12 @@ type CoordinatePreviewProps = {
 
 const CoordinatePreview: FunctionComponent<CoordinatePreviewProps> = ({ point, onClear, disabled }) => {
   const styles = useStyles();
+  const theme = useAppTheme();
   const { t } = useTranslation();
 
   if (!point) {
     return (
-      <Text variant="bodySmall" style={styles.emptyText}>
+      <Text variant="bodyMedium" style={styles.emptyText}>
         {t('common:location.noLocationCaptured')}
       </Text>
     );
@@ -139,6 +144,9 @@ const CoordinatePreview: FunctionComponent<CoordinatePreviewProps> = ({ point, o
 
   return (
     <View style={styles.coordRow}>
+      {/* Empty and captured states differed only by which grey line sat above the buttons; the check
+          is what makes "a position is held here" survive a glance (SPOTD-893). */}
+      <Icon source="check-circle" size={18} color={theme.colors.primary} />
       <Text variant="bodyMedium" style={styles.coordText}>
         {coord.latitude.toFixed(6)}, {coord.longitude.toFixed(6)}
       </Text>
