@@ -1,8 +1,8 @@
 import { isNullish } from '@lichens-innovation/ts-common';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import type { WidgetProps } from '@rjsf/utils';
 import { useToggle } from '@uidotdev/usehooks';
-import type { FunctionComponent } from 'react';
+import { useState, type FunctionComponent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { IconButton, TextInput } from 'react-native-paper';
@@ -37,6 +37,13 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const { t } = useTranslation();
   const [showPicker, togglePickerVisibility] = useToggle(false);
+  // Android has no combined date+time dialog. `mode="datetime"` is an iOS-only mode: asking for it
+  // on Android silently opens the DATE dialog, and then the library's unmount cleanup looks the mode
+  // up in a map holding only `date` and `time` and crashes on `undefined.dismiss()` (SPOTD-901). So
+  // Android runs the two dialogs in sequence and combines the answers. `androidStage` is the dialog
+  // currently on screen, `androidDate` the day chosen in the first one.
+  const [androidStage, setAndroidStage] = useState<'date' | 'time' | null>(null);
+  const [androidDate, setAndroidDate] = useState<Date | null>(null);
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
   const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
@@ -44,7 +51,6 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
   const date = parsedDate ?? new Date();
   const hasValue = !isNullish(parsedDate);
   const strValue = formatDateTimeForDisplay(value as string);
-  const pickerDisplay = Platform.OS === 'ios' ? 'spinner' : 'default';
   const themeVariant = isDarkMode ? 'dark' : 'light';
   const isDisplayOnly = disabled || readonly;
 
@@ -69,23 +75,56 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
     );
   }
 
+  const commit = (picked: Date) => {
+    const iso = picked.toISOString();
+    onChange(iso);
+    onBlur(id, iso);
+  };
+
   const handlePick = (_: unknown, selectedDate?: Date) => {
-    if (Platform.OS === 'android') togglePickerVisibility(false);
     if (!isNullish(selectedDate)) {
-      const iso = selectedDate.toISOString();
-      onChange(iso);
-      onBlur(id, iso);
+      commit(selectedDate);
     }
   };
 
-  // On iOS the spinner only fires onChange when the user scrolls to a different
-  // value, so opening on an empty field would leave it empty. Commit the default
-  // (current) date immediately so the shown value is actually entered.
+  /** First Android dialog: the day. Anything but a confirmed pick ends the sequence. */
+  const handleAndroidDatePick = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (event.type !== 'set' || isNullish(selectedDate)) {
+      setAndroidStage(null);
+      return;
+    }
+    setAndroidDate(selectedDate);
+    setAndroidStage('time');
+  };
+
+  /**
+   * Second Android dialog: the time of the day already chosen. Nothing is written until this one is
+   * confirmed — cancelling here leaves the field exactly as it was, rather than storing a day at an
+   * hour the user never picked.
+   */
+  const handleAndroidTimePick = (event: DateTimePickerEvent, selectedTime?: Date) => {
+    setAndroidStage(null);
+    if (event.type !== 'set' || isNullish(selectedTime)) return;
+
+    const combined = new Date(androidDate ?? date);
+    combined.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
+    commit(combined);
+  };
+
   const handleOpen = () => {
+    if (Platform.OS === 'android') {
+      setAndroidDate(null);
+      setAndroidStage('date');
+      return;
+    }
+
+    // On iOS the spinner only fires onChange when the user scrolls to a different
+    // value, so opening on an empty field would leave it empty. Commit the default
+    // (current) date immediately so the shown value is actually entered. Android needs
+    // no such nudge — its dialogs hand back the value on OK — and doing it there would
+    // leave a timestamp behind when the user backs out of the two-dialog sequence.
     if (!showPicker && !hasValue) {
-      const iso = date.toISOString();
-      onChange(iso);
-      onBlur(id, iso);
+      commit(date);
     }
     togglePickerVisibility();
   };
@@ -115,9 +154,7 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
         />
       </Pressable>
 
-      {hasValue && (
-        <IconButton icon="close" size={20} onPress={handleClear} style={styles.clearButton} />
-      )}
+      {hasValue && <IconButton icon="close" size={20} onPress={handleClear} style={styles.clearButton} />}
 
       {Platform.OS === 'ios' ? (
         <Modal visible={showPicker} transparent animationType="slide">
@@ -139,13 +176,16 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
           </View>
         </Modal>
       ) : (
-        showPicker && (
+        androidStage !== null && (
+          // Keyed by stage so the first dialog unmounts — and so dismisses under its OWN mode —
+          // before the second mounts. The library's cleanup dismisses whatever mode it was last
+          // rendered with, which is the whole reason a single `mode="datetime"` crashed here.
           <DateTimePicker
-            value={date}
-            mode="datetime"
-            display={pickerDisplay}
-            onChange={handlePick}
-            onTouchCancel={() => togglePickerVisibility(false)}
+            key={androidStage}
+            value={androidStage === 'time' ? (androidDate ?? date) : date}
+            mode={androidStage}
+            display="default"
+            onChange={androidStage === 'date' ? handleAndroidDatePick : handleAndroidTimePick}
             themeVariant={themeVariant}
           />
         )
