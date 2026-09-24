@@ -15,6 +15,7 @@ import {
   SelectWidget,
   TextWidget,
   TextareaWidget,
+  TimeWidget,
   LabelWidget,
   MultiSelectWidget,
 } from './widgets';
@@ -31,6 +32,8 @@ export const RJSF_PAPER_THEME: ThemeProps = {
     DateWidget,
     datetime: DateTimeWidget,
     DateTimeWidget,
+    time: TimeWidget,
+    TimeWidget,
     select: SelectWidget,
     SelectWidget,
     radio: RadioWidget,

@@ -2,7 +2,7 @@ import { isNullish } from '@lichens-innovation/ts-common';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import type { WidgetProps } from '@rjsf/utils';
 import { useToggle } from '@uidotdev/usehooks';
-import { useState, type FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { IconButton, TextInput } from 'react-native-paper';
@@ -10,14 +10,26 @@ import { useAppTheme, useIsDarkMode } from '../../../theme';
 import { mergeLabelColorTheme } from '../label-color-theme';
 
 import {
-  formatDateTimeForDisplay,
+  formatTimeOnlyForDisplay,
   getRjsfDisplayLabel,
   getRjsfLabelColor,
   hasRjsfErrors,
-  parseDateOrNull,
+  parseTimeOnlyToLocalDate,
+  timeToTimeOnlyString,
 } from '@lichens-innovation/ts-common/rjsf';
 
-export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
+/**
+ * A clock reading with no day behind it: the date is entered once in the form header and
+ * each reading row carries only HH:MM — a micro-purge sheet with one time per station, say.
+ *
+ * Simpler than DateTimeWidget because `mode="time"` is supported natively on BOTH platforms, so
+ * there is none of the two-dialog sequencing that Android's missing datetime mode forced there.
+ *
+ * Seconds are never entered: neither native picker offers them, and the feature dropped them rather
+ * than ship a hand-rolled picker. The stored value still carries `:00` because JSON Schema's "time"
+ * format demands seconds, and the display strips them back off.
+ */
+export const TimeWidget: FunctionComponent<WidgetProps> = ({
   id,
   value,
   disabled,
@@ -37,20 +49,13 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
   const styles = useStyles();
   const { t } = useTranslation();
   const [showPicker, togglePickerVisibility] = useToggle(false);
-  // Android has no combined date+time dialog. `mode="datetime"` is an iOS-only mode: asking for it
-  // on Android silently opens the DATE dialog, and then the library's unmount cleanup looks the mode
-  // up in a map holding only `date` and `time` and crashes on `undefined.dismiss()` (SPOTD-901). So
-  // Android runs the two dialogs in sequence and combines the answers. `androidStage` is the dialog
-  // currently on screen, `androidDate` the day chosen in the first one.
-  const [androidStage, setAndroidStage] = useState<'date' | 'time' | null>(null);
-  const [androidDate, setAndroidDate] = useState<Date | null>(null);
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
   const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
-  const parsedDate = parseDateOrNull(value as string);
-  const date = parsedDate ?? new Date();
-  const hasValue = !isNullish(parsedDate);
-  const strValue = formatDateTimeForDisplay(value as string);
+  const parsedTime = parseTimeOnlyToLocalDate(value as string);
+  const time = parsedTime ?? new Date();
+  const hasValue = !isNullish(parsedTime);
+  const strValue = formatTimeOnlyForDisplay(value as string);
   const themeVariant = isDarkMode ? 'dark' : 'light';
   const isDisplayOnly = disabled || readonly;
 
@@ -76,55 +81,27 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
   }
 
   const commit = (picked: Date) => {
-    const iso = picked.toISOString();
-    onChange(iso);
-    onBlur(id, iso);
+    const timeOnly = timeToTimeOnlyString(picked);
+    onChange(timeOnly);
+    onBlur(id, timeOnly);
   };
 
-  const handlePick = (_: unknown, selectedDate?: Date) => {
-    if (!isNullish(selectedDate)) {
-      commit(selectedDate);
-    }
-  };
-
-  /** First Android dialog: the day. Anything but a confirmed pick ends the sequence. */
-  const handleAndroidDatePick = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (event.type !== 'set' || isNullish(selectedDate)) {
-      setAndroidStage(null);
-      return;
-    }
-    setAndroidDate(selectedDate);
-    setAndroidStage('time');
-  };
-
-  /**
-   * Second Android dialog: the time of the day already chosen. Nothing is written until this one is
-   * confirmed — cancelling here leaves the field exactly as it was, rather than storing a day at an
-   * hour the user never picked.
-   */
-  const handleAndroidTimePick = (event: DateTimePickerEvent, selectedTime?: Date) => {
-    setAndroidStage(null);
+  const handlePick = (event: DateTimePickerEvent, selectedTime?: Date) => {
+    if (Platform.OS === 'android') togglePickerVisibility(false);
+    // Backing out of the Android dialog reports 'dismissed'; writing then would store a time the
+    // user never confirmed. iOS commits as the spinner moves, so it only ever reports 'set'.
     if (event.type !== 'set' || isNullish(selectedTime)) return;
-
-    const combined = new Date(androidDate ?? date);
-    combined.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
-    commit(combined);
+    commit(selectedTime);
   };
 
+  // On iOS the spinner only fires onChange when the user scrolls to a different
+  // value, so opening on an empty field would leave it empty. Commit the default
+  // (current) time immediately so the shown value is actually entered. Android's
+  // dialog hands the value back on OK, so it needs no such nudge — and doing it
+  // there would leave a time behind when the user cancels out.
   const handleOpen = () => {
-    if (Platform.OS === 'android') {
-      setAndroidDate(null);
-      setAndroidStage('date');
-      return;
-    }
-
-    // On iOS the spinner only fires onChange when the user scrolls to a different
-    // value, so opening on an empty field would leave it empty. Commit the default
-    // (current) date immediately so the shown value is actually entered. Android needs
-    // no such nudge — its dialogs hand back the value on OK — and doing it there would
-    // leave a timestamp behind when the user backs out of the two-dialog sequence.
-    if (!showPicker && !hasValue) {
-      commit(date);
+    if (Platform.OS !== 'android' && !showPicker && !hasValue) {
+      commit(time);
     }
     togglePickerVisibility();
   };
@@ -148,7 +125,7 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
           style={styles.input}
           outlineColor={theme.colors.outline}
           theme={labelColorTheme}
-          right={hasValue ? undefined : <TextInput.Icon icon="calendar-clock" />}
+          right={hasValue ? undefined : <TextInput.Icon icon="clock-outline" />}
           onFocus={() => onFocus(id, value)}
           pointerEvents="none"
         />
@@ -166,8 +143,8 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
               </Pressable>
             </View>
             <DateTimePicker
-              value={date}
-              mode="datetime"
+              value={time}
+              mode="time"
               display="spinner"
               onChange={handlePick}
               themeVariant={themeVariant}
@@ -176,16 +153,15 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
           </View>
         </Modal>
       ) : (
-        androidStage !== null && (
-          // Keyed by stage so the first dialog unmounts — and so dismisses under its OWN mode —
-          // before the second mounts. The library's cleanup dismisses whatever mode it was last
-          // rendered with, which is the whole reason a single `mode="datetime"` crashed here.
+        showPicker && (
+          // `is24Hour` is honoured on Android only; iOS follows the device locale and ignores it.
+          // Either way the STORED value is 24-hour HH:MM:00 — this is the dialog's appearance alone.
           <DateTimePicker
-            key={androidStage}
-            value={androidStage === 'time' ? (androidDate ?? date) : date}
-            mode={androidStage}
+            value={time}
+            mode="time"
             display="default"
-            onChange={androidStage === 'date' ? handleAndroidDatePick : handleAndroidTimePick}
+            is24Hour
+            onChange={handlePick}
             themeVariant={themeVariant}
           />
         )
