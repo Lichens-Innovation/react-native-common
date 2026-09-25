@@ -32,7 +32,9 @@ export const useUpdates = () => {
       await Updates.fetchUpdateAsync();
       logger.info('[useUpdates.fetchAndApplyUpdate] Update fetched successfully');
     } catch (error) {
-      logger.error('[useUpdates.fetchAndApplyUpdate] Failed to fetch update:', error);
+      // Almost always no connection to the update server; the user can simply try again. A warning,
+      // not a Sentry event (LICHENS-DISPATCH-MOBILE-1X).
+      logger.warn('[useUpdates.fetchAndApplyUpdate] Failed to fetch update:', error);
     } finally {
       setIsLoading(false);
     }
@@ -46,7 +48,8 @@ export const useUpdates = () => {
       await checkForUpdateAsync();
       logger.info('[useUpdates.checkForUpdates] Updates checked successfully');
     } catch (error) {
-      logger.error('[useUpdates.checkForUpdates] Failed to check for updates:', error);
+      // Same as above: an offline device cannot reach the update server, and that is not a bug.
+      logger.warn('[useUpdates.checkForUpdates] Failed to check for updates:', error);
     } finally {
       setIsLoading(false);
     }

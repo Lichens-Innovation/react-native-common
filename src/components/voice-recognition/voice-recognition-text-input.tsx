@@ -46,6 +46,13 @@ const FILE_FALLBACK_TIMEOUT_MS = 30_000;
 /** Same idea for a system session whose `audioend` never arrives. */
 const AUDIO_END_TIMEOUT_MS = 10_000;
 
+/**
+ * Recognition errors caused by the user's surroundings, not by the app: no connection to the online
+ * recognizer, or nothing said before it gave up. Logged as warnings so they stop reaching Sentry
+ * (LICHENS-DISPATCH-MOBILE-77); anything else still does.
+ */
+const EXPECTED_RECOGNITION_ERRORS: ReadonlySet<string> = new Set(['network', 'no-speech', 'speech-timeout']);
+
 interface SpeechRecognitionListenerProps {
   phase: DictationPhase;
   isSystemEngine: boolean;
@@ -82,7 +89,8 @@ const SpeechRecognitionListener: FunctionComponent<SpeechRecognitionListenerProp
   useSpeechRecognitionEvent('error', (event) => {
     const { error, message } = event;
     if (error !== 'aborted') {
-      logger.error(`[useSpeechRecognitionEvent] error: ${error} - ${message}`);
+      const log = EXPECTED_RECOGNITION_ERRORS.has(error) ? logger.warn : logger.error;
+      log.call(logger, `[useSpeechRecognitionEvent] error: ${error} - ${message}`);
     }
     wantsAudioEndRef.current = false;
     if (phase === 'fileFallback') onFileFallbackDone();
