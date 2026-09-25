@@ -44,10 +44,11 @@ type ResolveArgs = {
 /**
  * Whether a value is a DynamicFetchField answer: an object wrapper — `{ data, fetched_at,
  * manually_edited, feature_uuid }` — because a fetched value has to carry the moment and the entity
- * it was read from. The number a formula wants is inside it.
+ * it was read from. The number a formula wants is inside it. A fetch that found nothing leaves `data`
+ * out, so `feature_uuid` alone also identifies one.
  */
-const isFetchedAnswer = (value: unknown): value is { data: unknown } =>
-  value !== null && typeof value === 'object' && !Array.isArray(value) && 'data' in value;
+const isFetchedAnswer = (value: unknown): value is { data?: unknown } =>
+  value !== null && typeof value === 'object' && !Array.isArray(value) && ('data' in value || 'feature_uuid' in value);
 
 const resolveFormula = ({ formula, rootData, rootSchema, live, idPrefix, idSeparator }: ResolveArgs): ResolveResult => {
   const missing: string[] = [];
