@@ -27,6 +27,8 @@ jobs:
 
       - name: Install Yarn and dependencies
         uses: mskelton/setup-yarn@v2.0.0
+        with:
+          node-version: '24.x'
 
       - name: Check yarn version
         run: yarn --version
