@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@legendapp/list": "^2.0.9",
-    "@lichens-innovation/ts-common": "^1.15.4",
+    "@lichens-innovation/ts-common": "^1.27.2",
     "@noble/hashes": "^2.0.1",
     "@uidotdev/usehooks": "^2.4.1",
     "buffer": "^6.0.3",
