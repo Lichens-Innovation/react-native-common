@@ -8,11 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../theme';
 import { logger } from '../../../logger';
 import { useSnackbar } from '../../snack-bar/snackbar-provider';
-import {
-  LocationPickerModal,
-  geoJsonPointToLatLng,
-  type GeoJsonPoint,
-} from '../../map/location-picker-modal';
+import { LocationPickerModal, geoJsonPointToLatLng, type GeoJsonPoint } from '../../map/location-picker-modal';
 
 type LocationFieldValue = { coordinates?: GeoJsonPoint | null };
 

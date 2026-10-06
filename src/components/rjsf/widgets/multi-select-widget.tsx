@@ -1,4 +1,9 @@
-import { getRjsfDisplayLabel, getRjsfLabelColor, hasRjsfErrors, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
+import {
+  getRjsfDisplayLabel,
+  getRjsfLabelColor,
+  hasRjsfErrors,
+  mapEnumOptions,
+} from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';

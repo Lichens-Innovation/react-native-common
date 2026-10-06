@@ -116,9 +116,7 @@ export const DateWidget: FunctionComponent<WidgetProps> = ({
         />
       </Pressable>
 
-      {hasValue && (
-        <IconButton icon="close" size={20} onPress={handleClear} style={styles.clearButton} />
-      )}
+      {hasValue && <IconButton icon="close" size={20} onPress={handleClear} style={styles.clearButton} />}
 
       {Platform.OS === 'ios' ? (
         <Modal visible={showPicker} transparent animationType="slide">

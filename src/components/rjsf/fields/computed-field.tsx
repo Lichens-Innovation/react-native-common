@@ -169,7 +169,6 @@ export const ComputedField: FunctionComponent<FieldProps<unknown, RJSFSchema>> =
     if (isFirstPass && storedIsUsable) return;
     onChange(computed as unknown, fieldPath, undefined, baseId);
     // fieldPath/baseId derived from stable id; intentionally omitted from deps to avoid loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [computed]);
 
   return (
