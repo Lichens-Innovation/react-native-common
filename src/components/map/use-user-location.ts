@@ -85,7 +85,7 @@ export function useUserLocation(): UseUserLocationResult {
             });
             setIsLoading(false);
           }
-        },
+        }
       );
       locationSubscriptionRef.current = subscription;
     } catch (error) {

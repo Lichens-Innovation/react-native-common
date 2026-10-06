@@ -14,7 +14,8 @@
     "paths": {
       "~/*": ["src/*"],
       "@lichens-innovation/ts-common/*": ["../ts-common/src/*"],
-      "@lichens-innovation/ts-common": ["../ts-common/src"]
+      "@lichens-innovation/ts-common": ["../ts-common/src"],
+      "i18next": ["node_modules/i18next"]
     },
     "skipLibCheck": true,
     "sourceMap": true,

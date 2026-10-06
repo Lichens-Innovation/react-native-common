@@ -1,5 +1,10 @@
 import type { EnumOptionDisplay } from '@lichens-innovation/ts-common/rjsf';
-import { getRjsfDisplayLabel, getRjsfLabelColor, mapEnumOptions, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
+import {
+  getRjsfDisplayLabel,
+  getRjsfLabelColor,
+  mapEnumOptions,
+  toStringOrEmpty,
+} from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';

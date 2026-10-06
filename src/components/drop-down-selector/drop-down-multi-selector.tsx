@@ -51,10 +51,7 @@ export const DropDownMultiSelector: FunctionComponent<DropDownMultiSelectorProps
   const styles = useStyles({ isFocused, disabled, isError, textColor, disabledTransparentBackground, labelColor });
 
   // For left icon, show icon of first selected item if any
-  const selectedItem = useMemo(
-    () => options.find((option) => value?.includes(option.value)),
-    [options, value]
-  );
+  const selectedItem = useMemo(() => options.find((option) => value?.includes(option.value)), [options, value]);
 
   const renderItem = useCallback(
     (item: MultiSelectOption, selected?: boolean) => (
