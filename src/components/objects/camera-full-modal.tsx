@@ -12,6 +12,11 @@ import * as ImagePicker from 'expo-image-picker';
 import { VolumeManager } from 'react-native-volume-manager';
 import { useTranslation } from 'react-i18next';
 import { normalizeImageToJpeg, normalizeImagesToJpeg } from '../../utils/image-convert.utils';
+import {
+  openAppSettings,
+  requestPermissionOrOpenSettings,
+  resolvePermissionRequest,
+} from '../../utils/permission.utils';
 
 interface CameraFullModalArgs {
   mode?: 'image' | 'video';
@@ -82,6 +87,11 @@ export const CameraFullModal = ({
     writeOnly: true,
   });
   const [torchEnabled, setTorchEnabled] = useState(false);
+  /** Set once the user chose to record without sound, so they are not asked again for this session. */
+  const recordWithoutSoundRef = useRef(false);
+  const [pendingRecording, setPendingRecording] = useState(false);
+  /** The camera permission was requested since opening: Android's `canAskAgain` can be trusted from then on. */
+  const [cameraAsked, setCameraAsked] = useState(false);
 
   const flashAnim = useRef(new Animated.Value(0)).current;
 
@@ -149,10 +159,56 @@ export const CameraFullModal = ({
     }
   };
 
+  const confirmRecordWithoutSound = () =>
+    new Promise<boolean>((resolve) => {
+      Alert.alert(
+        t('common:camera.microphoneDeniedTitle'),
+        t('common:camera.microphoneDeniedDescription'),
+        [
+          {
+            text: t('common:openSettings'),
+            onPress: () => {
+              resolve(false);
+              closeCamera();
+              openAppSettings();
+            },
+          },
+          {
+            text: t('common:camera.recordWithoutSound'),
+            onPress: () => {
+              recordWithoutSoundRef.current = true;
+              resolve(true);
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    });
+
+  /**
+   * - `ready`: record now, with sound or muted as the user accepted.
+   * - `justGranted`: the OS prompt was just accepted, but the camera is still muted until the next render.
+   * - `cancelled`: the user went to the settings instead.
+   */
+  const ensureMicrophone = async (): Promise<'ready' | 'justGranted' | 'cancelled'> => {
+    if (recordWithoutSoundRef.current) return 'ready';
+
+    const action = resolvePermissionRequest(audioPermission);
+    if (action === 'granted') return 'ready';
+    if (action === 'prompt' && (await requestAudioPermission()).granted) return 'justGranted';
+
+    return (await confirmRecordWithoutSound()) ? 'ready' : 'cancelled';
+  };
+
+  // Starting is deferred to an effect when the microphone was just granted, so the camera has been
+  // unmuted before recordAsync reads it.
+  useEffect(() => {
+    if (!pendingRecording) return;
+    setPendingRecording(false);
+    startRecording();
+  }, [pendingRecording]);
+
   async function takeVideo() {
-    if (audioPermission && !audioPermission.granted) {
-      await requestAudioPermission();
-    }
     if (!cameraRef.current) return;
     if (isRecording) {
       manualStopRef.current = true;
@@ -162,6 +218,18 @@ export const CameraFullModal = ({
       return;
     }
 
+    const microphone = await ensureMicrophone();
+    if (microphone === 'cancelled') return;
+    if (microphone === 'justGranted') {
+      setPendingRecording(true);
+      return;
+    }
+
+    await startRecording();
+  }
+
+  async function startRecording() {
+    if (!cameraRef.current) return;
     manualStopRef.current = false;
     setIsRecording(true);
     const video = await cameraRef.current.recordAsync(VIDEO_PARAMS);
@@ -264,13 +332,30 @@ export const CameraFullModal = ({
     };
   }, []);
 
-  if (!permission?.granted) {
+  // Still reading the permission: showing the dialog now would flash it even when access is granted.
+  if (!permission) return null;
+
+  if (!permission.granted) {
+    const options = { askedThisSession: cameraAsked };
+    const mustOpenSettings = resolvePermissionRequest(permission, options) === 'settings';
+    // SPOTD-1064: once the OS no longer prompts, asking again silently resolves to denied and left the
+    // user stuck on this dialog; the settings are the only way out.
+    const onOk = async () => {
+      const outcome = await requestPermissionOrOpenSettings(permission, requestPermission, options);
+      setCameraAsked(true);
+      // Blocked: stay, the dialog now offers the settings.
+      if (outcome === 'denied' || outcome === 'settingsOpened') onClose();
+    };
+
     return (
       <DialogOkCancel
         isVisible={true}
-        title="Permissions requises"
-        description="Nous avons besoin de vos permissions pour montrer la caméra"
-        onOk={requestPermission}
+        title={t(mustOpenSettings ? 'common:camera.permissionDeniedTitle' : 'common:camera.permissionRequiredTitle')}
+        description={t(
+          mustOpenSettings ? 'common:camera.permissionDeniedDescription' : 'common:camera.permissionRequiredDescription'
+        )}
+        okLabel={mustOpenSettings ? t('common:openSettings') : undefined}
+        onOk={onOk}
         onCancel={onClose}
       />
     );
@@ -287,6 +372,8 @@ export const CameraFullModal = ({
           enableTorch={torchEnabled}
           zoom={zoom}
           videoQuality={VIDEO_QUALITY}
+          // Android refuses to record unmuted without the microphone permission.
+          mute={!audioPermission?.granted}
         />
         <View
           style={[styles.badgeContainer, { opacity: captureCount > 0 ? 1 : 0 }]}

@@ -36,7 +36,14 @@
     },
     "browse": "Parcourir",
     "camera": {
-      "videoLengthLimitReached": "La durée de la vidéo est limitée à {{seconds}}s par vidéo."
+      "videoLengthLimitReached": "La durée de la vidéo est limitée à {{seconds}}s par vidéo.",
+      "permissionRequiredTitle": "Accès à la caméra requis",
+      "permissionRequiredDescription": "L'application a besoin d'accéder à la caméra pour prendre des photos et des vidéos.",
+      "permissionDeniedTitle": "Accès à la caméra refusé",
+      "permissionDeniedDescription": "Autorisez l'accès à la caméra dans les paramètres de l'appareil pour ajouter des photos et des vidéos.",
+      "microphoneDeniedTitle": "Microphone refusé",
+      "microphoneDeniedDescription": "La vidéo sera enregistrée sans son. Autorisez l'accès au microphone dans les paramètres de l'appareil pour enregistrer le son.",
+      "recordWithoutSound": "Enregistrer sans son"
     },
     "cancel": "Annuler",
     "check": "Vérifier",
@@ -139,6 +146,7 @@
     "ok": "Ok",
     "on": "Activé",
     "open": "Ouvrir",
+    "openSettings": "Ouvrir les paramètres",
     "options": "Options",
     "password": "Mot de passe",
     "passwordInput": {

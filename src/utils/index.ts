@@ -15,6 +15,7 @@ export * from './image.utils';
 export * from './licences.utils';
 export * from './linking.utils';
 export * from './network.utils';
+export * from './permission.utils';
 export * from './platform.utils';
 export * from './sharing.utils';
 export * from './sqlite.utils';

@@ -36,7 +36,14 @@
     },
     "browse": "Browse",
     "camera": {
-      "videoLengthLimitReached": "Video length is limited to {{seconds}}s per video."
+      "videoLengthLimitReached": "Video length is limited to {{seconds}}s per video.",
+      "permissionRequiredTitle": "Camera access required",
+      "permissionRequiredDescription": "The app needs camera access to take photos and videos.",
+      "permissionDeniedTitle": "Camera access denied",
+      "permissionDeniedDescription": "Allow camera access in your device settings to add photos and videos.",
+      "microphoneDeniedTitle": "Microphone access denied",
+      "microphoneDeniedDescription": "The video will be recorded without sound. Allow microphone access in your device settings to record sound.",
+      "recordWithoutSound": "Record without sound"
     },
     "cancel": "Cancel",
     "check": "Check",
@@ -139,6 +146,7 @@
     "ok": "Ok",
     "on": "On",
     "open": "Open",
+    "openSettings": "Open settings",
     "options": "Options",
     "password": "Password",
     "passwordInput": {

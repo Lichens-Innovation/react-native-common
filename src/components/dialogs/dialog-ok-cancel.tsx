@@ -10,6 +10,8 @@ interface DialogOkCancelProps extends Omit<DialogProps, 'children' | 'visible'> 
   icon?: string;
   title?: ReactNode;
   description?: ReactNode;
+  /** Replaces the default "Ok" label when the action deserves to be named. */
+  okLabel?: string;
   onOk: () => void;
   onCancel: () => void;
   isVisible: boolean;
@@ -19,6 +21,7 @@ export const DialogOkCancel: FunctionComponent<DialogOkCancelProps> = ({
   icon,
   title,
   description,
+  okLabel,
   onOk,
   onCancel,
   isVisible,
@@ -53,8 +56,8 @@ export const DialogOkCancel: FunctionComponent<DialogOkCancelProps> = ({
 
         <Dialog.Actions>
           <Button onPress={onCancel}>{t('common:cancel')}</Button>
-          <Button style={styles.button} mode="contained" onPress={onOk}>
-            {t('common:ok')}
+          <Button style={okLabel ? undefined : styles.button} mode="contained" onPress={onOk}>
+            {okLabel ?? t('common:ok')}
           </Button>
         </Dialog.Actions>
       </Dialog>
