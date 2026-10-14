@@ -1,4 +1,4 @@
-import { isNullish } from '@lichens-innovation/ts-common';
+import { isNullish, toDisplayLocale } from '@lichens-innovation/ts-common';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import type { WidgetProps } from '@rjsf/utils';
 import { useToggle } from '@uidotdev/usehooks';
@@ -47,7 +47,7 @@ export const TimeWidget: FunctionComponent<WidgetProps> = ({
   const theme = useAppTheme();
   const isDarkMode = useIsDarkMode();
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showPicker, togglePickerVisibility] = useToggle(false);
   const hasError = hasRjsfErrors(rawErrors);
   const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
@@ -55,7 +55,7 @@ export const TimeWidget: FunctionComponent<WidgetProps> = ({
   const parsedTime = parseTimeOnlyToLocalDate(value as string);
   const time = parsedTime ?? new Date();
   const hasValue = !isNullish(parsedTime);
-  const strValue = formatTimeOnlyForDisplay(value as string);
+  const strValue = formatTimeOnlyForDisplay(value as string, toDisplayLocale(i18n.language));
   const themeVariant = isDarkMode ? 'dark' : 'light';
   const isDisplayOnly = disabled || readonly;
 

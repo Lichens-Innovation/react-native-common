@@ -1,4 +1,4 @@
-import { isNullish } from '@lichens-innovation/ts-common';
+import { isNullish, toDisplayLocale } from '@lichens-innovation/ts-common';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import type { WidgetProps } from '@rjsf/utils';
 import { useToggle } from '@uidotdev/usehooks';
@@ -35,7 +35,7 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
   const theme = useAppTheme();
   const isDarkMode = useIsDarkMode();
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showPicker, togglePickerVisibility] = useToggle(false);
   // Android has no combined date+time dialog. `mode="datetime"` is an iOS-only mode: asking for it
   // on Android silently opens the DATE dialog, and then the library's unmount cleanup looks the mode
@@ -50,7 +50,7 @@ export const DateTimeWidget: FunctionComponent<WidgetProps> = ({
   const parsedDate = parseDateOrNull(value as string);
   const date = parsedDate ?? new Date();
   const hasValue = !isNullish(parsedDate);
-  const strValue = formatDateTimeForDisplay(value as string);
+  const strValue = formatDateTimeForDisplay(value as string, toDisplayLocale(i18n.language));
   const themeVariant = isDarkMode ? 'dark' : 'light';
   const isDisplayOnly = disabled || readonly;
 
