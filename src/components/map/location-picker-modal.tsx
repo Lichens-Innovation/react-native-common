@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button, Modal, Portal } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import MapView, { Marker, PROVIDER_GOOGLE, type LatLng, type Region } from 'react-native-maps';
@@ -63,26 +63,45 @@ export const LocationPickerModal: FunctionComponent<LocationPickerModalProps> = 
   return (
     <Portal>
       <Modal visible onDismiss={onCancel} contentContainerStyle={styles.container} dismissable={false}>
-        <View style={styles.mapContainer}>
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            initialRegion={initialRegion}
-            showsUserLocation
-            onPress={handleMapPress}
-          >
-            {pendingCoord ? (
-              <Marker coordinate={pendingCoord} tracksViewChanges={false} pinColor={PICK_MARKER_COLOR} />
-            ) : null}
-          </MapView>
-        </View>
-        <View style={styles.footer}>
-          <Button mode="outlined" onPress={onCancel} style={styles.footerButton}>
-            {t('common:cancel')}
-          </Button>
-          <Button mode="contained" onPress={handleConfirm} disabled={!pendingCoord} style={styles.footerButton}>
-            {t('common:confirm')}
-          </Button>
+        <View style={styles.clip}>
+          <View style={styles.mapContainer}>
+            <MapView
+              provider={PROVIDER_GOOGLE}
+              style={styles.map}
+              initialRegion={initialRegion}
+              showsUserLocation
+              onPress={handleMapPress}
+            >
+              {pendingCoord ? (
+                <Marker coordinate={pendingCoord} tracksViewChanges={false} pinColor={PICK_MARKER_COLOR} />
+              ) : null}
+            </MapView>
+          </View>
+          {/* Same buttons as the app's ModalActions: they share the width and wrap with Confirm on top.
+            The padding sits on the outer view because Yoga mirrors it on a `wrap-reverse` row. */}
+          <View style={styles.footer}>
+            <View style={styles.footerRow}>
+              <Button
+                mode="outlined"
+                onPress={onCancel}
+                style={styles.footerButton}
+                contentStyle={styles.footerButtonContent}
+                labelStyle={styles.footerButtonLabel}
+              >
+                {t('common:cancel')}
+              </Button>
+              <Button
+                mode="contained"
+                onPress={handleConfirm}
+                disabled={!pendingCoord}
+                style={styles.footerButton}
+                contentStyle={styles.footerButtonContent}
+                labelStyle={styles.footerButtonLabel}
+              >
+                {t('common:confirm')}
+              </Button>
+            </View>
+          </View>
         </View>
       </Modal>
     </Portal>
@@ -91,15 +110,22 @@ export const LocationPickerModal: FunctionComponent<LocationPickerModalProps> = 
 
 const useStyles = () => {
   const theme = useAppTheme();
-  const { width, height } = useWindowDimensions();
 
   return StyleSheet.create({
+    // Sized in shares of Paper's wrapper, which already keeps clear of the system bars, so Paper can
+    // centre it. The card is a Surface, whose shadow breaks under `overflow: hidden`: clip one in.
+    // In dark mode a border, or the card's edge disappears into the backdrop.
     container: {
       backgroundColor: theme.colors.background,
-      width: width * 0.95,
-      height: height * 0.9,
+      ...(theme.dark ? { borderWidth: 1, borderColor: theme.colors.outlineVariant } : {}),
+      width: '90%',
+      height: '90%',
       alignSelf: 'center',
-      borderRadius: 16,
+      borderRadius: 20,
+    },
+    clip: {
+      flex: 1,
+      borderRadius: 20,
       overflow: 'hidden',
     },
     mapContainer: {
@@ -109,14 +135,26 @@ const useStyles = () => {
       ...StyleSheet.absoluteFillObject,
     },
     footer: {
+      padding: 16,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.background,
+    },
+    footerRow: {
       flexDirection: 'row',
-      justifyContent: 'flex-end',
-      gap: theme.spacing(1),
-      padding: theme.spacing(1.5),
-      backgroundColor: theme.colors.surface,
+      flexWrap: 'wrap-reverse',
+      gap: 8,
     },
     footerButton: {
-      minWidth: 120,
+      flexGrow: 1,
+      flexShrink: 1,
+      borderRadius: 12,
+    },
+    footerButtonContent: {
+      height: 48,
+    },
+    footerButtonLabel: {
+      fontWeight: 'bold',
     },
   });
 };
