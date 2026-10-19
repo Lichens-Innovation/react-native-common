@@ -21,6 +21,7 @@ Table of content
   - [Services, Utilities and Hooks](#services-utilities-and-hooks)
   - [Consume in a project](#consume-in-a-project)
     - [Adding the dependency to an existing mobile application](#adding-the-dependency-to-an-existing-mobile-application)
+    - [Upgrading from 3.x (Expo SDK 54) to 4.x (Expo SDK 58)](#upgrading-from-3x-expo-sdk-54-to-4x-expo-sdk-58)
     - [Basic Usage Example](#basic-usage-example)
   - [Optional modules](#optional-modules)
     - [RJSF (`@lichens-innovation/react-native-common/rjsf`)](#rjsf-lichens-innovationreact-native-commonrjsf)
@@ -74,22 +75,36 @@ Depending on your Expo SDK version, here are the compatibility table for `react-
 | -------------- | ---------------- | ----------------------------------------------------- |
 | 1.x.y          | SDK 52, SDK 53   | Compatible with applications using Expo SDK 52 and 53 |
 | 2.x.y, 3.x.y   | SDK 54           | Compatible with applications using Expo SDK 54        |
-| 4.x.y          | SDK 55           | Compatible with applications using Expo SDK 55        |
+| 4.x.y          | SDK 58           | Compatible with applications using Expo SDK 58        |
 
 ### Adding the dependency to an existing mobile application
 
-The following will install the latest available version on your react-native app:
+The following will install the latest available version on your react-native app, pinned to an exact version:
 
 ```bash
-yarn add @lichens-Innovation/react-native-common
+yarn add --exact @lichens-innovation/react-native-common
 ```
+
+### Upgrading from 3.x (Expo SDK 54) to 4.x (Expo SDK 58)
+
+Starting with Expo SDK 56, `expo-router` ships its own navigation implementation. Navigation hooks and contexts imported from `@react-navigation/*` no longer match the ones provided by `expo-router`, so version 4.x imports them from `expo-router/react-navigation` instead.
+
+1. Upgrade the application to Expo SDK 58 (`expo` >= 58, `expo-router` >= 58, `react-native` >= 0.88, `react` >= 19.3).
+2. Repoint the application's own `@react-navigation/*` imports to `expo-router`:
+
+   ```bash
+   npx expo-codemod sdk-56-expo-router-react-navigation-replace src
+   ```
+
+3. Remove `@react-navigation/native` from the application dependencies if nothing else requires it (it is no longer a peer dependency of this package).
+4. `NAVIGATION_DARK` / `NAVIGATION_LIGHT` themes are meant for the `ThemeProvider` exported by `expo-router/react-navigation`.
 
 ### Basic Usage Example
 
 Here's how to import and use the `DialogOkCancel` component:
 
 ```tsx
-import { DialogOkCancel } from '@lichens-Innovation/react-native-common';
+import { DialogOkCancel } from '@lichens-innovation/react-native-common';
 import React, { useState } from 'react';
 import { Button } from 'react-native-paper';
 
