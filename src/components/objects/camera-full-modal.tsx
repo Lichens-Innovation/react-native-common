@@ -516,7 +516,7 @@ const useStyles = () => {
       color: 'white',
     },
     captureFlashOverlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       backgroundColor: 'white',
     },
     badgeContainer: {

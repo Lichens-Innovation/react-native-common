@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 export const useTimeoutToggle = (timeoutMs: number) => {
   const [isLoading, toggleLoading] = useToggle(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onStartLoading = useCallback(() => {
     clearTimeout(timeoutRef.current ?? undefined);

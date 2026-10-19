@@ -1,4 +1,4 @@
-import { DarkTheme as DarkNavigationTheme, DefaultTheme as LightNavigationTheme } from '@react-navigation/native';
+import { DarkTheme as DarkNavigationTheme, DefaultTheme as LightNavigationTheme } from 'expo-router/react-navigation';
 import { MD3DarkTheme, MD3LightTheme, adaptNavigationTheme, useTheme } from 'react-native-paper';
 import { DARK_COLORS_SCHEME } from './dark-colors-scheme';
 import { LIGHT_COLORS_SCHEME } from './light-colors-scheme';
@@ -31,9 +31,12 @@ export const LIGHT_THEME = {
 export type AppTheme = typeof DARK_THEME;
 
 // React Navigation themes
+// expo-router types theme colors as ColorValue while react-native-paper expects strings (runtime values are strings)
+type PaperNavigationTheme = Parameters<typeof adaptNavigationTheme>[0]['reactNavigationLight'];
+
 const navigationAdaptedThemes = adaptNavigationTheme({
-  reactNavigationLight: LightNavigationTheme,
-  reactNavigationDark: DarkNavigationTheme,
+  reactNavigationLight: LightNavigationTheme as PaperNavigationTheme,
+  reactNavigationDark: DarkNavigationTheme as PaperNavigationTheme,
   materialLight: LIGHT_THEME,
   materialDark: DARK_THEME,
 });

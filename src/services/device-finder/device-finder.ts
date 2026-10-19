@@ -20,7 +20,7 @@ export class DeviceFinder {
 
   private zeroConf: Zeroconf | null = null;
   public isScanning: boolean = false;
-  private timerID: NodeJS.Timeout | undefined = undefined;
+  private timerID: ReturnType<typeof setTimeout> | undefined = undefined;
   public discoveredDevices: DiscoveredDevice[] = [];
 
   private onErrorCallback: (error: Error) => void = () => {};

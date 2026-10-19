@@ -132,7 +132,7 @@ const useStyles = () => {
       flex: 1,
     },
     map: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     },
     footer: {
       padding: 16,

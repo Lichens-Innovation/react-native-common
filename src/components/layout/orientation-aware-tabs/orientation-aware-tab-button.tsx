@@ -1,5 +1,5 @@
 import { TabTriggerSlotProps } from 'expo-router/ui';
-import { FunctionComponent } from 'react';
+import { ComponentProps, FunctionComponent } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useIsLandscape } from '../../../hooks/use-window-orientation';
@@ -19,6 +19,7 @@ export const OrientationAwareTabButton: FunctionComponent<OrientationAwareTabBut
   activeColor,
   isFocused,
   isLabelHidden = false,
+  ref,
   ...props
 }) => {
   const theme = useAppTheme();
@@ -27,7 +28,7 @@ export const OrientationAwareTabButton: FunctionComponent<OrientationAwareTabBut
   const color = isFocused ? activeColor : theme.colors.onSurfaceDisabled;
 
   return (
-    <Pressable {...props} style={styles.tabButton}>
+    <Pressable {...props} ref={ref as ComponentProps<typeof Pressable>['ref']} style={styles.tabButton}>
       <TabBarIcon name={icon} color={color} />
 
       {isLabelVisible && (

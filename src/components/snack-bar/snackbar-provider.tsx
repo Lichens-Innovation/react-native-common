@@ -1,5 +1,4 @@
 import { JSX, PropsWithChildren, createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { InteractionManager } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import { SnackbarDurationsMs } from './snackbar.constants';
 
@@ -34,7 +33,7 @@ export const SnackbarProvider = ({ children }: PropsWithChildren): JSX.Element =
     (msg: string, duration = DEFAULT_DURATION) => {
       setVisibility(false); // close the current snackbar (if any)
 
-      InteractionManager.runAfterInteractions(() => {
+      requestIdleCallback(() => {
         setMessage(msg);
         setDuration(duration);
         setVisibility(true);
