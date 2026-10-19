@@ -4,7 +4,7 @@ import type { FunctionComponent } from 'react';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IconButton, Button, FAB, Portal } from 'react-native-paper';
-import { NavigationContext } from '@react-navigation/native';
+import { NavigationContext } from 'expo-router/react-navigation';
 import { useAppTheme } from '../../theme';
 import { FormSubmitContext, SubmitButtonOptionsContext } from './form-submit-context';
 import { SafeAreaView } from 'react-native-safe-area-context';

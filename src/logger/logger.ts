@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Sentry from '@sentry/react-native';
-import { InteractionManager, LogBox } from 'react-native';
+import { LogBox } from 'react-native';
 import {
   fileAsyncTransport,
   mapConsoleTransport,
@@ -87,7 +87,7 @@ export const logger = new LoggerWrapper({
     error: LOG_LEVELS.error,
   },
   async: true,
-  asyncFunc: InteractionManager.runAfterInteractions,
+  asyncFunc: (callback: () => void) => requestIdleCallback(callback),
   dateFormat: (date: Date) => `${date.toISOString()} `,
   printLevel: true,
   fixedExtLvlLength: true,

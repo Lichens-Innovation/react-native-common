@@ -18,7 +18,7 @@ export const BarcodeScanner: FunctionComponent<BarcodeScannerProps> = ({ onBarco
     <>
       <View style={styles.cameraContainer}>
         <CameraView
-          style={[StyleSheet.absoluteFillObject, styles.camera]}
+          style={[StyleSheet.absoluteFill, styles.camera]}
           onBarcodeScanned={onBarcodeScanned}
           barcodeScannerSettings={{ barcodeTypes: BARCODE_TYPES }}
           facing="back"

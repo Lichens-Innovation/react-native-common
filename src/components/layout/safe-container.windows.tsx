@@ -1,4 +1,4 @@
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from "expo-router/react-navigation";
 import { FunctionComponent, PropsWithChildren } from 'react';
 import { SafeAreaView, StyleSheet, ViewStyle } from 'react-native';
 

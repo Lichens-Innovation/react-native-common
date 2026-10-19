@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "prefer-absolute-version-dependencies": "error",
+    "prefer-absolute-version-devDependencies": [
+      "error",
+      {
+        "exceptions": ["@babel/core"]
+      }
+    ]
+  }
+}

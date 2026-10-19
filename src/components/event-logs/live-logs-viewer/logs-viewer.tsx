@@ -1,6 +1,6 @@
 import { LegendList } from '@legendapp/list';
 import { observer } from 'mobx-react-lite';
-import { type FunctionComponent, useEffect } from 'react';
+import { type ComponentProps, type FunctionComponent, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LogBox, Platform, StyleSheet, View } from 'react-native';
 import { IconButton, TextInput } from 'react-native-paper';
@@ -72,7 +72,8 @@ export const LogsViewer: FunctionComponent<LogsViewerProps> = observer(
         )}
 
         <LegendList<LogEntry>
-          ref={listRef}
+          // LegendList v2 ref type intersects ScrollView instance, which RN 0.88 types no longer satisfy
+          ref={listRef as ComponentProps<typeof LegendList>['ref']}
           data={filteredLogs}
           renderItem={({ item }: { item: LogEntry }) => <LogEntryItem logEntry={item} />}
           estimatedItemSize={30}

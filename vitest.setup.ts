@@ -60,17 +60,19 @@ vi.mock('expo-updates', () => ({
 
 // Mock react-native-mmkv
 vi.mock('react-native-mmkv', () => ({
-  MMKV: vi.fn().mockImplementation(() => ({
-    set: vi.fn(),
-    getString: vi.fn(),
-    getNumber: vi.fn(),
-    getBoolean: vi.fn(),
-    getBuffer: vi.fn(),
-    delete: vi.fn(),
-    clearAll: vi.fn(),
-    contains: vi.fn(),
-    getAllKeys: vi.fn(() => []),
-  })),
+  MMKV: vi.fn().mockImplementation(function () {
+    return {
+      set: vi.fn(),
+      getString: vi.fn(),
+      getNumber: vi.fn(),
+      getBoolean: vi.fn(),
+      getBuffer: vi.fn(),
+      delete: vi.fn(),
+      clearAll: vi.fn(),
+      contains: vi.fn(),
+      getAllKeys: vi.fn(() => []),
+    };
+  }),
 }));
 
 // Mock react-native-logs
