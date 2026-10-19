@@ -16,7 +16,8 @@
       "~/*": ["./src/*"],
       "@lichens-innovation/ts-common/*": ["../ts-common/src/*"],
       "@lichens-innovation/ts-common": ["../ts-common/src"],
-      "i18next": ["./node_modules/i18next"]
+      "i18next": ["./node_modules/i18next"],
+      "@rjsf/utils": ["./node_modules/@rjsf/utils"]
     },
     "skipLibCheck": true,
     "sourceMap": true,

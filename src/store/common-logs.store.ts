@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable } from 'mobx';
+import { makeAutoObservable, observableShallow } from 'mobx';
 import { transportFunctionType } from 'react-native-logs';
 import { LogEntry } from '../logger/logger.types';
 
@@ -13,7 +13,7 @@ class CommonLogsStore {
 
   constructor() {
     // buffer is shallow — entries are plain { msg, level } and don't need deep proxying.
-    makeAutoObservable(this, { buffer: observable.shallow });
+    makeAutoObservable(this, { buffer: observableShallow });
   }
 
   get logEntries(): LogEntry[] {
