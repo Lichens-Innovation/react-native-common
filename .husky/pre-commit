@@ -6,3 +6,7 @@ set -e
 echo "Running typecheck..."
 yarn typecheck
 echo "  -->  ✅ Typecheck completed"
+
+echo "Running package.json lint..."
+yarn lint:package
+echo "  -->  ✅ package.json lint completed"

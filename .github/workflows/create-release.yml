@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24.x'
+          node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org/'
           always-auth: true
 
@@ -35,6 +35,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Lint package.json
+        run: yarn lint:package
 
       - name: Run unit tests
         run: yarn test
