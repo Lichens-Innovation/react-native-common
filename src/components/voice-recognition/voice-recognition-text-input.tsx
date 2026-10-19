@@ -145,6 +145,12 @@ interface VoiceRecognitionTextInputProps extends TextInputProps {
   showClear?: boolean;
   /** Long-press on the microphone, used to surface a help tooltip. */
   onMicLongPress?: () => void;
+  /**
+   * Where the microphone sits. `right` (the default) keeps it beside the field; `below` gives it its
+   * own row under the field, larger, for a screen with room to spare and a field that should not
+   * lose its width to the button.
+   */
+  micPosition?: 'right' | 'below';
 }
 
 export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextInputProps> = ({
@@ -158,6 +164,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   persistRecording = true,
   showClear = true,
   onMicLongPress,
+  micPosition = 'right',
   ...rest
 }) => {
   const [phase, setPhase] = useState<DictationPhase>('idle');
@@ -516,7 +523,7 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   };
 
   return (
-    <View style={styles.container}>
+    <View style={micPosition === 'below' ? styles.containerBelow : styles.container}>
       {phase !== 'idle' && (
         <SpeechRecognitionListener
           phase={phase}
@@ -529,7 +536,8 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
           onSystemError={endSession}
         />
       )}
-      <View style={styles.inputWrapper}>
+      {/* In a column, `flex: 1` with no height to share would collapse the field. */}
+      <View style={micPosition === 'below' ? styles.inputWrapperBelow : styles.inputWrapper}>
         <TextInput
           {...rest}
           style={[
@@ -559,17 +567,21 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
       {isBusy ? (
         // Transcription runs for a few seconds after stop; without this the field just sits there
         // looking broken.
-        <ActivityIndicator size={28} style={styles.micButton} testID="dictation-busy" />
+        <ActivityIndicator
+          size={28}
+          style={micPosition === 'below' ? styles.micBelow : styles.micButton}
+          testID="dictation-busy"
+        />
       ) : (
         <IconButton
           mode="contained"
-          size={28}
+          size={micPosition === 'below' ? 40 : 28}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           icon={isRecording ? 'stop' : 'microphone-outline'}
           onPress={toggleRecording}
           onLongPress={onMicLongPress}
           disabled={!rest.editable || isLockedByAnotherField}
-          style={styles.micButton}
+          style={micPosition === 'below' ? styles.micBelow : styles.micButton}
           testID="dictation-mic"
         />
       )}
@@ -587,6 +599,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  containerBelow: {
+    gap: 12,
+  },
+  micBelow: {
+    alignSelf: 'center',
+  },
+  inputWrapperBelow: {
+    position: 'relative',
   },
   inputWrapper: {
     position: 'relative',
