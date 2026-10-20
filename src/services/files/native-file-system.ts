@@ -24,12 +24,12 @@ export class NativeFileSystem implements INativeFileSystem {
 
     // for base64 encoding, pass the base64 string directly
     if (options?.encoding === EncodingType.Base64) {
-      file.write(contents, { encoding: 'base64' });
+      await file.write(contents, { encoding: 'base64' });
       return;
     }
 
     // Default to UTF-8 string
-    file.write(contents, { encoding: 'utf8' });
+    await file.write(contents, { encoding: 'utf8' });
   }
 
   async readAsStringAsync(fileUri: string, options?: ReadOptions): Promise<string> {
