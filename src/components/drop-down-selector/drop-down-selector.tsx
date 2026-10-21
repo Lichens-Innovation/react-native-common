@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import { FunctionComponent, ReactNode, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { IconButton, Text } from 'react-native-paper';
@@ -11,6 +11,8 @@ export interface SelectOption {
   label: string;
   value: string;
   icon?: string;
+  /** Drawn before the label in the list instead of `icon`, for an option that needs more than a plain icon. */
+  left?: ReactNode;
 }
 
 export type DropDownSelectorProps = {

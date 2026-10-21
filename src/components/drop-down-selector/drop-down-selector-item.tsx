@@ -17,7 +17,7 @@ export const DropDownSelectorItem: FunctionComponent<DropDownSelectorItemProps> 
 
   return (
     <View style={styles.itemContainer}>
-      {item.icon && <DropDownSelectorLeftIcon icon={item.icon} color={textColor} />}
+      {item.left ?? (item.icon && <DropDownSelectorLeftIcon icon={item.icon} color={textColor} />)}
       <Text style={{ color: textColor }}>{item.label}</Text>
     </View>
   );
