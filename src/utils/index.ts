@@ -23,3 +23,5 @@ export * from './storage';
 export * from './webview.utils';
 export * from './object.utils';
 export * from './image-convert.utils';
+export * from './exif-location.utils';
+export * from './capture-position.utils';

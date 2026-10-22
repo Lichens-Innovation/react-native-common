@@ -15,6 +15,7 @@ export default defineConfig({
   outDir: 'dist',
   external: [
     '@legendapp/list',
+    '@lodev09/react-native-exify',
     '@lichens-innovation/ts-common',
     '@noble/hashes',
     '@uidotdev/usehooks',

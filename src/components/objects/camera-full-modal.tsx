@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { logger } from '../../logger';
 import { DialogOkCancel } from '../dialogs/dialog-ok-cancel';
 import * as ExpoCamera from 'expo-camera';
-import { Alert, Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Text, Icon } from 'react-native-paper';
 import { AppModal } from '../modal/app-modal';
@@ -12,6 +12,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { VolumeManager } from 'react-native-volume-manager';
 import { useTranslation } from 'react-i18next';
 import { normalizeImageToJpeg, normalizeImagesToJpeg } from '../../utils/image-convert.utils';
+import { startPositionTracking, type PositionTracker } from '../../utils/capture-position.utils';
 import {
   openAppSettings,
   requestPermissionOrOpenSettings,
@@ -92,6 +93,22 @@ export const CameraFullModal = ({
   const [pendingRecording, setPendingRecording] = useState(false);
   /** The camera permission was requested since opening: Android's `canAskAgain` can be trusted from then on. */
   const [cameraAsked, setCameraAsked] = useState(false);
+  /** Photos taken but not handed back yet: each waits for its re-encode and, before the first fix, for the GPS. */
+  const [pendingCaptures, setPendingCaptures] = useState(0);
+
+  const positionTrackerRef = useRef<PositionTracker | null>(null);
+
+  // Photos taken here carry the device position. The GPS runs while the camera is open, once the camera
+  // itself is allowed, so a shot takes the fix already known instead of waiting for a new one.
+  useEffect(() => {
+    if (mode !== 'image' || !permission?.granted) return;
+    const tracker = startPositionTracking();
+    positionTrackerRef.current = tracker;
+    return () => {
+      tracker.stop();
+      positionTrackerRef.current = null;
+    };
+  }, [mode, permission?.granted]);
 
   const flashAnim = useRef(new Animated.Value(0)).current;
 
@@ -129,6 +146,9 @@ export const CameraFullModal = ({
   const takePicture = async () => {
     if (!cameraRef.current) return;
 
+    // Asked with the shutter so a missing fix is awaited while the photo is captured and re-encoded.
+    const position = positionTrackerRef.current?.positionForCapture() ?? Promise.resolve(null);
+    setPendingCaptures((count) => count + 1);
     try {
       const picture = await cameraRef.current.takePictureAsync(PICTURE_PARAMS);
       if (!picture) {
@@ -148,7 +168,7 @@ export const CameraFullModal = ({
           logger.warn('Gallery backup failed:', e);
         }
       }
-      const jpegUri = await normalizeImageToJpeg(picture.uri);
+      const jpegUri = await normalizeImageToJpeg(picture.uri, undefined, { fallbackPosition: position });
       handleObjectsTaken([jpegUri]);
       setCaptureCount((c) => c + 1);
       if (!allowMultipleSelection) {
@@ -156,6 +176,8 @@ export const CameraFullModal = ({
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to save picture: ' + (error as Error).message);
+    } finally {
+      setPendingCaptures((count) => count - 1);
     }
   };
 
@@ -416,8 +438,12 @@ export const CameraFullModal = ({
               </TouchableOpacity>
 
               {mode === 'image' ? (
-                <TouchableOpacity style={styles.button} onPress={takePicture}>
-                  <Icon source="camera" size={30} color="white" />
+                <TouchableOpacity style={styles.button} onPress={takePicture} testID="camera-shutter">
+                  {pendingCaptures > 0 ? (
+                    <ActivityIndicator size={30} color="white" testID="camera-capture-pending" />
+                  ) : (
+                    <Icon source="camera" size={30} color="white" />
+                  )}
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={styles.button} onPress={takeVideo}>

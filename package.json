@@ -62,6 +62,7 @@
     "@commitlint/cli": "^20.3.0",
     "@commitlint/config-conventional": "^20.3.0",
     "@gorhom/bottom-sheet": "^5.2.4",
+    "@lodev09/react-native-exify": "^1.0.3",
     "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-community/datetimepicker": "^8.6.0",
     "@react-native-community/netinfo": "^11.4.1",
@@ -151,6 +152,7 @@
   },
   "peerDependencies": {
     "@gorhom/bottom-sheet": ">=5.2.4",
+    "@lodev09/react-native-exify": ">=1.0.3",
     "@react-native-clipboard/clipboard": ">=1.16.3",
     "@react-native-community/datetimepicker": ">=8.6.0",
     "@react-native-community/netinfo": ">=11.4.1",

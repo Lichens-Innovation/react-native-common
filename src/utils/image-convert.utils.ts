@@ -1,5 +1,7 @@
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import type { LocationObject } from 'expo-location';
 import { logger } from '../logger/logger';
+import { readLocationTags, writeLocationTags } from './exif-location.utils';
 
 /**
  * JPEG compression factor applied when normalizing images added from the app.
@@ -34,20 +36,35 @@ export function isAnimatableImageUri(uri: string | null | undefined): boolean {
   return ANIMATABLE_IMAGE_EXTENSIONS.has(getExtension(uri));
 }
 
+export interface NormalizeImageOptions {
+  /**
+   * Position written into the JPEG when the original has no GPS position of its own — the device's, for a
+   * photo taken in the app. A promise so the fix can be awaited in parallel with the capture and re-encode.
+   */
+  fallbackPosition?: Promise<LocationObject | null>;
+}
+
 /**
  * Convert and compress an image to JPEG on the local filesystem.
  * Re-encodes existing JPEGs too, so every image that goes through here is compressed.
+ * The re-encode drops all EXIF, so the original's position and capture date are written back afterwards.
  * Returns the new file uri, or the original uri if conversion fails or would destroy the image.
  */
-export async function normalizeImageToJpeg(uri: string, compress: number = IMAGE_JPEG_COMPRESSION): Promise<string> {
+export async function normalizeImageToJpeg(
+  uri: string,
+  compress: number = IMAGE_JPEG_COMPRESSION,
+  options: NormalizeImageOptions = {}
+): Promise<string> {
   if (!uri) return uri;
   // A GIF or WebP picked from the gallery may be animated, and JPEG cannot hold an animation: the
   // normalized copy would be its first frame, with nothing to say the rest was dropped. Handed back
   // untouched instead, which is the same thing this function already does when conversion fails.
   if (isAnimatableImageUri(uri)) return uri;
   try {
+    const locationTags = await readLocationTags(uri);
     const image = await ImageManipulator.manipulate(uri).renderAsync();
     const result = await image.saveAsync({ format: SaveFormat.JPEG, compress });
+    await writeLocationTags(result.uri, locationTags, options.fallbackPosition);
     return result.uri;
   } catch (error) {
     logger.error('Failed to normalize image to JPEG, keeping original:', error);
