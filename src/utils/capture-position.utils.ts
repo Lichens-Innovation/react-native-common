@@ -37,7 +37,7 @@ type FixWaiter = (position: Location.LocationObject | null) => void;
 /**
  * Keeps the GPS running while the camera is open, so a photo takes the position already known instead of
  * asking the GPS for a new fix per shot, which takes seconds. Asks for the permission first if the user never
- * answered. Only the photos taken before the first fix wait for it.
+ * answered. A photo waits only when no fresh fix is known: before the first one, or once the last one is stale.
  */
 export function startPositionTracking(): PositionTracker {
   let latest: Location.LocationObject | null = null;
@@ -49,9 +49,13 @@ export function startPositionTracking(): PositionTracker {
     [...waiters].forEach((waiter) => waiter(position));
   };
 
+  const isFresh = (position: Location.LocationObject) => Date.now() - position.timestamp <= FRESH_POSITION_MAX_AGE_MS;
+
+  // The first update of a watch can be the OS's cached last location, hours old: a waiting photo takes only a
+  // fresh fix and keeps waiting otherwise.
   const onFix = (position: Location.LocationObject) => {
     latest = position;
-    settleWaiters(position);
+    if (isFresh(position)) settleWaiters(position);
   };
 
   const watch = async () => {
@@ -85,7 +89,7 @@ export function startPositionTracking(): PositionTracker {
 
   return {
     positionForCapture: (timeoutMs = CAPTURE_POSITION_TIMEOUT_MS) => {
-      if (latest && Date.now() - latest.timestamp <= FRESH_POSITION_MAX_AGE_MS) return Promise.resolve(latest);
+      if (latest && isFresh(latest)) return Promise.resolve(latest);
       if (stopped) return Promise.resolve(null);
       return waitForFix(timeoutMs);
     },
