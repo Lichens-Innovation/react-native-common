@@ -3,7 +3,7 @@
   "description": "Lichens Innovation React Native Expo shared components, utilities, hooks and services",
   "repository": "https://github.com/Lichens-Innovation/react-native-common",
   "author": "Lichens Innovation",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "private": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -178,6 +178,7 @@
     "expo-file-system": ">=19.0.16",
     "expo-font": ">=14.0.8",
     "expo-image": ">=3.0.11",
+    "expo-image-manipulator": ">=14.0.7",
     "expo-image-picker": ">=17.0.8",
     "expo-linking": ">=8.0.8",
     "expo-localization": ">=17.0.7",
@@ -221,9 +222,6 @@
   },
   "peerDependenciesMeta": {
     "@rjsf/core": {
-      "optional": true
-    },
-    "react-native-maps": {
       "optional": true
     },
     "@rjsf/utils": {
