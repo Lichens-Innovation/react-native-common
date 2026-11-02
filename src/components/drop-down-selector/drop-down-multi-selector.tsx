@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { MultiSelect } from 'react-native-element-dropdown';
 import { IconButton, Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
-import { getBorderColor, getLabelColor, getTextColor } from './drop-down-selector.utils';
+import { getBorderColor, getDropdownContainerStyle, getLabelColor, getTextColor } from './drop-down-selector.utils';
 import { DropDownSelectorItem } from './drop-down-selector-item';
 import { DropDownSelectorLeftIcon } from './drop-down-selector-left-icon';
 
@@ -85,6 +85,7 @@ export const DropDownMultiSelector: FunctionComponent<DropDownMultiSelectorProps
 
       <MultiSelect
         style={styles.dropdown}
+        containerStyle={modal ? undefined : getDropdownContainerStyle()}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         data={options}
