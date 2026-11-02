@@ -37,7 +37,8 @@
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
     "lint:package": "npmPkgJsonLint .",
     "lint:fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix",
-    "format:fix": "prettier \"**/*.{js,jsx,ts,tsx,json}\" --write"
+    "format:fix": "prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
+    "security:check": "bunx cve-lite-cli@latest . --fail-on high --ratchet --verbose"
   },
   "dependencies": {
     "@legendapp/list": "2.0.19",

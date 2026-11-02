@@ -212,20 +212,21 @@ bun install
 
 ### Scripts
 
-| Command                            | Description                                                        |
-| ---------------------------------- | ------------------------------------------------------------------ |
-| `bun run build`                    | Cleans the dist folder and bundles with `tsup` (CJS + types)       |
-| `bun run clean:node`               | Removes node_modules and bun.lock                                  |
-| `bun run clean:dist`               | Removes the dist directory                                         |
-| `bun run typecheck`                | Checks TypeScript types without emitting files (`tsc --noEmit`)    |
-| `bun run watch:for:rvdrain`        | Watches TS and syncs dist to rinno-rvdrain-app-mobile node_modules |
-| `bun run watch:for:manufacture`    | Watches TS and syncs dist to rinno-manufacture-app node_modules    |
-| `bun run watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules |
-| `bun run test`                     | Runs tests with Vitest                                             |
-| `bun run lint`                     | Runs ESLint and Prettier check on JS/TS/TSX/JSON                   |
-| `bun run lint:package`             | Lints `package.json` (exact versions) with npm-package-json-lint   |
-| `bun run lint:fix`                 | Runs ESLint with auto-fix                                          |
-| `bun run format:fix`               | Formats code with Prettier (write)                                 |
+| Command                            | Description                                                                                                                                                                                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bun run build`                    | Cleans the dist folder and bundles with `tsup` (CJS + types)                                                                                                                                                                             |
+| `bun run clean:node`               | Removes node_modules and bun.lock                                                                                                                                                                                                        |
+| `bun run clean:dist`               | Removes the dist directory                                                                                                                                                                                                               |
+| `bun run typecheck`                | Checks TypeScript types without emitting files (`tsc --noEmit`)                                                                                                                                                                          |
+| `bun run watch:for:rvdrain`        | Watches TS and syncs dist to rinno-rvdrain-app-mobile node_modules                                                                                                                                                                       |
+| `bun run watch:for:manufacture`    | Watches TS and syncs dist to rinno-manufacture-app node_modules                                                                                                                                                                          |
+| `bun run watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules                                                                                                                                                                       |
+| `bun run test`                     | Runs tests with Vitest                                                                                                                                                                                                                   |
+| `bun run lint`                     | Runs ESLint and Prettier check on JS/TS/TSX/JSON                                                                                                                                                                                         |
+| `bun run lint:package`             | Lints `package.json` (exact versions) with npm-package-json-lint                                                                                                                                                                         |
+| `bun run lint:fix`                 | Runs ESLint with auto-fix                                                                                                                                                                                                                |
+| `bun run format:fix`               | Formats code with Prettier (write)                                                                                                                                                                                                       |
+| `bun run security:check`           | Audits dependencies for new CVEs vs [.cve-lite/baseline.json](.cve-lite/baseline.json), fails on high severity ([cve-lite-cli](https://github.com/OWASP/cve-lite-cli)); runs in `pre-commit` when `package.json` or `bun.lock` is staged |
 
 ## Peer Dependencies
 
