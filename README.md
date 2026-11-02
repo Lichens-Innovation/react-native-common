@@ -3,15 +3,15 @@
 This repository contains common components, utilities, and services used across React Native Expo applications.
 
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.4+-000000.svg?style=flat-square&logo=bun)](https://bun.sh/)
-[![React](https://img.shields.io/badge/React-19.1.0-61DAFB.svg?style=flat-square&logo=react)](https://react.dev/)
-[![Node.js](https://img.shields.io/badge/Node.js-LTS-339933.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
-[![Vitest](https://img.shields.io/badge/Vitest-3.2.4-6E9F18.svg?style=flat-square&logo=vitest)](https://vitest.dev/)
-[![React Native](https://img.shields.io/badge/React%20Native-0.81.4-61DAFB.svg?style=flat-square&logo=react)](https://reactnative.dev/)
-[![Expo SDK](https://img.shields.io/badge/Expo%20SDK-54-000020.svg?style=flat-square&logo=expo)](https://expo.dev/)
+[![React](https://img.shields.io/badge/React-19.3-61DAFB.svg?style=flat-square&logo=react)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-24-339933.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![Vitest](https://img.shields.io/badge/Vitest-5.0-6E9F18.svg?style=flat-square&logo=vitest)](https://vitest.dev/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.88-61DAFB.svg?style=flat-square&logo=react)](https://reactnative.dev/)
+[![Expo SDK](https://img.shields.io/badge/Expo%20SDK-58-000020.svg?style=flat-square&logo=expo)](https://expo.dev/)
 
-[![GitHub Package](https://img.shields.io/badge/GitHub%20Package-@Lichens--Innovation%2Freact--native--common-blue.svg?style=flat-square&logo=github)](https://github.com/Lichens-Innovation/react-native-common) [![npm](https://img.shields.io/npm/v/@lichens-innovation/react-native-common.svg?style=flat-square&logo=npm)](https://www.npmjs.com/package/@lichens-innovation/react-native-common) [![semantic-release](https://img.shields.io/badge/semantic--release-conventionalcommits-e10079.svg?style=flat-square&logo=semantic-release)](https://github.com/semantic-release/semantic-release)
+[![GitHub](https://img.shields.io/badge/GitHub-Lichens--Innovation%2Freact--native--common-blue.svg?style=flat-square&logo=github)](https://github.com/Lichens-Innovation/react-native-common) [![npm](https://img.shields.io/npm/v/@lichens-innovation/react-native-common.svg?style=flat-square&logo=npm)](https://www.npmjs.com/package/@lichens-innovation/react-native-common) [![semantic-release](https://img.shields.io/badge/semantic--release-conventionalcommits-e10079.svg?style=flat-square&logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 
 Table of content
 
@@ -26,6 +26,7 @@ Table of content
   - [Optional modules](#optional-modules)
     - [RJSF (`@lichens-innovation/react-native-common/rjsf`)](#rjsf-lichens-innovationreact-native-commonrjsf)
   - [Contributions](#contributions)
+    - [Releases](#releases)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
     - [Scripts](#scripts)
@@ -62,6 +63,7 @@ Table of content
 - WiFi and available networks detection
 - hooks for Expo updates detection, image picking, animations...
 - `WebView` integration hooks and utilities
+- `MobX` stores (common state, in-memory logs)
 - I18N internationalization (`i18next` setup and files)
 - `logging` service (`Sentry`, file-base, console, in-memory)
 - various helper functions (strings, dates, base64...)
@@ -123,7 +125,7 @@ export const MyComponent = () => {
 
   return (
     <>
-      <Button title="Show Dialog" onPress={() => setShowDialog(true)} />
+      <Button onPress={() => setShowDialog(true)}>Show Dialog</Button>
 
       <DialogOkCancel
         isVisible={showDialog}
@@ -156,22 +158,23 @@ yarn add @rjsf/core @rjsf/utils @rjsf/validator-ajv8 ajv-i18n i18next
 # Optional (if not already in your app)
 #  - @react-native-community/datetimepicker — for DateWidget and DateTimeWidget
 #  - @react-native-community/slider — for RangeWidget
-yarn add react-native-paper @react-native-community/datetimepicker @react-native-community/slider
+yarn add @react-native-community/datetimepicker @react-native-community/slider
 ```
 
 **Usage example:**
 
 ```tsx
-import { RjsfPaperRenderer, FormSubmitProvider } from '@lichens-innovation/react-native-common/rjsf';
+import { RjsfPaperRenderer } from '@lichens-innovation/react-native-common/rjsf';
 import type { RJSFSchema } from '@rjsf/utils';
+import { useTranslation } from 'react-i18next';
 
 const schema: RJSFSchema = { type: 'object', properties: { name: { type: 'string', title: 'Name' } } };
 
-export const MyForm = () => (
-  <FormSubmitProvider onSubmit={(data) => console.info(data)}>
-    <RjsfPaperRenderer schema={schema} />
-  </FormSubmitProvider>
-);
+export const MyForm = () => {
+  const { i18n } = useTranslation();
+
+  return <RjsfPaperRenderer schema={schema} i18n={i18n} onSubmit={({ formData }) => console.info(formData)} />;
+};
 ```
 
 ## Contributions
@@ -195,7 +198,7 @@ Major versions are aligned with Expo SDK versions (see the compatibility table a
 
 ### Prerequisites
 
-- Node.js (LTS or higher)
+- Node.js 24 (see `.nvmrc`)
 - [Bun](https://bun.sh/)
 - React Native development environment set up (see [React Native documentation](https://reactnative.dev/docs/environment-setup))
 
@@ -211,7 +214,7 @@ bun install
 
 | Command                            | Description                                                        |
 | ---------------------------------- | ------------------------------------------------------------------ |
-| `bun run build`                    | Cleans the dist folder and compiles TypeScript                     |
+| `bun run build`                    | Cleans the dist folder and bundles with `tsup` (CJS + types)       |
 | `bun run clean:node`               | Removes node_modules and bun.lock                                  |
 | `bun run clean:dist`               | Removes the dist directory                                         |
 | `bun run typecheck`                | Checks TypeScript types without emitting files (`tsc --noEmit`)    |
@@ -220,6 +223,7 @@ bun install
 | `bun run watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules |
 | `bun run test`                     | Runs tests with Vitest                                             |
 | `bun run lint`                     | Runs ESLint and Prettier check on JS/TS/TSX/JSON                   |
+| `bun run lint:package`             | Lints `package.json` (exact versions) with npm-package-json-lint   |
 | `bun run lint:fix`                 | Runs ESLint with auto-fix                                          |
 | `bun run format:fix`               | Formats code with Prettier (write)                                 |
 
