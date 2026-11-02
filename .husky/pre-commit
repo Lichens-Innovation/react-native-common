@@ -4,9 +4,9 @@
 set -e
 
 echo "Running typecheck..."
-yarn typecheck
+bun run typecheck
 echo "  -->  ✅ Typecheck completed"
 
 echo "Running package.json lint..."
-yarn lint:package
+bun run lint:package
 echo "  -->  ✅ package.json lint completed"

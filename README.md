@@ -4,14 +4,14 @@ This repository contains common components, utilities, and services used across 
 
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Yarn](https://img.shields.io/badge/Yarn-1.22+-2C8EBB.svg?style=flat-square&logo=yarn)](https://yarnpkg.com/)
+[![Bun](https://img.shields.io/badge/Bun-1.4+-000000.svg?style=flat-square&logo=bun)](https://bun.sh/)
 [![React](https://img.shields.io/badge/React-19.1.0-61DAFB.svg?style=flat-square&logo=react)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-LTS-339933.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Vitest](https://img.shields.io/badge/Vitest-3.2.4-6E9F18.svg?style=flat-square&logo=vitest)](https://vitest.dev/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.81.4-61DAFB.svg?style=flat-square&logo=react)](https://reactnative.dev/)
 [![Expo SDK](https://img.shields.io/badge/Expo%20SDK-54-000020.svg?style=flat-square&logo=expo)](https://expo.dev/)
 
-[![GitHub Package](https://img.shields.io/badge/GitHub%20Package-@Lichens--Innovation%2Freact--native--common-blue.svg?style=flat-square&logo=github)](https://github.com/Lichens-Innovation/react-native-common) [![Version](https://img.shields.io/badge/version-2.7.1-blue.svg?style=flat-square)](https://github.com/Lichens-Innovation/react-native-common)
+[![GitHub Package](https://img.shields.io/badge/GitHub%20Package-@Lichens--Innovation%2Freact--native--common-blue.svg?style=flat-square&logo=github)](https://github.com/Lichens-Innovation/react-native-common) [![npm](https://img.shields.io/npm/v/@lichens-innovation/react-native-common.svg?style=flat-square&logo=npm)](https://www.npmjs.com/package/@lichens-innovation/react-native-common) [![semantic-release](https://img.shields.io/badge/semantic--release-conventionalcommits-e10079.svg?style=flat-square&logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 
 Table of content
 
@@ -176,12 +176,27 @@ export const MyForm = () => (
 
 ## Contributions
 
-Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. If the version field in `package.json` is incremented, the build will be automatically triggered when the PR is merged into the `main` branch, and the new version will be published to our enterprise Git repository.
+Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. CI (lint, typecheck, tests, build) runs on every PR.
+
+### Releases
+
+Releases are fully automated by [semantic-release](https://github.com/semantic-release/semantic-release): do **not** bump the `version` field in `package.json` manually. When a PR is squash-merged into `main`, the PR title (which becomes the commit message) is analyzed to determine the next version, then the package is published to npm, `CHANGELOG.md` and `package.json` are updated, and a GitHub release is created.
+
+PR titles must therefore follow [Conventional Commits](https://www.conventionalcommits.org/) (checked in CI):
+
+| PR title                                   | Release |
+| ------------------------------------------ | ------- |
+| `fix: ...`                                 | patch   |
+| `feat: ...`                                | minor   |
+| `feat!: ...` or `BREAKING CHANGE:` in body | major   |
+| `chore: ...`, `docs: ...`, `ci: ...`, etc. | none    |
+
+Major versions are aligned with Expo SDK versions (see the compatibility table above): only use `!` / `BREAKING CHANGE` for real breaking changes.
 
 ### Prerequisites
 
 - Node.js (LTS or higher)
-- Yarn
+- [Bun](https://bun.sh/)
 - React Native development environment set up (see [React Native documentation](https://reactnative.dev/docs/environment-setup))
 
 ### Installation
@@ -189,24 +204,24 @@ Contributions to the project are made by simply improving the current codebase a
 ```bash
 git clone https://github.com/Lichens-Innovation/react-native-common.git
 cd react-native-common
-yarn install
+bun install
 ```
 
 ### Scripts
 
-| Command                         | Description                                                        |
-| ------------------------------- | ------------------------------------------------------------------ |
-| `yarn build`                    | Cleans the dist folder and compiles TypeScript                     |
-| `yarn clean:node`               | Removes node_modules and yarn.lock                                 |
-| `yarn clean:dist`               | Removes the dist directory                                         |
-| `yarn typecheck`                | Checks TypeScript types without emitting files (`tsc --noEmit`)    |
-| `yarn watch:for:rvdrain`        | Watches TS and syncs dist to rinno-rvdrain-app-mobile node_modules |
-| `yarn watch:for:manufacture`    | Watches TS and syncs dist to rinno-manufacture-app node_modules    |
-| `yarn watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules |
-| `yarn test`                     | Runs tests with Vitest                                             |
-| `yarn lint`                     | Runs ESLint and Prettier check on JS/TS/TSX/JSON                   |
-| `yarn lint:fix`                 | Runs ESLint with auto-fix                                          |
-| `yarn format:fix`               | Formats code with Prettier (write)                                 |
+| Command                            | Description                                                        |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| `bun run build`                    | Cleans the dist folder and compiles TypeScript                     |
+| `bun run clean:node`               | Removes node_modules and bun.lock                                  |
+| `bun run clean:dist`               | Removes the dist directory                                         |
+| `bun run typecheck`                | Checks TypeScript types without emitting files (`tsc --noEmit`)    |
+| `bun run watch:for:rvdrain`        | Watches TS and syncs dist to rinno-rvdrain-app-mobile node_modules |
+| `bun run watch:for:manufacture`    | Watches TS and syncs dist to rinno-manufacture-app node_modules    |
+| `bun run watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules |
+| `bun run test`                     | Runs tests with Vitest                                             |
+| `bun run lint`                     | Runs ESLint and Prettier check on JS/TS/TSX/JSON                   |
+| `bun run lint:fix`                 | Runs ESLint with auto-fix                                          |
+| `bun run format:fix`               | Formats code with Prettier (write)                                 |
 
 ## Peer Dependencies
 

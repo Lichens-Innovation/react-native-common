@@ -4,7 +4,7 @@
 set -e
 
 echo "Running lint..."
-yarn lint
+bun run lint
 echo "  -->  ✅ Lint completed"
 
 # Prevent force push on protected branches

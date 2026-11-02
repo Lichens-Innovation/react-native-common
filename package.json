@@ -18,17 +18,18 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "clean:node": "npx rimraf node_modules yarn.lock",
-    "clean:dist": "npx rimraf dist",
-    "typecheck": "npx tsc --noEmit",
-    "build": "npm run clean:dist && tsup",
+    "clean:node": "bunx rimraf node_modules bun.lock",
+    "clean:dist": "bunx rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "build": "bun run clean:dist && tsup",
     "watch:for:rvdrain": "tsup --watch & cpx \"dist/**/*\" ../rinno-rvdrain-app-mobile/node_modules/@lichens-innovation/react-native-common/dist --watch",
     "watch:for:manufacture": "tsup --watch & cpx \"dist/**/*\" ../rinno-manufacture-app/node_modules/@lichens-innovation/react-native-common/dist --watch",
     "watch:for:rn-common-demo": "tsup --watch & cpx \"dist/**/*\" ../react-native-common-demo/node_modules/@lichens-innovation/react-native-common/dist --watch",
@@ -71,6 +72,10 @@
     "@rjsf/core": "6.11.0",
     "@rjsf/utils": "6.11.0",
     "@rjsf/validator-ajv8": "6.11.0",
+    "@semantic-release/changelog": "7.0.0",
+    "@semantic-release/git": "11.0.1",
+    "@semantic-release/github": "12.0.10",
+    "@semantic-release/npm": "13.2.0",
     "@sentry/react-native": "8.31.0",
     "@tanstack/react-query": "5.104.5",
     "@types/react": "19.3.0",
@@ -147,6 +152,7 @@
     "react-native-winrt": "0.72.2",
     "react-native-zeroconf": "0.17.6",
     "rimraf": "6.1.3",
+    "semantic-release": "25.0.9",
     "tsup": "9.0.0",
     "typescript": "6.0.3",
     "vite": "8.3.4",
@@ -234,5 +240,5 @@
       "optional": true
     }
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "bun@1.4.4"
 }
