@@ -1,4 +1,19 @@
+import { Platform, StatusBar, ViewStyle } from 'react-native';
 import { AppTheme } from '../../theme';
+
+/**
+ * react-native-element-dropdown adds `StatusBar.currentHeight` to the position measured with `measureInWindow`.
+ * With Android edge-to-edge (mandatory since RN 0.81) the measure already includes the status bar, so the list
+ * is rendered one status bar height below its anchor. This style shifts the list back into place.
+ */
+export const getDropdownContainerStyle = (): ViewStyle | undefined => {
+  const statusBarHeight = StatusBar.currentHeight ?? 0;
+  if (Platform.OS !== 'android' || statusBarHeight === 0) {
+    return undefined;
+  }
+
+  return { transform: [{ translateY: -statusBarHeight }] };
+};
 
 interface GetTextColorArgs {
   theme: AppTheme;

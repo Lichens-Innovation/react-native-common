@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { IconButton, Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
-import { getBorderColor, getLabelColor, getTextColor } from './drop-down-selector.utils';
+import { getBorderColor, getDropdownContainerStyle, getLabelColor, getTextColor } from './drop-down-selector.utils';
 import { DropDownSelectorItem } from './drop-down-selector-item';
 import { DropDownSelectorLeftIcon } from './drop-down-selector-left-icon';
 
@@ -82,6 +82,7 @@ export const DropDownSelector: FunctionComponent<DropDownSelectorProps> = ({
 
       <Dropdown
         style={styles.dropdown}
+        containerStyle={getDropdownContainerStyle()}
         autoScroll={false} // @see https://github.com/hoaphantn7604/react-native-element-dropdown/issues/345
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
