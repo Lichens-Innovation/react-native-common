@@ -2,6 +2,7 @@ export * from './battery';
 export * from './bottom-sheet';
 export * from './code-scanner';
 export * from './dialogs';
+export * from './drawing';
 export * from './drop-down-selector';
 export * from './error';
 export * from './event-logs';

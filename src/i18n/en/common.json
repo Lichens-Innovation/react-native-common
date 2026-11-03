@@ -122,6 +122,24 @@
       "permissionDenied": "Location permission denied. Please enable location permissions in your device settings to use this feature.",
       "error": "Error accessing location. Please try again and make sure to grant location permissions."
     },
+    "signature": {
+      "comment": "Comment",
+      "signedBy": "Signed by {{name}} on {{date}}",
+      "empty": "No signature",
+      "padTitle": "Sign",
+      "signHere": "Sign here",
+      "save": "Save",
+      "clear": "Clear",
+      "cancel": "Cancel",
+      "replaceTitle": "Existing signature",
+      "replaceBody": "{{name}} signed this field previously. Delete their signature and sign instead?",
+      "replace": "Replace",
+      "deleteTitle": "Delete signature",
+      "deleteBody": "Delete {{name}}'s signature?",
+      "delete": "Delete",
+      "userNotSyncedTitle": "Signing unavailable",
+      "userNotSyncedBody": "Your profile has not synced to this device yet. Connect to the network once, then try again."
+    },
     "lock": "Lock",
     "logout": "Logout",
     "logs": {

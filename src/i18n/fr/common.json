@@ -122,6 +122,24 @@
       "permissionDenied": "Permission de localisation refusée. Veuillez activer les permissions de localisation dans les paramètres de votre appareil pour utiliser cette fonctionnalité.",
       "error": "Erreur d'accès à la localisation. Veuillez réessayer et vous assurer d'accorder les permissions de localisation."
     },
+    "signature": {
+      "comment": "Commentaire",
+      "signedBy": "Signé par {{name}} le {{date}}",
+      "empty": "Aucune signature",
+      "padTitle": "Signer",
+      "signHere": "Signez ici",
+      "save": "Enregistrer",
+      "clear": "Effacer",
+      "cancel": "Annuler",
+      "replaceTitle": "Signature existante",
+      "replaceBody": "{{name}} a déjà signé ce champ. Voulez-vous supprimer sa signature et signer à votre tour ?",
+      "replace": "Remplacer",
+      "deleteTitle": "Supprimer la signature",
+      "deleteBody": "Supprimer la signature de {{name}} ?",
+      "delete": "Supprimer",
+      "userNotSyncedTitle": "Signature indisponible",
+      "userNotSyncedBody": "Votre profil n'est pas encore synchronisé sur cet appareil. Connectez-vous au réseau une fois, puis réessayez."
+    },
     "lock": "Verrouiller",
     "logout": "Déconnexion",
     "logs": {
