@@ -41,7 +41,7 @@
     "security:check": "bunx cve-lite-cli@latest . --fail-on high --ratchet --verbose"
   },
   "dependencies": {
-    "@legendapp/list": "2.0.19",
+    "@legendapp/list": "3.7.1",
     "@lichens-innovation/ts-common": "1.29.0",
     "@noble/hashes": "2.4.0",
     "@uidotdev/usehooks": "2.4.1",
