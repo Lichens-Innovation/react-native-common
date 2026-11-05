@@ -19,6 +19,12 @@ export type OrientationAwareTabsLayoutProps = {
   activeColor?: string;
   containerStyle?: ViewStyle;
   tabListStyle?: ViewStyle;
+  /**
+   * When false, inactive tab screens stay attached to the native view hierarchy.
+   * Needed for screens owning native surfaces (e.g. GL views) that must survive a tab switch.
+   * Default: expo-router default (true on android/ios/web)
+   */
+  detachInactiveScreens?: boolean;
 };
 
 export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsLayoutProps> = ({
@@ -26,6 +32,7 @@ export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsL
   activeColor,
   containerStyle,
   tabListStyle,
+  detachInactiveScreens,
 }) => {
   const theme = useAppTheme();
   const { isLandscape, isLandscapeLeft } = useScreenOrientation();
@@ -33,7 +40,7 @@ export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsL
 
   return (
     <Tabs style={[styles.tabsContainer, containerStyle]}>
-      <TabSlot style={styles.tabSlot} />
+      <TabSlot style={styles.tabSlot} detachInactiveScreens={detachInactiveScreens} />
 
       <TabList style={[styles.tabList, tabListStyle]}>
         {tabs.map((tab) => (
