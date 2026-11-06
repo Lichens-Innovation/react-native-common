@@ -5,7 +5,7 @@
     "": {
       "name": "@lichens-innovation/react-native-common",
       "dependencies": {
-        "@legendapp/list": "2.0.19",
+        "@legendapp/list": "3.7.1",
         "@lichens-innovation/ts-common": "1.29.0",
         "@noble/hashes": "2.4.0",
         "@uidotdev/usehooks": "2.4.1",
@@ -588,7 +588,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@legendapp/list": ["@legendapp/list@2.0.19", "", { "dependencies": { "use-sync-external-store": "^1.5.0" } }, "sha512-zDWg8yg0smKxxk+M7gwAbZAnf5uczohPA+IjqLSkImz7+e9ytxeT0Mq35RBO9RTKODOXfV/aIgm1uqUHLBEdmg=="],
+    "@legendapp/list": ["@legendapp/list@3.7.1", "", { "dependencies": { "use-sync-external-store": "^1.5.0" }, "peerDependencies": { "react": "*", "react-dom": "*", "react-native": "*" }, "optionalPeers": ["react-dom", "react-native"] }, "sha512-zgIy84yG2JP93+kib61rZBTcYGZ6fULrkCQz/MF7WrjVJeJQa/rR4z+rXfM5oveirO5mYkro4IDGytARIjJe9w=="],
 
     "@lichens-innovation/ts-common": ["@lichens-innovation/ts-common@1.29.0", "", { "dependencies": { "date-fns": "4.4.0" }, "peerDependencies": { "@rjsf/utils": "*", "@rjsf/validator-ajv8": "*", "ajv-i18n": "*", "exceljs": "^4.4.0", "i18next": "*", "jspdf": "^4.2.1", "jspdf-autotable": "^5.0.7", "mime": "^4.1.0", "papaparse": "^5.4.1", "pino": "^10.3.1", "pino-pretty": "^13.0.0", "react-i18next": "*" }, "optionalPeers": ["@rjsf/utils", "@rjsf/validator-ajv8", "ajv-i18n", "exceljs", "i18next", "jspdf", "jspdf-autotable", "mime", "papaparse", "pino", "pino-pretty", "react-i18next"] }, "sha512-41fb244q7GxZuksGNgnzVBHJq+GzyssdiG8iep5bos8tmCO9sG32gEwTd5ol7xA7mpylnEh7LdQNv4o8kQ3npQ=="],
 
