@@ -1,3 +1,10 @@
+## [4.2.1](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.0...v4.2.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* **resizable:** mark pan gesture callbacks as worklets ([#55](https://github.com/Lichens-Innovation/react-native-common/issues/55)) ([cd3cf0b](https://github.com/Lichens-Innovation/react-native-common/commit/cd3cf0b6ad3f7c1b43169b59ac8d9bf4e07c9037))
+
 # [4.2.0](https://github.com/Lichens-Innovation/react-native-common/compare/v4.1.2...v4.2.0) (2026-11-05)
 
 
