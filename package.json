@@ -61,7 +61,7 @@
     "react-syntax-highlighter": "16.1.2"
   },
   "devDependencies": {
-    "@babel/core": "^8.0.7",
+    "@babel/core": "8.1.0",
     "@babel/plugin-proposal-export-namespace-from": "7.18.9",
     "@commitlint/cli": "21.2.4",
     "@commitlint/config-conventional": "21.2.4",
