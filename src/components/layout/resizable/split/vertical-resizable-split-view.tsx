@@ -55,14 +55,17 @@ export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSpli
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
+      'worklet';
       startY.value = topSectionHeight.value;
       isDragging.value = true;
     })
     .onUpdate((event) => {
+      'worklet';
       const newHeight = startY.value + event.translationY;
       topSectionHeight.value = Math.max(minHeight.value, Math.min(newHeight, maxHeight.value));
     })
     .onFinalize(() => {
+      'worklet';
       isDragging.value = false;
     });
 

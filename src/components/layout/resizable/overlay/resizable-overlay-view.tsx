@@ -73,16 +73,19 @@ export const ResizableOverlayView: FunctionComponent<ResizableOverlayViewProps> 
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
+      'worklet';
       startY.value = overlayHeight.value;
       isDragging.value = true;
     })
     .onUpdate((event) => {
+      'worklet';
       // If the overlay is anchored to the bottom, dragging up should INCREASE its height.
       const direction = isBottomAnchored ? -1 : 1;
       const newHeight = startY.value + direction * event.translationY;
       overlayHeight.value = Math.max(minHeight.value, Math.min(newHeight, maxHeight.value));
     })
     .onFinalize(() => {
+      'worklet';
       isDragging.value = false;
     });
 

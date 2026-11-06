@@ -55,14 +55,17 @@ export const HorizontalResizableSplitView: FunctionComponent<HorizontalResizable
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
+      'worklet';
       startX.value = leftSectionWidth.value;
       isDragging.value = true;
     })
     .onUpdate((event) => {
+      'worklet';
       const newWidth = startX.value + event.translationX;
       leftSectionWidth.value = Math.max(minWidth.value, Math.min(newWidth, maxWidth.value));
     })
     .onFinalize(() => {
+      'worklet';
       isDragging.value = false;
     });
 
