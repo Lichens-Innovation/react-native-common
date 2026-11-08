@@ -1,6 +1,6 @@
 import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
 import { FunctionComponent } from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useScreenOrientation } from '../../../hooks/use-screen-orientation';
@@ -42,17 +42,20 @@ export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsL
     <Tabs style={[styles.tabsContainer, containerStyle]}>
       <TabSlot style={styles.tabSlot} detachInactiveScreens={detachInactiveScreens} />
 
-      <TabList style={[styles.tabList, tabListStyle]}>
-        {tabs.map((tab) => (
-          <TabTrigger key={tab.name} name={tab.name} href={tab.href} asChild>
-            <OrientationAwareTabButton
-              isLabelHidden={isLandscape}
-              icon={tab.icon}
-              title={tab.title}
-              activeColor={activeColor ?? theme.colors.primary}
-            />
-          </TabTrigger>
-        ))}
+      {/* asChild: skip expo-router's additive left/right safe area, insets are handled in useStyles */}
+      <TabList asChild style={[styles.tabList, tabListStyle]}>
+        <View>
+          {tabs.map((tab) => (
+            <TabTrigger key={tab.name} name={tab.name} href={tab.href} asChild>
+              <OrientationAwareTabButton
+                isLabelHidden={isLandscape}
+                icon={tab.icon}
+                title={tab.title}
+                activeColor={activeColor ?? theme.colors.primary}
+              />
+            </TabTrigger>
+          ))}
+        </View>
       </TabList>
     </Tabs>
   );
