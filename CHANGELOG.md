@@ -1,3 +1,10 @@
+## [4.2.2](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.1...v4.2.2) (2026-11-08)
+
+
+### Bug Fixes
+
+* **tabs:** drop expo-router additive safe area on landscape tab list ([#56](https://github.com/Lichens-Innovation/react-native-common/issues/56)) ([ee492bc](https://github.com/Lichens-Innovation/react-native-common/commit/ee492bc9e7f7b1c3351a9a05341fa9b735964b44))
+
 ## [4.2.1](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.0...v4.2.1) (2026-11-06)
 
 
