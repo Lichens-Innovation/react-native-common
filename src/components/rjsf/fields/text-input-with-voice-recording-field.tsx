@@ -109,6 +109,8 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
     <View style={styles.container}>
       <VoiceRecognitionTextInput
         mode="outlined"
+        // Empty and unused, drawn as a light stand-in: forms hold many of these (rec 24.C).
+        deferUntilUsed
         label={displayLabel}
         value={text}
         placeholder={typeof uiSchema?.['ui:placeholder'] === 'string' ? uiSchema['ui:placeholder'] : undefined}

@@ -16,6 +16,22 @@ const ThemedForm = withTheme(RJSF_PAPER_THEME);
 
 export type FormData = Record<string, unknown>;
 
+// One validator per language for the whole app session (rec 24.E). A validator keeps every schema it
+// compiles, and compiling a 155-field checklist cost 0.85 s on a recent Android, 1.9 s on an old one:
+// a validator per form opening paid it again on every save. rjsf's own default validator is a
+// module-level singleton for the same reason.
+const validatorsByLanguage = new Map<string, ReturnType<typeof createRjsfValidator>>();
+
+/** The shared validator for `language`, created on first use. */
+export const getRjsfValidator = (language: string): ReturnType<typeof createRjsfValidator> => {
+  let validator = validatorsByLanguage.get(language);
+  if (!validator) {
+    validator = createRjsfValidator(language);
+    validatorsByLanguage.set(language, validator);
+  }
+  return validator;
+};
+
 type FormTemplates = FormProps<FormData, RJSFSchema>['templates'];
 type FormWidgets = FormProps<FormData, RJSFSchema>['widgets'];
 type FormFields = FormProps<FormData, RJSFSchema>['fields'];
@@ -44,10 +60,9 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   submitButtonOverrideLabel = null,
   ...rest
 }) => {
-  // Memoize the AJV validator here (React layer) so ts-common stays React-free.
-  // A stable validator keeps AJV's schema cache and RJSF's schemaUtils/retrieveSchema
-  // cache warm across keystrokes — critical for forms with conditional (if/then) fields.
-  const customValidator = useMemo(() => createRjsfValidator(i18n.language), [i18n.language]);
+  // The shared validator keeps AJV's schema cache and RJSF's schemaUtils/retrieveSchema cache warm
+  // across keystrokes and across openings — critical for forms with conditional (if/then) fields.
+  const customValidator = useMemo(() => getRjsfValidator(i18n.language), [i18n.language]);
   const insets = useSafeAreaInsets();
 
   // Live form data is kept in a ref and published through a stable store, never in state: a setState

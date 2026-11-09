@@ -93,6 +93,8 @@ export const SignatureField: FunctionComponent<FieldProps<Record<string, unknown
       {enableComment ? (
         <VoiceRecognitionTextInput
           mode="outlined"
+          // Empty and unused, drawn as a light stand-in: forms hold many of these (rec 24.C).
+          deferUntilUsed
           label={commentLabel ?? t('common:signature.comment')}
           value={answer.comment ?? ''}
           disabled={disabled}

@@ -55,6 +55,8 @@ export const TextWidget: FunctionComponent<WidgetProps> = ({
       style={styles.input}
       outlineColor={theme.colors.outline}
       theme={labelColorTheme}
+      // A checklist holds dozens of these, most left empty (rec 24.C).
+      deferUntilUsed
     />
   );
 };

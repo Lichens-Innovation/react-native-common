@@ -15,6 +15,7 @@ import { useMemo, type ComponentType } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme';
+import { useProgressiveCount } from './progressive-count';
 import {
   AddButton,
   ClearButton,
@@ -33,6 +34,9 @@ const NoopErrorList = () => null;
 const PaperObjectFieldTemplate = ({ title, description, properties, uiSchema }: ObjectFieldTemplateProps) => {
   const styles = useStyles();
   const labelColor = getRjsfLabelColor(getUiOptions(uiSchema));
+  // A long form draws its fields a batch per frame instead of all before the first frame (rec 24.B).
+  // The fields already drawn are not redrawn: their `content` elements are the same objects.
+  const drawnCount = useProgressiveCount(properties.length);
 
   return (
     <View style={styles.fieldSet}>
@@ -48,7 +52,7 @@ const PaperObjectFieldTemplate = ({ title, description, properties, uiSchema }: 
         </Text>
       ) : null}
 
-      {properties.map((prop) => {
+      {properties.slice(0, drawnCount).map((prop) => {
         if (prop.hidden) return null;
         return <View key={prop.name}>{prop.content}</View>;
       })}

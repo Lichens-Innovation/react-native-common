@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState, type FunctionComponent } from 're
 import { Platform, StyleSheet } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { logger } from '../../../logger/logger';
+import { OutlinedFieldStandIn } from '../../outlined-field-stand-in';
 import { useAppTheme } from '../../../theme';
 import { mergeLabelColorTheme } from '../label-color-theme';
 import { useRootFormDataStore } from '../root-form-data-context';
@@ -48,6 +49,10 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
 
   const [localText, setLocalText] = useState(externalStr);
   const isFocusedRef = useRef(false);
+  // An empty number field draws as a light stand-in until tapped (rec 24.C), then focuses in place.
+  const [used, setUsed] = useState(false);
+  const inputRef = useRef<{ focus: () => void } | null>(null);
+  const focusOnLayoutRef = useRef(false);
 
   // A ComputedField reading this value repaints in the keystroke's own frame instead of waiting for
   // rjsf's change cycle, whose cost is a whole-schema state derivation and grows with the form
@@ -124,8 +129,34 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
 
   const unit = options?.unit as string | undefined;
 
+  if (!used && !disabled && isBlank(localText)) {
+    return (
+      <OutlinedFieldStandIn
+        label={displayLabel}
+        labelColor={getRjsfLabelColor(options)}
+        outlineColor={theme.colors.outline}
+        error={hasError}
+        readonly={readonly}
+        rightText={unit}
+        style={styles.input}
+        onActivate={() => {
+          focusOnLayoutRef.current = true;
+          setUsed(true);
+        }}
+      />
+    );
+  }
+
   return (
     <TextInput
+      ref={(node: { focus: () => void } | null) => {
+        inputRef.current = node;
+      }}
+      onLayout={() => {
+        if (!focusOnLayoutRef.current) return;
+        focusOnLayoutRef.current = false;
+        requestAnimationFrame(() => inputRef.current?.focus());
+      }}
       mode="outlined"
       label={displayLabel}
       value={localText}

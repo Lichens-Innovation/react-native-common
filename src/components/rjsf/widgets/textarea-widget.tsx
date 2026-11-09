@@ -44,6 +44,8 @@ export const TextareaWidget: FunctionComponent<WidgetProps> = ({
   return (
     <VoiceRecognitionTextInput
       mode="outlined"
+      // Empty and unused, drawn as a light stand-in: forms hold many of these (rec 24.C).
+      deferUntilUsed
       label={displayLabel}
       value={toStringOrEmpty(value)}
       placeholder={placeholder}

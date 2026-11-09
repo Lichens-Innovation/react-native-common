@@ -2,9 +2,10 @@ import { isBlank, isNotBlank, isNullish } from '@lichens-innovation/ts-common';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import { FunctionComponent, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Keyboard, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Keyboard, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { IconButton, TextInput, TextInputProps } from 'react-native-paper';
 import { logger } from '../../logger/logger';
+import { MicStandIn, OutlinedFieldStandIn } from '../outlined-field-stand-in';
 import { RecordingPlayer } from './recording-player';
 import {
   clearOwner,
@@ -151,6 +152,17 @@ interface VoiceRecognitionTextInputProps extends TextInputProps {
    * lose its width to the button.
    */
   micPosition?: 'right' | 'below';
+  /**
+   * While the field is empty and unused, draw a light stand-in of it and of its microphone instead of
+   * the real input (rec 24.C). For forms that hold dozens of fields: Paper's outlined input measures
+   * its label and draws three times on mount, about 17 ms each on a recent Android. A tap swaps the
+   * real input in and focuses it once laid out (an `autoFocus` would make Android scroll); a tap on the
+   * microphone swaps it in dictating. Ignored with `autoFocus`, `disabled` or the microphone below.
+   *
+   * Opt-in: the stand-in is not an input, so a caller focusing the field through a ref, or a screen
+   * reader expecting a text field, would not find one.
+   */
+  deferUntilUsed?: boolean;
 }
 
 export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextInputProps> = ({
@@ -165,8 +177,18 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
   showClear = true,
   onMicLongPress,
   micPosition = 'right',
+  deferUntilUsed = false,
   ...rest
 }) => {
+  const inputRef = useRef<{ focus: () => void } | null>(null);
+  // Set when the stand-in is tapped: the real input focuses on its first layout, in place.
+  const focusOnLayoutRef = useRef(false);
+  const focusIfAsked = () => {
+    if (!focusOnLayoutRef.current) return;
+    focusOnLayoutRef.current = false;
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+  const [used, setUsed] = useState(false);
   const [phase, setPhase] = useState<DictationPhase>('idle');
   const [recordingValue, setRecordingValue] = useState('');
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
@@ -522,6 +544,46 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
     onValueChange({ value: '' });
   };
 
+  const showStandIn =
+    deferUntilUsed &&
+    !used &&
+    micPosition === 'right' &&
+    !rest.autoFocus &&
+    !rest.disabled &&
+    phase === 'idle' &&
+    isBlank(finalValue) &&
+    isNullish(effectiveRecordingUri);
+
+  if (showStandIn) {
+    const readOnlyField = rest.editable === false;
+    return (
+      <View style={styles.container}>
+        <View style={styles.inputWrapper}>
+          <OutlinedFieldStandIn
+            label={typeof label === 'string' ? label : undefined}
+            labelColor={(rest.theme?.colors as { onSurfaceVariant?: string } | undefined)?.onSurfaceVariant}
+            outlineColor={rest.outlineColor}
+            error={rest.error}
+            multiline={rest.multiline}
+            readonly={readOnlyField}
+            style={rest.style as StyleProp<ViewStyle>}
+            onActivate={() => {
+              focusOnLayoutRef.current = true;
+              setUsed(true);
+            }}
+          />
+        </View>
+        <MicStandIn
+          disabled={readOnlyField || isLockedByAnotherField}
+          onDictate={() => {
+            setUsed(true);
+            void handleStartRecording();
+          }}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={micPosition === 'below' ? styles.containerBelow : styles.container}>
       {phase !== 'idle' && (
@@ -540,6 +602,13 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
       <View style={micPosition === 'below' ? styles.inputWrapperBelow : styles.inputWrapper}>
         <TextInput
           {...rest}
+          ref={(node: { focus: () => void } | null) => {
+            inputRef.current = node;
+          }}
+          onLayout={(event) => {
+            focusIfAsked();
+            rest.onLayout?.(event);
+          }}
           style={[
             styles.textInput,
             hasRightButtons(showPlayback, showClear) && styles.textInputWithRightButtons,
@@ -553,7 +622,9 @@ export const VoiceRecognitionTextInput: FunctionComponent<VoiceRecognitionTextIn
         <View style={styles.rightButtonsOverlay} pointerEvents="box-none">
           <View style={styles.rightButtons} pointerEvents="auto">
             {showPlayback && <RecordingPlayer recordingUri={effectiveRecordingUri} />}
-            {showClear && (
+            {/* Only once there is something to clear: an empty form shows dozens of these fields, and a
+                disabled button in each cost its mount for nothing (rec 24.C). */}
+            {showClear && !isBlank(finalValue) && (
               <IconButton
                 icon="close"
                 onPress={clearValue}
