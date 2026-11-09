@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "..",
+    "types": ["jest"],
+    "paths": {
+      "~/*": ["../src/*"],
+      "@lib": ["../src/index.ts"],
+      "@lib/rjsf": ["../src/components/rjsf/index.ts"],
+      "i18next": ["../node_modules/i18next"],
+      "@rjsf/utils": ["../node_modules/@rjsf/utils"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "../jest.setup.ts", "../src/types/*.d.ts"],
+  "exclude": []
+}

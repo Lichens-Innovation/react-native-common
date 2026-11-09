@@ -1,15 +1,14 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { isFileUri, normalizeFileUri, nowAsIsoFilename } from './file.utils';
 
 describe('Tests suite for file utilities', () => {
   describe('nowAsIsoFilename', () => {
     beforeEach(() => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date('2024-03-15T14:30:45.123Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2024-03-15T14:30:45.123Z'));
     });
 
     afterEach(() => {
-      vi.useRealTimers();
+      jest.useRealTimers();
     });
 
     it('should return a string with underscores instead of colons', () => {
