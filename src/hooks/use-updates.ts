@@ -5,19 +5,19 @@ import { useEffect, useState } from 'react';
 
 import { logger } from '../logger/logger';
 import { getDeviceType, isRealDevice } from '../utils/device/device.utils';
-import { isProduction } from '../utils/device/env.utils';
+import { isDevelopment } from '../utils/device/env.utils';
 
 const checkForUpdateAsync = async (): Promise<void> => {
   const deviceType = getDeviceType();
 
-  if (isRealDevice() && isProduction()) {
-    logger.info(`[checkForUpdateAsync] Checking for update on ${deviceType}`);
-    await Updates.checkForUpdateAsync();
+  if (isDevelopment() || !isRealDevice()) {
+    logger.info(`[checkForUpdateAsync] Faking update check on ${deviceType}`);
+    await sleep(1000);
     return;
   }
 
-  logger.info(`[checkForUpdateAsync] Faking update check on ${deviceType}`);
-  await sleep(1000);
+  logger.info(`[checkForUpdateAsync] Checking for update on ${deviceType}`);
+  await Updates.checkForUpdateAsync();
 };
 
 const fetchUpdateSafely = async (): Promise<void> => {
