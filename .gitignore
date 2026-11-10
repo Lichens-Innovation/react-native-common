@@ -43,3 +43,6 @@ yarn-error.*
 node_modules/.yarn-integrity
 
 dist/
+
+# test coverage
+coverage/
