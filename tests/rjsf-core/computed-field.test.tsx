@@ -290,6 +290,23 @@ describe('ComputedField', () => {
       expect(computedInput()).toHaveDisplayValue('3');
     });
 
+    it('keeps a stale but finite stored value when an unrelated field is edited', async () => {
+      // arrange
+      const onChange = jest.fn();
+      await renderForm({
+        schema: buildSchema({ note: { type: 'string', title: 'Note' } }),
+        uiSchema: computedUi({ formula: '{a}+{b}' }),
+        formData: { a: 1, b: 2, note: '', total: 99 },
+        onChange,
+      });
+
+      // act
+      await fireEvent.changeText(inputAt(2), 'hello');
+
+      // assert
+      expect(lastFormData(onChange)).toEqual({ a: 1, b: 2, note: 'hello', total: 99 });
+    });
+
     it('overwrites a non-finite stored value on mount', async () => {
       // arrange
       const onChange = jest.fn();
