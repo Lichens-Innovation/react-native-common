@@ -12,7 +12,8 @@ import {
 } from '@lib/rjsf';
 import type { RjsfRegistryWithTranslate } from '@lichens-innovation/ts-common/rjsf';
 import { TranslatableString } from '@rjsf/utils';
-import { fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
+import { NavigationContext } from 'expo-router/react-navigation';
 import type { FunctionComponent } from 'react';
 import { renderWithProviders } from './render-with-providers';
 
@@ -211,5 +212,93 @@ describe('SubmitButton', () => {
 
     // assert
     expect(submit).not.toHaveBeenCalled();
+  });
+});
+
+describe('SubmitButton screen focus (absolute mode)', () => {
+  type FocusEvent = 'focus' | 'blur';
+
+  const makeNavigation = (initiallyFocused: boolean) => {
+    let focused = initiallyFocused;
+    const listeners: Record<FocusEvent, Set<() => void>> = { focus: new Set(), blur: new Set() };
+
+    const navigation = {
+      isFocused: jest.fn(() => focused),
+      addListener: jest.fn((event: FocusEvent, listener: () => void) => {
+        listeners[event].add(listener);
+        return () => listeners[event].delete(listener);
+      }),
+    };
+
+    const emit = async (event: FocusEvent) => {
+      focused = event === 'focus';
+      await act(async () => listeners[event].forEach((listener) => listener()));
+    };
+
+    const listenerCount = () => listeners.focus.size + listeners.blur.size;
+
+    return { navigation, emit, listenerCount };
+  };
+
+  const renderFocusAwareSubmit = (navigation: ReturnType<typeof makeNavigation>['navigation']) =>
+    renderWithProviders(
+      <NavigationContext.Provider value={navigation as never}>
+        <SubmitButtonOptionsContext.Provider
+          value={{ submitButtonAbsolutePosition: true, submitButtonOverrideLabel: null }}
+        >
+          <SubmitButton uiSchema={{ 'ui:submitButtonOptions': { submitText: 'Go' } }} />
+        </SubmitButtonOptionsContext.Provider>
+      </NavigationContext.Provider>
+    );
+
+  it('renders the FAB when the screen is focused on mount', async () => {
+    // arrange
+    const { navigation } = makeNavigation(true);
+
+    // act
+    await renderFocusAwareSubmit(navigation);
+
+    // assert
+    expect(screen.getByText('Go')).toBeOnTheScreen();
+  });
+
+  it('renders nothing when the screen is not focused on mount', async () => {
+    // arrange
+    const { navigation } = makeNavigation(false);
+
+    // act
+    await renderFocusAwareSubmit(navigation);
+
+    // assert
+    expect(screen.queryByText('Go')).toBeNull();
+  });
+
+  it('hides the FAB on blur and shows it again on focus', async () => {
+    // arrange
+    const { navigation, emit } = makeNavigation(true);
+    await renderFocusAwareSubmit(navigation);
+
+    // act
+    await emit('blur');
+    const visibleAfterBlur = screen.queryByText('Go');
+    await emit('focus');
+
+    // assert
+    expect(visibleAfterBlur).toBeNull();
+    expect(screen.getByText('Go')).toBeOnTheScreen();
+  });
+
+  it('unsubscribes from focus and blur on unmount', async () => {
+    // arrange
+    const { navigation, listenerCount } = makeNavigation(true);
+    const { unmount } = await renderFocusAwareSubmit(navigation);
+    const countWhileMounted = listenerCount();
+
+    // act
+    await unmount();
+
+    // assert
+    expect(countWhileMounted).toBeGreaterThan(0);
+    expect(listenerCount()).toBe(0);
   });
 });
