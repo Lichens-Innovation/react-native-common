@@ -8,6 +8,7 @@ This repository contains common components, utilities, and services used across 
 [![React](https://img.shields.io/badge/React-19.3-61DAFB.svg?style=flat-square&logo=react)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-24-339933.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Jest](https://img.shields.io/badge/Jest-30-C21325.svg?style=flat-square&logo=jest)](https://jestjs.io/)
+[![Coverage](https://img.shields.io/badge/coverage-82%25-green.svg?style=flat-square)](#coverage)
 [![React Native](https://img.shields.io/badge/React%20Native-0.88-61DAFB.svg?style=flat-square&logo=react)](https://reactnative.dev/)
 [![Expo SDK](https://img.shields.io/badge/Expo%20SDK-58-000020.svg?style=flat-square&logo=expo)](https://expo.dev/)
 
@@ -39,6 +40,7 @@ Table of content
   - [Project coding guidelines](#project-coding-guidelines)
     - [Coding-guide policy](#coding-guide-policy)
   - [Unit tests](#unit-tests)
+    - [Coverage](#coverage)
   - [License](#license)
 
 ## Reusable Components
@@ -182,7 +184,7 @@ export const MyForm = () => {
 
 ## Contributions
 
-Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. CI (coding-guide lint, format check, `package.json` lint, knip, typecheck, tests, build) runs on every PR.
+Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. CI (coding-guide lint, format check, `package.json` lint, knip, typecheck, tests with coverage threshold, build) runs on every PR.
 
 ### Releases
 
@@ -225,6 +227,7 @@ bun install
 | `bun run watch:for:manufacture`    | Watches TS and syncs dist to rinno-manufacture-app node_modules                                                                                                                                                                          |
 | `bun run watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules                                                                                                                                                                       |
 | `bun run test`                     | Runs unit tests with Jest (`jest-expo` preset)                                                                                                                                                                                           |
+| `bun run test:coverage`            | Runs unit tests with coverage; fails below the [coverage threshold](#coverage), HTML report in `coverage/lcov-report/`                                                                                                                   |
 | `bun run lint`                     | Coding-guide coaching on the whole project (`coding-guide check`: ESLint, knip, comments, duplication)                                                                                                                                   |
 | `bun run lint:ci`                  | Plain ESLint (no coaching, no knip / comments / duplication sensors)                                                                                                                                                                     |
 | `bun run lint:package`             | Lints `package.json` (exact versions) with npm-package-json-lint                                                                                                                                                                         |
@@ -243,7 +246,7 @@ Installed by Husky on `bun install` (`prepare` script):
 
 - **commit-msg**: commitlint ([Conventional Commits](https://www.conventionalcommits.org))
 - **pre-commit**: typecheck, Prettier on staged files (lint-staged), coding-guide on staged files (`coding-guide check --staged`), `package.json` lint, CVE check when `package.json` / `bun.lock` are staged
-- **pre-push**: knip (unused files / dependencies / exports), blocks force push on `main`, `master`, `development`
+- **pre-push**: knip (unused files / dependencies / exports), unit tests with [coverage threshold](#coverage) (`test:coverage`), blocks force push on `main`, `master`, `development`
 
 ## Peer Dependencies
 
@@ -305,6 +308,19 @@ Tests run on [Jest](https://jestjs.io/) with the [`jest-expo`](https://docs.expo
 - [jest.setup.ts](jest.setup.ts) mocks the native modules (Reanimated, Gesture Handler, Expo modules, MMKV, maps, Wi-Fi, ...); override a mock per test with `jest.mocked(...)` or a local `jest.mock` factory.
 - React Native Testing Library 14 is async: always `await render(...)`, `await renderHook(...)`, `await fireEvent.press(...)`.
 - Mark test phases with `// arrange`, `// act`, `// assert` (enforced by `coding-guide/require-aaa-comments`).
+
+### Coverage
+
+`bun run test:coverage` measures coverage over `src/**/*.{ts,tsx}` (tests excluded), prints a summary and writes an HTML report to `coverage/lcov-report/index.html`.
+
+| Metric     | Current | Minimum |
+| ---------- | ------- | ------- |
+| Statements | 81.97%  | 80%     |
+| Branches   | 78.19%  | 75%     |
+| Functions  | 76.73%  | 75%     |
+| Lines      | 82.4%   | 80%     |
+
+The minimums (`coverageThreshold` in [jest.config.js](jest.config.js)) are enforced in CI and in the Husky `pre-push` hook: a push or PR that drops coverage below them fails. CI uploads the HTML report as the `coverage` artifact. When coverage rises, raise the thresholds (and update this table and the badge) so it cannot slip back.
 
 ## License
 
