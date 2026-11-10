@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { makePersistable } from 'mobx-persist-store';
 import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
 import { logger } from '../logger/logger';
-import { mmkvStorageForMobxPersist } from '../utils/storage';
+import { mmkvStorageForMobxPersist } from '../utils/files/storage';
 
 const DEFAULT_DARK_MODE = true;
 
@@ -17,9 +17,9 @@ class CommonStore {
       name: 'CommonStore',
       properties: ['isDarkMode'],
       storage: mmkvStorageForMobxPersist,
-    }).then(() => {
-      logger.info('[CommonStore] Hydration complete');
-    });
+    })
+      .then(() => logger.info('[CommonStore] Hydration complete'))
+      .catch((error: unknown) => logger.error('[CommonStore] Hydration failed', error));
 
     this.appStateSubscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
       if (nextAppState === this.appStatus) return;

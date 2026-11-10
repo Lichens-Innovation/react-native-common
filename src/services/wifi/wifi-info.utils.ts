@@ -2,7 +2,7 @@ import * as Location from 'expo-location';
 import { Platform } from 'react-native';
 import WifiManager from 'react-native-wifi-reborn';
 import { logger } from '../../logger/logger';
-import { isRealDevice } from '../../utils/device.utils';
+import { isRealDevice } from '../../utils/device/device.utils';
 import { DEFAULT_CONNECT_WIFI_TIMEOUT, toWifiInfoArray, WifiInfo } from './wifi-info.types';
 import { fetchAvailableWifiListSimulator, fetchWifiInfosSimulator } from './wifi-info.utils.simulator';
 
@@ -17,7 +17,7 @@ export const fetchWifiInfo = async (): Promise<WifiInfo> => {
     logger.info('[fetchWifiInfo] calling WifiManager.getCurrentWifiSSID');
     const [ssid, signalStrength, ip] = await Promise.all([
       WifiManager.getCurrentWifiSSID(),
-      // the following methods are not implemented on all platforms:
+      // the following methods are not implemented on all platforms: habit-hooks-disable non-essential-comment
       WifiManager.getCurrentSignalStrength?.(),
       WifiManager.getIP?.(),
     ]);
@@ -98,7 +98,7 @@ export const fetchAvailableWifiList = async (): Promise<WifiInfo[]> => {
   }
 
   if (Platform.OS === 'ios') {
-    // Apple does not allow third-party apps to scan surrounding WiFi networks.
+    // Apple does not allow third-party apps to scan surrounding WiFi networks. habit-hooks-disable non-essential-comment
     logger.info('[fetchAvailableWifiList] returning empty array for iOS');
     return [];
   }

@@ -1,27 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Dimensions, Text } from 'react-native';
+import { isNotBlank } from '@lichens-innovation/ts-common';
 import { Image } from 'expo-image';
-import { ActivityIndicator, Icon } from 'react-native-paper';
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import { useVideoPlayer, VideoView } from 'expo-video';
-import { AppModal } from '../modal/app-modal';
-import { logger } from '../../logger/logger';
-import { getErrorMessage } from '@lichens-innovation/ts-common';
+import { VideoView } from 'expo-video';
+import React from 'react';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 import { getMediaTypeFromUri } from '../../utils/object.utils';
+import { AppModal } from '../modal/app-modal';
+import { MediaViewerAudioControls } from './media-viewer/media-viewer-audio-controls';
+import { MediaViewerFab } from './media-viewer/media-viewer-fab';
+import type { ViewerFabAction } from './media-viewer/media-viewer.types';
+import { useMediaViewerPlayers } from './media-viewer/use-media-viewer-players';
+
+export type { ViewerFabAction } from './media-viewer/media-viewer.types';
 
 const { width, height } = Dimensions.get('window');
-
-/**
- * An action offered on top of the media currently on screen. Deliberately generic: the viewer knows
- * only that someone handed it an icon, a label and something to run. An app that passes nothing gets
- * no button, so consumers that never set it are unaffected.
- */
-export interface ViewerFabAction {
-  icon: string;
-  label: string;
-  onPress: () => void;
-  busy?: boolean;
-}
 
 interface ViewerModalProps {
   visible: boolean;
@@ -30,121 +22,15 @@ interface ViewerModalProps {
   fabAction?: ViewerFabAction | null;
 }
 
-const ViewerModal: React.FC<ViewerModalProps> = ({ visible, uri, onClose: onRequestClose, fabAction }) => {
-  const [audioError, setAudioError] = useState<string | null>(null);
+const ViewerModal: React.FC<ViewerModalProps> = ({ visible, uri, onClose, fabAction }) => {
   const type = getMediaTypeFromUri(uri);
-  // Only provide a source when we actually want audio loaded.
-  const audioSource = useMemo(() => {
-    return visible && type === 'audio' && uri ? uri : null;
-  }, [visible, type, uri]);
+  const { audioPlayer, videoPlayer, stopPlayback } = useMediaViewerPlayers({ visible, type, uri });
+  const hasUri = isNotBlank(uri);
 
-  const audioPlayer = useAudioPlayer(audioSource, {
-    updateInterval: 500,
-  });
-
-  const audioStatus = useAudioPlayerStatus(audioPlayer);
-
-  // Only provide a source when we actually want video loaded.
-  const videoSource = useMemo(() => {
-    return visible && type === 'video' && uri ? uri : null;
-  }, [visible, type, uri]);
-
-  const videoPlayer = useVideoPlayer(videoSource, (player) => {
-    player.loop = false;
-    if (visible && type === 'video') {
-      player.play();
-    }
-  });
-
-  useEffect(() => {
-    if (type === 'audio') {
-      setAudioError(null);
-      try {
-        audioPlayer.pause();
-        audioPlayer.seekTo(0);
-      } catch (error) {
-        logger.error(`Error preparing audio: ${getErrorMessage(error)}`);
-      }
-    }
-  }, [type, uri, audioPlayer]);
-
-  useEffect(() => {
-    if (!visible) {
-      try {
-        audioPlayer.pause();
-        audioPlayer.seekTo(0);
-      } catch (error) {
-        logger.error(`Error resetting audio on close: ${getErrorMessage(error)}`);
-      }
-
-      try {
-        videoPlayer.pause();
-        videoPlayer.currentTime = 0;
-      } catch (error) {
-        logger.error(`Error resetting video on close: ${getErrorMessage(error)}`);
-      }
-      return;
-    }
-
-    if (visible && type === 'video') {
-      try {
-        videoPlayer.play();
-      } catch (error) {
-        logger.error(`Error starting video playback: ${getErrorMessage(error)}`);
-      }
-    }
-  }, [visible, type, audioPlayer, videoPlayer]);
-
-  const handleClose = useCallback(() => {
-    try {
-      audioPlayer.pause();
-      audioPlayer.seekTo(0);
-    } catch (error) {
-      logger.error(`Error closing audio player: ${getErrorMessage(error)}`);
-    }
-
-    try {
-      videoPlayer.pause();
-      videoPlayer.currentTime = 0;
-    } catch (error) {
-      logger.error(`Error closing video player: ${getErrorMessage(error)}`);
-    }
-
-    setAudioError(null);
-    onRequestClose();
-  }, [audioPlayer, videoPlayer, onRequestClose]);
-
-  const togglePlayPause = useCallback(() => {
-    try {
-      if (audioStatus.playing) {
-        audioPlayer.pause();
-        return;
-      }
-
-      const duration = audioStatus.duration ?? 0;
-      const currentTime = audioStatus.currentTime ?? 0;
-
-      // expo-audio does not automatically reset to the beginning after finishing.
-      if (duration > 0 && currentTime >= duration) {
-        audioPlayer.seekTo(0);
-      }
-
-      audioPlayer.play();
-    } catch (error) {
-      logger.error(`Error toggling playback: ${getErrorMessage(error)}`);
-    }
-  }, [audioPlayer, audioStatus.playing, audioStatus.duration, audioStatus.currentTime]);
-
-  const formatTime = useCallback((seconds: number) => {
-    const totalSeconds = Math.floor(seconds);
-    const minutes = Math.floor(totalSeconds / 60);
-    const remainingSeconds = totalSeconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }, []);
-
-  const durationSeconds = audioStatus.duration ?? 0;
-  const positionSeconds = audioStatus.currentTime ?? 0;
-  const hasDuration = durationSeconds > 0;
+  const handleClose = () => {
+    stopPlayback();
+    onClose();
+  };
 
   return (
     <AppModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
@@ -153,7 +39,7 @@ const ViewerModal: React.FC<ViewerModalProps> = ({ visible, uri, onClose: onRequ
           <Icon source="close" size={32} color="#fff" />
         </TouchableOpacity>
 
-        {type === 'image' && uri && (
+        {type === 'image' && hasUri && (
           <Image
             source={uri}
             style={styles.fullscreenImage}
@@ -163,52 +49,13 @@ const ViewerModal: React.FC<ViewerModalProps> = ({ visible, uri, onClose: onRequ
           />
         )}
 
-        {type === 'video' && uri && (
+        {type === 'video' && hasUri && (
           <VideoView player={videoPlayer} style={styles.fullscreenVideo} contentFit="contain" nativeControls />
         )}
 
-        {type === 'audio' && uri && (
-          <View style={styles.audioContainer}>
-            <Text style={styles.audioTitle}>Enregistrement audio</Text>
+        {type === 'audio' && hasUri && <MediaViewerAudioControls player={audioPlayer} />}
 
-            {audioError ? (
-              <View style={styles.errorContainer}>
-                <Icon source="alert-circle" size={60} color="#ff6b6b" />
-                <Text style={styles.errorText}>{audioError}</Text>
-              </View>
-            ) : (
-              <>
-                <TouchableOpacity style={styles.playButton} onPress={togglePlayPause}>
-                  <Icon source={audioStatus.playing ? 'pause' : 'play'} size={60} color="#fff" />
-                </TouchableOpacity>
-
-                {hasDuration && (
-                  <Text style={styles.timeText}>
-                    {formatTime(positionSeconds)} / {formatTime(durationSeconds)}
-                  </Text>
-                )}
-              </>
-            )}
-          </View>
-        )}
-
-        {fabAction && (
-          <TouchableOpacity
-            style={styles.fab}
-            onPress={fabAction.onPress}
-            disabled={fabAction.busy}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel={fabAction.label}
-          >
-            {fabAction.busy ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <Icon source={fabAction.icon} size={22} color="#fff" />
-            )}
-            <Text style={styles.fabLabel}>{fabAction.label}</Text>
-          </TouchableOpacity>
-        )}
+        {!!fabAction && <MediaViewerFab action={fabAction} />}
       </View>
     </AppModal>
   );
@@ -231,23 +78,6 @@ const styles = StyleSheet.create({
     width: width * 0.9,
     height: height * 0.5,
   },
-  fab: {
-    position: 'absolute',
-    bottom: 40,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 24,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-  },
-  fabLabel: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '500',
-  },
   closeButton: {
     position: 'absolute',
     top: 40,
@@ -256,42 +86,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 20,
     padding: 4,
-  },
-  audioContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  audioTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 40,
-  },
-  playButton: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  timeText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 15,
-  },
-  errorContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  errorText: {
-    color: '#ff6b6b',
-    fontSize: 18,
-    marginTop: 20,
-    textAlign: 'center',
   },
 });

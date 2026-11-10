@@ -1,7 +1,21 @@
 import { isNullish } from '@lichens-innovation/ts-common';
-import type { LayoutChangeEvent } from 'react-native';
+import type { LayoutChangeEvent, ViewStyle } from 'react-native';
+import { assertFiniteRatioInUnitRange, assertRatioBoundsOrdering } from '../resizable-view.utils';
+import { RESIZE_HANDLE } from '../resizable-view.constants';
+import type { ResizableOverlayViewAnchorType, ResizableOverlayViewProps } from './resizable-overlay-view.types';
 
-import type { ResizableOverlayViewProps } from './resizable-overlay-view.types';
+const OVERLAY_ANCHOR_STYLES: Record<ResizableOverlayViewAnchorType, ViewStyle> = {
+  topLeft: { top: 0, left: 0 },
+  topRight: { top: 0, right: 0 },
+  bottomLeft: { bottom: 0, left: 0 },
+  bottomRight: { bottom: 0, right: 0 },
+};
+
+export const getOverlayAnchor = (anchorType: ResizableOverlayViewAnchorType) => ({
+  anchorStyle: OVERLAY_ANCHOR_STYLES[anchorType],
+  isBottomAnchored: ['bottomLeft', 'bottomRight'].includes(anchorType),
+  isLeftAnchored: ['topLeft', 'bottomLeft'].includes(anchorType),
+});
 
 interface ComputeResizableOverlayLayoutValuesArgs {
   event: LayoutChangeEvent;
@@ -21,7 +35,6 @@ export const computeResizableOverlayLayoutValues = ({
   const { height, width } = event.nativeEvent.layout;
   if (height <= 0) return { containerHeight: 0, containerWidth: 0, minHeight: 0, maxHeight: 0, overlayHeight: 0 };
 
-  // Always keep container & bounds updated (layout can change over time).
   const computedMinHeight = height * minForegroundRatio;
   const computedMaxHeightFromContainer = height * maxForegroundRatio;
   const computedMaxHeightFromAspectRatio =
@@ -45,49 +58,80 @@ export const computeResizableOverlayLayoutValues = ({
   };
 };
 
-export const validateResizableOverlayProps = (props: ResizableOverlayViewProps) => {
-  const { foregroundContentAspectRatio, initialForegroundRatio, minForegroundRatio, maxForegroundRatio } = props;
+interface FitOverlayToAspectRatioArgs {
+  overlayHeight: number;
+  containerWidth: number;
+  minHeight: number;
+  aspectRatio?: number;
+}
 
-  if (!isNullish(foregroundContentAspectRatio)) {
-    if (!Number.isFinite(foregroundContentAspectRatio) || foregroundContentAspectRatio <= 0)
-      throw new Error('foregroundContentAspectRatio must be greater than 0. Provided: ' + foregroundContentAspectRatio);
+export interface OverlaySize {
+  height: number;
+  width?: number;
+}
+
+export const fitOverlayToAspectRatio = ({
+  overlayHeight,
+  containerWidth,
+  minHeight,
+  aspectRatio,
+}: FitOverlayToAspectRatioArgs): OverlaySize => {
+  'worklet';
+  if (aspectRatio === undefined) {
+    return { height: overlayHeight };
   }
 
-  if (!isNullish(initialForegroundRatio)) {
-    if (!Number.isFinite(initialForegroundRatio) || initialForegroundRatio < 0 || initialForegroundRatio > 1)
-      throw new Error(`initialForegroundRatio must be between 0 and 1. Provided: ${initialForegroundRatio}`);
+  const widthAtCurrentHeight = overlayHeight * aspectRatio;
+  if (widthAtCurrentHeight > containerWidth) {
+    return { height: Math.max(containerWidth / aspectRatio, minHeight), width: containerWidth };
   }
 
-  if (!isNullish(minForegroundRatio)) {
-    if (!Number.isFinite(minForegroundRatio) || minForegroundRatio < 0 || minForegroundRatio > 1)
-      throw new Error(`minForegroundRatio must be between 0 and 1. Provided: ${minForegroundRatio}`);
+  return { height: overlayHeight, width: widthAtCurrentHeight };
+};
+
+interface ComputeOverlayHandlePositionArgs {
+  overlaySize: OverlaySize;
+  containerWidth: number;
+  containerHeight: number;
+  isLeftAnchored: boolean;
+  isBottomAnchored: boolean;
+}
+
+export const computeOverlayHandlePosition = ({
+  overlaySize,
+  containerWidth,
+  containerHeight,
+  isLeftAnchored,
+  isBottomAnchored,
+}: ComputeOverlayHandlePositionArgs) => {
+  'worklet';
+  const width = overlaySize.width ?? containerWidth;
+  // Always compute an explicit `left` to avoid stale left/right values when `anchorType` changes. habit-hooks-disable non-essential-comment
+  const left = isLeftAnchored ? 0 : Math.max(0, containerWidth - width);
+  const overlayEdgeY = isBottomAnchored ? containerHeight - overlaySize.height : overlaySize.height;
+
+  return { top: overlayEdgeY - RESIZE_HANDLE.dragTargetCrossAxis / 2, width, left };
+};
+
+const assertPositiveAspectRatio = (aspectRatio?: number) => {
+  if (!isNullish(aspectRatio) && (!Number.isFinite(aspectRatio) || aspectRatio <= 0)) {
+    throw new Error('foregroundContentAspectRatio must be greater than 0. Provided: ' + aspectRatio);
   }
+};
 
-  if (!isNullish(maxForegroundRatio)) {
-    if (!Number.isFinite(maxForegroundRatio) || maxForegroundRatio < 0 || maxForegroundRatio > 1)
-      throw new Error(`maxForegroundRatio must be between 0 and 1. Provided: ${maxForegroundRatio}`);
-  }
+export const validateResizableOverlayProps = ({
+  foregroundContentAspectRatio,
+  initialForegroundRatio,
+  minForegroundRatio,
+  maxForegroundRatio,
+}: ResizableOverlayViewProps) => {
+  const initial = { name: 'initialForegroundRatio', value: initialForegroundRatio };
+  const min = { name: 'minForegroundRatio', value: minForegroundRatio };
+  const max = { name: 'maxForegroundRatio', value: maxForegroundRatio };
 
-  if (!isNullish(minForegroundRatio) && !isNullish(maxForegroundRatio) && minForegroundRatio >= maxForegroundRatio)
-    throw new Error(
-      `minForegroundRatio must be less than maxForegroundRatio. Provided: ${JSON.stringify({ minForegroundRatio, maxForegroundRatio })}`
-    );
-
-  if (
-    !isNullish(initialForegroundRatio) &&
-    !isNullish(minForegroundRatio) &&
-    initialForegroundRatio < minForegroundRatio
-  )
-    throw new Error(
-      `initialForegroundRatio must be >= minForegroundRatio. Provided: ${JSON.stringify({ initialForegroundRatio, minForegroundRatio })}`
-    );
-
-  if (
-    !isNullish(initialForegroundRatio) &&
-    !isNullish(maxForegroundRatio) &&
-    initialForegroundRatio > maxForegroundRatio
-  )
-    throw new Error(
-      `initialForegroundRatio must be <= maxForegroundRatio. Provided: ${JSON.stringify({ initialForegroundRatio, maxForegroundRatio })}`
-    );
+  assertPositiveAspectRatio(foregroundContentAspectRatio);
+  assertFiniteRatioInUnitRange(initial);
+  assertFiniteRatioInUnitRange(min);
+  assertFiniteRatioInUnitRange(max);
+  assertRatioBoundsOrdering({ initial, min, max });
 };

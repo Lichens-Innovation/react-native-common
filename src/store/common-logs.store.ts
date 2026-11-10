@@ -1,18 +1,20 @@
+import { isNotBlank } from '@lichens-innovation/ts-common';
 import { makeAutoObservable, observableShallow } from 'mobx';
 import { transportFunctionType } from 'react-native-logs';
 import { LogEntry } from '../logger/logger.types';
 
 const MAX_LOG_ENTRIES = 2000;
 
-// Circular buffer keeps in-memory log retention bounded with O(1) writes.
-// Array.prototype.shift() at cap is O(n) and dominates CPU during log storms.
+/* habit-hooks-disable non-essential-comment
+ * Circular buffer keeps in-memory log retention bounded with O(1) writes.
+ * Array.prototype.shift() at cap is O(n) and dominates CPU during log storms. */
 class CommonLogsStore {
   buffer: (LogEntry | null)[] = new Array(MAX_LOG_ENTRIES).fill(null);
   head = 0;
   size = 0;
 
   constructor() {
-    // buffer is shallow — entries are plain { msg, level } and don't need deep proxying.
+    // buffer is shallow: entries are plain { msg, level } and don't need deep proxying. habit-hooks-disable non-essential-comment
     makeAutoObservable(this, { buffer: observableShallow });
   }
 
@@ -21,14 +23,14 @@ class CommonLogsStore {
     if (this.size < MAX_LOG_ENTRIES) {
       return this.buffer.slice(0, this.size) as LogEntry[];
     }
-    // Buffer is full → oldest entry sits at `head`, wrap to reconstruct chronological order.
+    // Buffer is full: oldest entry sits at `head`, wrap to reconstruct chronological order. habit-hooks-disable non-essential-comment
     return [...(this.buffer.slice(this.head) as LogEntry[]), ...(this.buffer.slice(0, this.head) as LogEntry[])];
   }
 
   get allLogsAsText(): string {
     return this.logEntries
       .map((log) => log.msg)
-      .filter((log) => !!log)
+      .filter((log) => isNotBlank(log))
       .join('\n');
   }
 
@@ -52,10 +54,11 @@ class CommonLogsStore {
 
 export const commonLogsStore = new CommonLogsStore();
 
-// Strip rawMsg (caller args by reference). The formatted `msg` string is sufficient
-// for DevLogs display and prevents the in-memory buffer from retaining heavy objects
-// (full Error instances, sync row payloads, React component stacks). Sentry and the
-// file transport receive the original LogEntry directly from the logger and are unaffected.
+/* habit-hooks-disable non-essential-comment
+ * Strip rawMsg (caller args by reference). The formatted `msg` string is sufficient
+ * for DevLogs display and prevents the in-memory buffer from retaining heavy objects
+ * (full Error instances, sync row payloads, React component stacks). Sentry and the
+ * file transport receive the original LogEntry directly from the logger and are unaffected. */
 export const commonLogsStoreTransport: transportFunctionType<object> = (props: LogEntry) => {
   commonLogsStore.addLog({ msg: props.msg, level: props.level, rawMsg: undefined });
 };

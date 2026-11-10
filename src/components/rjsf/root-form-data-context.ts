@@ -1,24 +1,21 @@
 import { createContext, useContext, useSyncExternalStore } from 'react';
 
-/** A value a widget has parsed but rjsf has not converged on yet. */
-export type LiveEntry = {
-  /** The top-level property name, so a converge check needs no id/prefix arithmetic. */
+export interface LiveEntry {
   slug: string;
   value: unknown;
-};
+}
 
-export type RootFormSnapshot = {
-  /** The last form data rjsf published. */
-  data: Record<string, unknown> | undefined;
-  /**
+export interface RootFormSnapshot {
+  data?: Record<string, unknown>;
+  /** habit-hooks-disable non-essential-comment
    * Live values keyed by rjsf field id (`root_slug`), NOT by property name: `name` is the bare
    * property key, so a nested `foo` and a top-level `foo` share it and a nested write would feed the
    * wrong number into a top-level formula (SPOTD-621).
    */
   live: ReadonlyMap<string, LiveEntry>;
-};
+}
 
-/**
+/** habit-hooks-disable non-essential-comment
  * Live form data, published to the few fields that need it (ComputedField) WITHOUT making the rjsf
  * `Form` controlled.
  *
@@ -28,16 +25,16 @@ export type RootFormSnapshot = {
  * on every keystroke. A store whose identity never changes does neither: only the fields that
  * actually subscribe re-render (SPOTD-621).
  */
-export type RootFormDataStore = {
+export interface RootFormDataStore {
   getSnapshot: () => RootFormSnapshot;
   subscribe: (listener: () => void) => () => void;
-  /**
+  /** habit-hooks-disable non-essential-comment
    * Publish a value synchronously, ahead of rjsf's change cycle. A one-cycle-ahead cache only: the
    * renderer retires the entry as soon as rjsf converges on the same value, so rjsf stays the
    * authority on form data.
    */
   setLiveValue: (fieldId: string, slug: string, value: unknown) => void;
-  /**
+  /** habit-hooks-disable non-essential-comment
    * Drop a published value, handing the field back to rjsf's own form data.
    *
    * Retiring on convergence alone only covers rjsf AGREEING. rjsf can also overrule a value it was
@@ -47,12 +44,12 @@ export type RootFormDataStore = {
    * value the widget published can outlive rjsf's opinion of it.
    */
   clearLiveValue: (fieldId: string) => void;
-};
+}
 
 const EMPTY_LIVE: ReadonlyMap<string, LiveEntry> = new Map();
 const EMPTY_SNAPSHOT: RootFormSnapshot = { data: undefined, live: EMPTY_LIVE };
 
-/** Used when a widget or field is rendered outside RjsfPaperRenderer (other themes, unit tests). */
+// Fallback for widgets rendered outside RjsfPaperRenderer (other themes, unit tests). habit-hooks-disable non-essential-comment
 const NOOP_STORE: RootFormDataStore = {
   getSnapshot: () => EMPTY_SNAPSHOT,
   subscribe: () => () => {},

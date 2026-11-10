@@ -1,0 +1,6 @@
+{
+  "path": ["src"],
+  "ignore": ["src/types/winrt/**"],
+  "minLines": 5,
+  "minTokens": 50
+}

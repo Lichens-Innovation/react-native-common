@@ -1,4 +1,4 @@
-import { getErrorMessage } from '@lichens-innovation/ts-common';
+import { getErrorMessage, isBlank } from '@lichens-innovation/ts-common';
 import { useTranslation } from 'react-i18next';
 import uuid from 'react-native-uuid';
 
@@ -7,7 +7,8 @@ export const useErrorDetails = (error: unknown) => {
 
   const id = uuid.v4();
   const title = t('common:error');
-  const errorMsg = getErrorMessage(error) || 'Unknown';
+  const rawErrorMessage = getErrorMessage(error);
+  const errorMsg = isBlank(rawErrorMessage) ? 'Unknown' : rawErrorMessage;
   const description = t('common:errorBoundary.error', { id, errorMsg });
   const stack = error instanceof Error ? error.stack : '';
 

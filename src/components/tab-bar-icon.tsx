@@ -18,12 +18,12 @@ type IconLibrary =
   | 'SimpleLineIcons'
   | 'Zocial';
 
-type IconProps = {
+interface IconProps {
   library?: IconLibrary;
   name: string;
   color?: string;
   size?: number;
-};
+}
 
 export const TabBarIcon = ({ name, color, size = 28 }: IconProps) => {
   return <Icon source={name} size={size} color={color} />;

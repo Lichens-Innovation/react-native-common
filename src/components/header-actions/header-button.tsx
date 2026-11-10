@@ -4,11 +4,11 @@ import { IconButton } from 'react-native-paper';
 
 import { useAppTheme } from '../../theme/theme';
 
-type Props = {
+interface Props {
   iconName: string;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
-};
+}
 
 export const HeaderButton: FunctionComponent<Props> = ({ iconName, onPress, style }) => {
   const styles = useStyles();

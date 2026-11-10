@@ -1,11 +1,12 @@
-import { FunctionComponent, useCallback, useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { FunctionComponent, useCallback, useMemo } from 'react';
+import { View } from 'react-native';
 import { MultiSelect } from 'react-native-element-dropdown';
-import { IconButton, Text } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
-import { getBorderColor, getDropdownContainerStyle, getLabelColor, getTextColor } from './drop-down-selector.utils';
+import { DropDownClearButton } from './drop-down-clear-button';
+import { DropDownFieldTitle } from './drop-down-field-title';
+import { getDropdownContainerStyle } from './drop-down-selector.utils';
 import { DropDownSelectorItem } from './drop-down-selector-item';
 import { DropDownSelectorLeftIcon } from './drop-down-selector-left-icon';
+import { useDropDownField } from './use-drop-down-field';
 
 export interface MultiSelectOption {
   label: string;
@@ -13,7 +14,7 @@ export interface MultiSelectOption {
   icon?: string;
 }
 
-export type DropDownMultiSelectorProps = {
+export interface DropDownMultiSelectorProps {
   label?: string;
   value?: string[];
   onChange: (codes: string[]) => void;
@@ -25,9 +26,9 @@ export type DropDownMultiSelectorProps = {
   modal?: boolean; // If true, opens the dropdown in a modal (useful for better UX on smaller screens)
   showDeleteButton?: boolean;
   disabledTransparentBackground?: boolean;
-  /** Overrides the resting label color (ignored while in error/disabled state). */
+  /** Overrides the resting label color (ignored while in error/disabled state). habit-hooks-disable non-essential-comment */
   labelColor?: string;
-};
+}
 
 export const DropDownMultiSelector: FunctionComponent<DropDownMultiSelectorProps> = ({
   label,
@@ -43,51 +44,32 @@ export const DropDownMultiSelector: FunctionComponent<DropDownMultiSelectorProps
   disabledTransparentBackground = false,
   labelColor,
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const hasLabel = !!label;
-  const theme = useAppTheme();
-  const isDisabled = disabled === true;
-  const textColor = getTextColor({ theme, isFocused, isDisabled });
-  const styles = useStyles({ isFocused, disabled, isError, textColor, disabledTransparentBackground, labelColor });
+  const { isFocused, setIsFocused, textColor, styles, handleFocus, handleBlur } = useDropDownField({
+    disabled,
+    isError,
+    disabledTransparentBackground,
+    labelColor,
+  });
 
-  // For left icon, show icon of first selected item if any
-  const selectedItem = useMemo(() => options.find((option) => value?.includes(option.value)), [options, value]);
+  const firstSelectedItem = useMemo(() => options.find((option) => value?.includes(option.value)), [options, value]);
 
-  const renderItem = useCallback(
-    (item: MultiSelectOption, selected?: boolean) => (
-      <DropDownSelectorItem item={item} selected={selected} textColor={textColor} />
-    ),
-    [textColor]
-  );
-
-  const renderLeftIcon = useCallback(
-    () => <DropDownSelectorLeftIcon icon={selectedItem?.icon} color={textColor} />,
-    [selectedItem?.icon, textColor]
-  );
-
-  const handleFocus = useCallback(() => setIsFocused(true), []);
-  const handleBlur = useCallback(() => setIsFocused(false), []);
   const handleChange = useCallback(
     (items: string[]) => {
       onChange(items);
       setIsFocused(false);
     },
-    [onChange]
+    [onChange, setIsFocused]
   );
 
   return (
     <View>
-      {hasLabel && (
-        <Text variant="bodySmall" style={styles.dropdownTitle}>
-          {label}
-        </Text>
-      )}
+      <DropDownFieldTitle label={label} style={styles.dropdownTitle} />
 
       <MultiSelect
-        style={styles.dropdown}
+        style={[styles.dropdown, styles.multiDropdown]}
         containerStyle={modal ? undefined : getDropdownContainerStyle()}
         placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
+        selectedTextStyle={[styles.selectedTextStyle, styles.multiSelectedTextStyle]}
         data={options}
         search={false}
         searchPlaceholder={searchPlaceholder}
@@ -100,107 +82,14 @@ export const DropDownMultiSelector: FunctionComponent<DropDownMultiSelectorProps
         disable={disabled}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        selectedStyle={styles.selectedStyle}
+        selectedStyle={styles.multiSelectedStyle}
         onChange={handleChange}
-        renderItem={renderItem}
-        renderLeftIcon={renderLeftIcon}
+        renderItem={(item, selected) => <DropDownSelectorItem item={item} selected={selected} textColor={textColor} />}
+        renderLeftIcon={() => <DropDownSelectorLeftIcon icon={firstSelectedItem?.icon} color={textColor} />}
       />
-      {showDeleteButton && value && value.length > 0 && !disabled ? (
-        <IconButton
-          icon="close"
-          size={20}
-          iconColor={theme.colors.onBackground}
-          mode="contained"
-          onPress={() => onChange([])}
-          style={styles.deleteButton}
-        />
-      ) : null}
+      {showDeleteButton && !!value && value.length > 0 && !disabled && (
+        <DropDownClearButton onPress={() => onChange([])} style={styles.deleteButton} />
+      )}
     </View>
   );
-};
-
-type UseStylesProps = {
-  isFocused: boolean;
-  disabled?: boolean;
-  isError?: boolean;
-  textColor: string;
-  disabledTransparentBackground?: boolean;
-  labelColor?: string;
-};
-
-const useStyles = ({
-  isFocused,
-  disabled,
-  isError,
-  textColor,
-  disabledTransparentBackground,
-  labelColor: labelColorOverride,
-}: UseStylesProps) => {
-  const theme = useAppTheme();
-
-  return useMemo(() => {
-    const { surface, surfaceDisabled } = theme.colors;
-
-    const isDisabled = disabled === true;
-    const isFocusedAndEnabled = isFocused && !isDisabled;
-
-    // Priority: error > disabled > focus > labelColor override > normal
-    const labelColor =
-      labelColorOverride && !isError && !isDisabled
-        ? labelColorOverride
-        : getLabelColor({ theme, isError: !!isError, isDisabled, isFocusedAndEnabled });
-    const borderColor = getBorderColor({ theme, isError: !!isError, isDisabled, isFocused });
-    const borderWidth = isFocusedAndEnabled ? 2 : 1;
-
-    const backgroundColor = isDisabled
-      ? disabledTransparentBackground
-        ? 'transparent'
-        : surfaceDisabled
-      : 'transparent';
-
-    return StyleSheet.create({
-      dropdownTitle: {
-        position: 'absolute',
-        top: -theme.spacing(1),
-        left: theme.spacing(1),
-        backgroundColor: surface,
-        paddingHorizontal: theme.spacing(0.75),
-        color: labelColor,
-        zIndex: 1,
-      },
-      dropdown: {
-        height: 50,
-        borderColor,
-        borderWidth,
-        borderRadius: theme.roundness,
-        paddingHorizontal: theme.spacing(1),
-        marginBottom: theme.spacing(1),
-        backgroundColor,
-      },
-      placeholderStyle: {
-        color: textColor,
-      },
-      selectedTextStyle: {
-        color: textColor,
-        paddingLeft: theme.spacing(1),
-        maxWidth: 180,
-        flexShrink: 1,
-        overflow: 'hidden',
-      },
-      selectedStyle: {
-        borderRadius: theme.roundness,
-        maxWidth: 220,
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 1,
-        alignSelf: 'flex-start',
-      },
-      deleteButton: {
-        position: 'absolute',
-        right: 0,
-        top: 0,
-        backgroundColor: theme.colors.background,
-      },
-    });
-  }, [theme, isFocused, disabled, isError, textColor, disabledTransparentBackground, labelColorOverride]);
 };

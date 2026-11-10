@@ -2,8 +2,8 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: {
-    index: 'src/index.ts',
-    rjsf: 'src/components/rjsf/index.ts',
+    index: 'src/react-native-common.index.ts',
+    rjsf: 'src/components/rjsf/rjsf.index.ts',
   },
   format: ['cjs'],
   dts: true,

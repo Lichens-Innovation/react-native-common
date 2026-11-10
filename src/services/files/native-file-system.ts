@@ -22,13 +22,11 @@ export class NativeFileSystem implements INativeFileSystem {
   async writeAsStringAsync(fileUri: string, contents: string, options?: WriteOptions): Promise<void> {
     const file = new File(fileUri);
 
-    // for base64 encoding, pass the base64 string directly
     if (options?.encoding === EncodingType.Base64) {
       await file.write(contents, { encoding: 'base64' });
       return;
     }
 
-    // Default to UTF-8 string
     await file.write(contents, { encoding: 'utf8' });
   }
 
@@ -40,7 +38,6 @@ export class NativeFileSystem implements INativeFileSystem {
       return Buffer.from(bytes).toString('base64');
     }
 
-    // default to UTF-8 text
     return file.textSync();
   }
 
@@ -79,8 +76,7 @@ export class NativeFileSystem implements INativeFileSystem {
 
     try {
       const localUri = `${Paths.document.uri}${fileName}`;
-      // The new Expo SDK 54 API doesn't support content URIs
-      // We need to use the legacy API for copying content URIs correctly
+      // The Expo SDK 54 File API doesn't support content URIs: the legacy API copies them correctly habit-hooks-disable non-essential-comment
       await FileSystemLegacy.copyAsync({ from: contentUri, to: localUri });
       logger.info(`[copyContentUriToLocal] Copy successful: ${localUri}`);
       return localUri;

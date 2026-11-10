@@ -1,4 +1,4 @@
-// Generated colors from https://callstack.github.io/react-native-paper/docs/guides/theming
+// Generated colors from https://callstack.github.io/react-native-paper/docs/guides/theming habit-hooks-disable non-essential-comment
 export const DARK_COLORS_SCHEME = {
   primary: 'rgb(170, 212, 114)',
   onPrimary: 'rgb(32, 54, 0)',

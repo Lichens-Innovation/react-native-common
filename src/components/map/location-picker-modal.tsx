@@ -2,17 +2,17 @@ import { FunctionComponent, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Modal, Portal } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import MapView, { Marker, PROVIDER_GOOGLE, type LatLng, type Region } from 'react-native-maps';
-import { useAppTheme } from '../../theme';
+import MapView, { Marker, PROVIDER_GOOGLE, type LatLng, type MapViewProps, type Region } from 'react-native-maps';
+import { useAppTheme } from '../../theme/theme.index';
 import { useUserLocation } from './use-user-location';
 
-export type GeoJsonPoint = {
+export interface GeoJsonPoint {
   type: 'Point';
-  /** [longitude, latitude] — GeoJSON spec order */
+  /** [longitude, latitude] — GeoJSON spec order habit-hooks-disable non-essential-comment */
   coordinates: [number, number];
-};
+}
 
-export const geoJsonPointToLatLng = (point: GeoJsonPoint | null | undefined): LatLng | null => {
+export const geoJsonPointToLatLng = (point?: GeoJsonPoint | null): LatLng | null => {
   if (!point || point.type !== 'Point' || !Array.isArray(point.coordinates) || point.coordinates.length !== 2) {
     return null;
   }
@@ -30,11 +30,11 @@ const buildRegion = (coord: LatLng): Region => ({
   longitudeDelta: REGION_DELTA,
 });
 
-export type LocationPickerModalProps = {
+export interface LocationPickerModalProps {
   initialPoint: GeoJsonPoint | null;
   onConfirm: (lat: number, lng: number) => void;
   onCancel: () => void;
-};
+}
 
 export const LocationPickerModal: FunctionComponent<LocationPickerModalProps> = ({
   initialPoint,
@@ -51,7 +51,7 @@ export const LocationPickerModal: FunctionComponent<LocationPickerModalProps> = 
 
   const [pendingCoord, setPendingCoord] = useState<LatLng | null>(startingCoord);
 
-  const handleMapPress = (e: { nativeEvent: { coordinate: LatLng } }) => {
+  const handleMapPress: MapViewProps['onPress'] = (e) => {
     setPendingCoord(e.nativeEvent.coordinate);
   };
 
@@ -72,9 +72,9 @@ export const LocationPickerModal: FunctionComponent<LocationPickerModalProps> = 
               showsUserLocation
               onPress={handleMapPress}
             >
-              {pendingCoord ? (
+              {!!pendingCoord && (
                 <Marker coordinate={pendingCoord} tracksViewChanges={false} pinColor={PICK_MARKER_COLOR} />
-              ) : null}
+              )}
             </MapView>
           </View>
           {/* Same buttons as the app's ModalActions: they share the width and wrap with Confirm on top.
@@ -112,9 +112,11 @@ const useStyles = () => {
   const theme = useAppTheme();
 
   return StyleSheet.create({
-    // Sized in shares of Paper's wrapper, which already keeps clear of the system bars, so Paper can
-    // centre it. The card is a Surface, whose shadow breaks under `overflow: hidden`: clip one in.
-    // In dark mode a border, or the card's edge disappears into the backdrop.
+    /* habit-hooks-disable non-essential-comment
+     * Sized in shares of Paper's wrapper, which already keeps clear of the system bars, so Paper can
+     * centre it. The card is a Surface, whose shadow breaks under `overflow: hidden`: clip one in.
+     * In dark mode a border, or the card's edge disappears into the backdrop.
+     */
     container: {
       backgroundColor: theme.colors.background,
       ...(theme.dark ? { borderWidth: 1, borderColor: theme.colors.outlineVariant } : {}),

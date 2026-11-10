@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { WebViewMessageEvent } from 'react-native-webview';
 import { logger } from '../logger/logger';
-import { logIncomingHtmlDocMessage } from '../utils/webview.utils';
+import { logIncomingHtmlDocMessage } from '../utils/network/webview.utils';
 
 export const useOnHtmlDocMessage = () => {
   const [isDocumentReady, setIsDocumentReady] = useState<boolean>(false);

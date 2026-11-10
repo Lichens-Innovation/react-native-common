@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { commonLogsStore } from '../store/common-logs.store';
-import { notImplementedYet } from '../utils/platform.utils';
+import { notImplementedYet } from '../utils/device/platform.utils';
 import { SimpleLogger } from './logger.types';
 import { toLogLevel } from './logger.utils';
 
@@ -34,11 +34,9 @@ class LoggerWrapper implements SimpleLogger {
     const stringifiedArgs = args?.length ? JSON.stringify(args) : '';
     const info = `${formattedUpdatedAt} ${typeLabel} : ${formattedMessage} ${stringifiedArgs}`;
 
-    // append to file
     const file = await this.getOrCreateTodayFile();
     WindowsStorage.FileIO.appendTextAsync(file, `${info}\n`);
 
-    // add to in-memory store
     commonLogsStore.addLog({ msg: info, rawMsg: message, level: toLogLevel(type) });
   }
 

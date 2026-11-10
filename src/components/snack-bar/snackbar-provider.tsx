@@ -10,9 +10,10 @@ export const SnackbarContext = createContext({
 
 export const useSnackbar = () => useContext(SnackbarContext);
 
-// Module-scoped handle so non-React callers can show a
-// snackbar without holding a hook reference. The SnackbarProvider registers
-// itself on mount; calls before mount are dropped (and warned about).
+/* habit-hooks-disable non-essential-comment
+ * Module-scoped handle so non-React callers can show a snackbar without holding a hook reference.
+ * The SnackbarProvider registers itself on mount; calls before mount are dropped (and warned about).
+ */
 let globalShowSnackbar: ((msg: string, duration?: number) => void) | null = null;
 
 export const showSnackbarGlobal = (msg: string, duration: number = DEFAULT_DURATION): void => {
@@ -30,12 +31,12 @@ export const SnackbarProvider = ({ children }: PropsWithChildren): JSX.Element =
   const [isVisible, setVisibility] = useState(false);
 
   const showSnackbarMessage = useCallback(
-    (msg: string, duration = DEFAULT_DURATION) => {
+    (msg: string, durationMs = DEFAULT_DURATION) => {
       setVisibility(false); // close the current snackbar (if any)
 
       requestIdleCallback(() => {
         setMessage(msg);
-        setDuration(duration);
+        setDuration(durationMs);
         setVisibility(true);
       });
     },

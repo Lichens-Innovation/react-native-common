@@ -3,8 +3,8 @@ import { MD3DarkTheme, MD3LightTheme, adaptNavigationTheme, useTheme } from 'rea
 import { DARK_COLORS_SCHEME } from './dark-colors-scheme';
 import { LIGHT_COLORS_SCHEME } from './light-colors-scheme';
 
-const DEFAULT_SPACING: number = 8;
-const spacing = (units: number = 1): number => units * DEFAULT_SPACING;
+const DEFAULT_SPACING = 8;
+const spacing = (units = 1): number => units * DEFAULT_SPACING;
 
 const roundness = 2;
 
@@ -30,8 +30,7 @@ export const LIGHT_THEME = {
 
 export type AppTheme = typeof DARK_THEME;
 
-// React Navigation themes
-// expo-router types theme colors as ColorValue while react-native-paper expects strings (runtime values are strings)
+// expo-router types theme colors as ColorValue while react-native-paper expects strings (runtime values are strings) habit-hooks-disable non-essential-comment
 type PaperNavigationTheme = Parameters<typeof adaptNavigationTheme>[0]['reactNavigationLight'];
 
 const navigationAdaptedThemes = adaptNavigationTheme({
@@ -51,7 +50,7 @@ export const useAppTheme = (): AppTheme => {
     return theme;
   }
 
-  // edge case when error boundary is rendered while the app is not yet fully initialized
+  // edge case when error boundary is rendered while the app is not yet fully initialized habit-hooks-disable non-essential-comment
   return { ...theme, spacing };
 };
 

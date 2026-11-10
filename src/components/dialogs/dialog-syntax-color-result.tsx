@@ -1,8 +1,9 @@
+import { isNotBlank } from '@lichens-innovation/ts-common';
 import { type ComponentProps, type FunctionComponent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { Button, Dialog, Portal } from 'react-native-paper';
-import { setClipboardTextContent } from '../../utils/clipboard.utils';
+import { setClipboardTextContent } from '../../utils/device/clipboard.utils';
 import { useSnackbar } from '../snack-bar/snackbar-provider';
 import { SyntaxColoring } from '../syntax/syntax-coloring';
 import { useDialogStyles } from './use-dialog-styles';
@@ -33,11 +34,11 @@ export const DialogSyntaxColorResult: FunctionComponent<DialogSyntaxColorResultP
   const { showSnackbarMessage } = useSnackbar();
   const { t } = useTranslation();
 
-  const hasIcon = !!icon;
+  const hasIcon = isNotBlank(icon);
   const hasTitle = !!title;
 
   const onCopy = () => {
-    setClipboardTextContent(code);
+    void setClipboardTextContent(code);
     showSnackbarMessage(t('common:copiedToClipboard'));
   };
 

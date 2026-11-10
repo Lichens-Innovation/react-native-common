@@ -1,5 +1,3 @@
-export const formatLogMessage = (msg: string): string => {
-  // remove the DATE part of the timestamp from the very beginning of the message (ISO 8601 format)
-  // this allows to have a more readable log message on small devices
-  return msg.substring(11);
-};
+const ISO_DATE_PREFIX_LENGTH = 'YYYY-MM-DDT'.length;
+
+export const formatLogMessage = (msg: string): string => msg.substring(ISO_DATE_PREFIX_LENGTH);

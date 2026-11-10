@@ -1,3 +1,4 @@
+import { isNotBlank } from '@lichens-innovation/ts-common';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Image } from 'react-native';
@@ -25,7 +26,7 @@ export const useImagePicker = () => {
   const [selectedImage, setSelectedImage] = useState<string>();
   const [dimensions, setDimensions] = useState<ImageDimensions>(DEFAULT_DIMENSIONS);
 
-  const hasSelectedImage: boolean = !!selectedImage;
+  const hasSelectedImage = isNotBlank(selectedImage);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync(options);

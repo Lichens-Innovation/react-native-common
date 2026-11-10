@@ -1,3 +1,4 @@
+import { isNotBlank } from '@lichens-innovation/ts-common';
 import { type ComponentProps, type FunctionComponent, type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
@@ -7,7 +8,10 @@ import { useDialogStyles } from './use-dialog-styles';
 
 type DialogProps = ComponentProps<typeof Dialog>;
 
-type TextInputSelection = { start: number; end: number };
+interface TextInputSelection {
+  start: number;
+  end: number;
+}
 
 interface DialogSingleTextInputProps extends Omit<DialogProps, 'children' | 'visible'> {
   title: ReactNode;
@@ -46,7 +50,7 @@ export const DialogSingleTextInput: FunctionComponent<DialogSingleTextInputProps
   const hasDescription = !!description;
   const hasDescriptionString = typeof description === 'string';
 
-  const hasError = !!errorMessage;
+  const hasError = isNotBlank(errorMessage);
   const isInputPopulated = inputValue.trim().length > 0;
   const isOkEnabled = !hasError && isInputPopulated;
 

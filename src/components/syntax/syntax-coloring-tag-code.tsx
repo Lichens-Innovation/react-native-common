@@ -1,15 +1,13 @@
-import React, { type FunctionComponent, type ReactNode } from 'react';
+import React, { type FunctionComponent, type PropsWithChildren } from 'react';
 import { ScrollView, StyleSheet, Text, type TextStyle } from 'react-native';
-import { getMonospaceFontName } from '../../utils/font.utils';
+import { getMonospaceFontName } from '../../utils/device/font.utils';
 
-interface CodeTagProps {
-  children: ReactNode;
+interface CodeTagProps extends PropsWithChildren {
   style?: TextStyle;
   [key: string]: unknown;
 }
 
 export const CodeTag: FunctionComponent<CodeTagProps> = ({ children, style, ...props }) => {
-  const styles = useStyles();
   return (
     <ScrollView horizontal={true}>
       <Text style={[styles.codeText, style]} {...props}>
@@ -19,10 +17,8 @@ export const CodeTag: FunctionComponent<CodeTagProps> = ({ children, style, ...p
   );
 };
 
-const useStyles = () => {
-  return StyleSheet.create({
-    codeText: {
-      fontFamily: getMonospaceFontName(),
-    },
-  });
-};
+const styles = StyleSheet.create({
+  codeText: {
+    fontFamily: getMonospaceFontName(),
+  },
+});

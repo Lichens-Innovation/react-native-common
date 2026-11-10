@@ -38,11 +38,18 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: echo "$PR_TITLE" | bunx --no-install commitlint
 
-      - name: Lint
+      # coding-guide check: ESLint + knip + comments + jscpd, honoring .coding-guide/snooze.json
+      - name: Lint (coding-guide)
         run: bun run lint
+
+      - name: Format check
+        run: bun run format:check
 
       - name: Lint package.json
         run: bun run lint:package
+
+      - name: Unused files, dependencies and exports
+        run: bun run lint:unused
 
       - name: Typecheck
         run: bun run typecheck

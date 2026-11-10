@@ -6,8 +6,8 @@
     "types": ["jest"],
     "paths": {
       "~/*": ["../src/*"],
-      "@lib": ["../src/index.ts"],
-      "@lib/rjsf": ["../src/components/rjsf/index.ts"],
+      "@lib": ["../src/react-native-common.index.ts"],
+      "@lib/rjsf": ["../src/components/rjsf/rjsf.index.ts"],
       "i18next": ["../node_modules/i18next"],
       "@rjsf/utils": ["../node_modules/@rjsf/utils"]
     }

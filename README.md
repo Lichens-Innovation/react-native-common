@@ -30,13 +30,15 @@ Table of content
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
     - [Scripts](#scripts)
+    - [Git hooks](#git-hooks)
   - [Peer Dependencies](#peer-dependencies)
     - [Why Peer Dependencies?](#why-peer-dependencies)
     - [Our Implementation Strategy](#our-implementation-strategy)
     - [Why devDependencies + peerDependencies?](#why-devdependencies--peerdependencies)
   - [WinRT integration](#winrt-integration)
-  - [Unit tests](#unit-tests)
   - [Project coding guidelines](#project-coding-guidelines)
+    - [Coding-guide policy](#coding-guide-policy)
+  - [Unit tests](#unit-tests)
   - [License](#license)
 
 ## Reusable Components
@@ -180,7 +182,7 @@ export const MyForm = () => {
 
 ## Contributions
 
-Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. CI (lint, typecheck, tests, build) runs on every PR.
+Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. CI (coding-guide lint, format check, `package.json` lint, knip, typecheck, tests, build) runs on every PR.
 
 ### Releases
 
@@ -223,11 +225,25 @@ bun install
 | `bun run watch:for:manufacture`    | Watches TS and syncs dist to rinno-manufacture-app node_modules                                                                                                                                                                          |
 | `bun run watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules                                                                                                                                                                       |
 | `bun run test`                     | Runs unit tests with Jest (`jest-expo` preset)                                                                                                                                                                                           |
-| `bun run lint`                     | Runs ESLint and Prettier check on JS/TS/TSX/JSON                                                                                                                                                                                         |
+| `bun run lint`                     | Coding-guide coaching on the whole project (`coding-guide check`: ESLint, knip, comments, duplication)                                                                                                                                   |
+| `bun run lint:ci`                  | Plain ESLint (no coaching, no knip / comments / duplication sensors)                                                                                                                                                                     |
 | `bun run lint:package`             | Lints `package.json` (exact versions) with npm-package-json-lint                                                                                                                                                                         |
+| `bun run lint:unused`              | Finds unused files, dependencies and exports with [knip](https://knip.dev/)                                                                                                                                                              |
 | `bun run lint:fix`                 | Runs ESLint with auto-fix                                                                                                                                                                                                                |
-| `bun run format:fix`               | Formats code with Prettier (write)                                                                                                                                                                                                       |
+| `bun run format`                   | Formats all files with Prettier (write)                                                                                                                                                                                                  |
+| `bun run format:check`             | Checks Prettier formatting of all files                                                                                                                                                                                                  |
+| `bun run habit:hooks`              | Coding-guide check on files changed since `main` (run before opening a PR)                                                                                                                                                               |
+| `bun run habit:hooks:full`         | Coding-guide check on the whole project                                                                                                                                                                                                  |
+| `bun run habit:snoozed`            | Lists the snoozed coding-guide keys (`.coding-guide/snooze.json`)                                                                                                                                                                        |
 | `bun run security:check`           | Audits dependencies for new CVEs vs [.cve-lite/baseline.json](.cve-lite/baseline.json), fails on high severity ([cve-lite-cli](https://github.com/OWASP/cve-lite-cli)); runs in `pre-commit` when `package.json` or `bun.lock` is staged |
+
+### Git hooks
+
+Installed by Husky on `bun install` (`prepare` script):
+
+- **commit-msg**: commitlint ([Conventional Commits](https://www.conventionalcommits.org))
+- **pre-commit**: typecheck, Prettier on staged files (lint-staged), coding-guide on staged files (`coding-guide check --staged`), `package.json` lint, CVE check when `package.json` / `bun.lock` are staged
+- **pre-push**: knip (unused files / dependencies / exports), blocks force push on `main`, `master`, `development`
 
 ## Peer Dependencies
 
@@ -263,20 +279,32 @@ Interfaces and types are generated by the `react-native-winrt` package at build 
 - `my-app-desktop\node_modules\react-native-winrt\windows\WinRTTurboModule\Generated Files\types\`
 - to `src\types\winrt\`
 
+## Project coding guidelines
+
+Coding standards are enforced by ESLint (see [eslint.config.mjs](eslint.config.mjs)) and [`@lichens-innovation/eslint-plugin-coding-guide`](https://github.com/Lichens-Innovation/eslint-plugin-coding-guide), which ships both the `coding-guide/*` rules and the `coding-guide` CLI. The CLI runs four sensors (ESLint, knip, own-line comments, jscpd duplication) and prints a coaching guide per smell; it is configured in [.coding-guide/config.json](.coding-guide/config.json).
+
+- `bun run lint`: whole project, what CI runs
+- `bun run habit:hooks`: files changed since `main`, run it before opening a PR
+- `bunx coding-guide check --file <path>`: one file
+- `// eslint-disable-next-line <rule> -- <reason>`: one justified exception to an ESLint rule, visible in review
+
+Background reading: [Coding guidelines](https://github.com/amwebexpert/chrome-extensions-collection/blob/master/packages/coding-guide-helper/public/markdowns/table-of-content.md), [rules list](https://github.com/Lichens-Innovation/eslint-plugin-coding-guide/blob/main/docs/rules/README.md), [CLI](https://github.com/Lichens-Innovation/eslint-plugin-coding-guide/blob/main/docs/cli.md).
+
+### Coding-guide policy
+
+- The whole codebase is held to the standard: there is no snooze list (`.coding-guide/snooze.json` stays empty) and CI fails on any enforced finding.
+- Fix a finding rather than silencing it. A justified exception (a workaround, a public API constraint) gets a disable comment that states why, e.g. `// eslint-disable-next-line <rule> -- <reason>` (`coding-guide-disable-next-line` directives are themselves reported as comments by the current CLI, so prefer the ESLint form).
+- Comments explain _why_, never _what_: a comment that must stay carries the `habit-hooks-disable non-essential-comment` marker at the end of its first line.
+- `suggested` smells (duplication, some `react-hooks/*` rules) are printed but don't block: fix them when the fix is a genuine improvement.
+
 ## Unit tests
 
 Tests run on [Jest](https://jestjs.io/) with the [`jest-expo`](https://docs.expo.dev/develop/unit-testing/) preset and [React Native Testing Library](https://callstack.github.io/react-native-testing-library/) for components and hooks.
 
-- `tests/` holds behaviour tests written against the public API only: import from `@lib` (the package entry) or `@lib/rjsf`, never from an internal path, so a refactor that keeps the API keeps the tests green. Unit tests of a single module may live next to it (`src/**/*.test.ts`).
+- `tests/` holds behaviour tests written against the public API only: import from `@lib` (the package entry, `src/react-native-common.index.ts`) or `@lib/rjsf`, never from an internal path, so a refactor that keeps the API keeps the tests green. Unit tests of a single module may live next to it (`src/**/*.test.ts`).
 - [jest.setup.ts](jest.setup.ts) mocks the native modules (Reanimated, Gesture Handler, Expo modules, MMKV, maps, Wi-Fi, ...); override a mock per test with `jest.mocked(...)` or a local `jest.mock` factory.
 - React Native Testing Library 14 is async: always `await render(...)`, `await renderHook(...)`, `await fireEvent.press(...)`.
-- Mark test phases with `// arrange`, `// act`, `// assert`.
-
-## Project coding guidelines
-
-Adhering to established coding guidelines is essential for developing efficient, maintainable, and scalable software. These guidelines promote consistency across codebases, making it easier for teams to collaborate and for new developers to understand existing code. By following standardized patterns, such as those outlined in the [Coding guidelines](https://github.com/amwebexpert/chrome-extensions-collection/blob/master/packages/coding-guide-helper/public/markdowns/table-of-content.md), developers can reduce errors and enhance code readability.
-
-- [Coding guidelines](https://github.com/amwebexpert/chrome-extensions-collection/blob/master/packages/coding-guide-helper/public/markdowns/table-of-content.md)
+- Mark test phases with `// arrange`, `// act`, `// assert` (enforced by `coding-guide/require-aaa-comments`).
 
 ## License
 

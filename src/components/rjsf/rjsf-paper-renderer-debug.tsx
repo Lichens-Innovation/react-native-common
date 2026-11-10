@@ -1,7 +1,6 @@
 import type { IChangeEvent } from '@rjsf/core';
 import type { RJSFSchema } from '@rjsf/utils';
-import type { FunctionComponent } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, type FunctionComponent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -18,17 +17,21 @@ export const RjsfPaperRendererDebug: FunctionComponent<RjsfPaperRendererDebugPro
 }) => {
   const { t } = useTranslation();
   const styles = useStyles();
-  // Mirrors the data for the JSON dump ONLY. It is deliberately not fed back as the renderer's
-  // `formData`: doing that made the underlying rjsf Form controlled, which doubled the whole-schema
-  // state derivations per keystroke and reset the live-value cache on every change — so switching
-  // this debug view on would have shown the pre-SPOTD-621 lag rather than what ships.
+  /** habit-hooks-disable non-essential-comment
+   * Mirrors the data for the JSON dump ONLY. It is deliberately not fed back as the renderer's
+   * `formData`: doing that made the underlying rjsf Form controlled, which doubled the whole-schema
+   * state derivations per keystroke and reset the live-value cache on every change — so switching
+   * this debug view on would have shown the pre-SPOTD-621 lag rather than what ships.
+   */
   const [formData, setFormData] = useState<FormData>(initialFormData ?? {});
 
   const initialFormDataJson = useMemo(() => JSON.stringify(initialFormData ?? {}), [initialFormData]);
+  const [syncedFormDataJson, setSyncedFormDataJson] = useState<string>(initialFormDataJson);
 
-  useEffect(() => {
+  if (syncedFormDataJson !== initialFormDataJson) {
+    setSyncedFormDataJson(initialFormDataJson);
     setFormData(initialFormData ?? {});
-  }, [initialFormDataJson]);
+  }
 
   const handleChange = useCallback(
     (event: IChangeEvent<FormData, RJSFSchema>, id?: string) => {

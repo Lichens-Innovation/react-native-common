@@ -1,4 +1,4 @@
-import { notImplementedYet } from '../../utils/platform.utils';
+import { notImplementedYet } from '../../utils/device/platform.utils';
 import { WifiInfo } from './wifi-info.types';
 
 export const fetchWifiInfo = async (): Promise<WifiInfo> => {

@@ -1,30 +1,20 @@
-import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import Slider from '@react-native-community/slider';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useAppTheme } from '../../../theme';
+import { useAppTheme } from '../../../theme/theme.index';
 import { RjsfDisplayLabel } from './display-label';
+import { getWidgetTitle } from './shared/widget-title.utils';
+import { useCommitWidgetValue } from './shared/use-commit-widget-value';
+import { isWidgetDisplayOnly } from './shared/widget-state.utils';
 
-export const RangeWidget: FunctionComponent<WidgetProps> = ({
-  id,
-  value,
-  disabled,
-  readonly,
-  onChange,
-  onBlur,
-  label,
-  hideLabel,
-  required,
-  rawErrors: _rawErrors,
-  schema,
-  options,
-}) => {
+export const RangeWidget: FunctionComponent<WidgetProps> = (props) => {
+  const { value, schema } = props;
   const theme = useAppTheme();
+  const commitValue = useCommitWidgetValue(props);
   const styles = useStyles();
-  const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const labelColor = getRjsfLabelColor(options);
+  const widgetTitle = getWidgetTitle(props);
   const hasSchemaMin = typeof schema?.minimum === 'number';
   const min = hasSchemaMin ? schema.minimum : 0;
   const hasSchemaMax = typeof schema?.maximum === 'number';
@@ -33,15 +23,11 @@ export const RangeWidget: FunctionComponent<WidgetProps> = ({
   const numValue = (hasValidValue ? value : min) as number;
   const displayValue = Math.round(numValue);
 
-  const handleSlidingComplete = (v: number) => {
-    const intValue = Math.round(v);
-    onChange(intValue);
-    onBlur(id, intValue);
-  };
+  const handleSlidingComplete = (slidValue: number) => commitValue(Math.round(slidValue));
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.rangeLabel} />
+      <RjsfDisplayLabel {...widgetTitle} style={styles.rangeLabel} />
 
       <View style={styles.rangeRow}>
         <Slider
@@ -52,7 +38,7 @@ export const RangeWidget: FunctionComponent<WidgetProps> = ({
           onSlidingComplete={handleSlidingComplete}
           minimumTrackTintColor={theme.colors.primary}
           maximumTrackTintColor={theme.colors.outline}
-          disabled={disabled || readonly}
+          disabled={isWidgetDisplayOnly(props)}
         />
         <Text variant="bodyMedium" style={styles.rangeValue}>
           {displayValue}

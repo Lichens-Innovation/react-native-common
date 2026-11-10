@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
 import { commonStore } from '../../store/common.store';
-import { getMonospaceFontName } from '../../utils/font.utils';
+import { getMonospaceFontName } from '../../utils/device/font.utils';
 import dark from './styles/dark';
 import light from './styles/light';
 import { CodeTag } from './syntax-coloring-tag-code';

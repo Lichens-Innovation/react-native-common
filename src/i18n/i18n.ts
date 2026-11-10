@@ -1,6 +1,8 @@
+import { isBlank } from '@lichens-innovation/ts-common';
 import { ModuleType, ThirdPartyModule, type i18n } from 'i18next';
 import { initReactI18next as initReactI18nextFromCommon } from 'react-i18next';
-import { storage } from '../utils/storage';
+import { logger } from '../logger/logger';
+import { storage } from '../utils/files/storage';
 
 import en from './en/common.json';
 import fr from './fr/common.json';
@@ -43,7 +45,7 @@ interface InitCommonI18nArgs {
 
 export const initCommonI18N = ({ initReactI18next, instance }: InitCommonI18nArgs): i18n => {
   const savedLanguage = loadSelectedLanguage();
-  if (!savedLanguage) {
+  if (isBlank(savedLanguage)) {
     storeSelectedLanguage(DEFAULT_LANGUAGE);
   }
 
@@ -55,12 +57,13 @@ export const initCommonI18N = ({ initReactI18next, instance }: InitCommonI18nArg
       resources: { fr, en },
       defaultNS: 'common',
       fallbackLng: DEFAULT_LANGUAGE,
-      lng: savedLanguage || DEFAULT_LANGUAGE,
+      lng: isBlank(savedLanguage) ? DEFAULT_LANGUAGE : savedLanguage,
       debug: false,
       interpolation: {
         escapeValue: false, // not needed for react as it escapes by default
       },
-    });
+    })
+    .catch((error: unknown) => logger.error('[initCommonI18N] Failed to initialize i18n', error));
 
   return instance;
 };

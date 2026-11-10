@@ -1,195 +1,65 @@
-import { isNullish, toDisplayLocale } from '@lichens-innovation/ts-common';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import type { WidgetProps } from '@rjsf/utils';
-import { useToggle } from '@uidotdev/usehooks';
-import type { FunctionComponent } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { IconButton, TextInput } from 'react-native-paper';
-import { useAppTheme, useIsDarkMode } from '../../../theme';
-import { mergeLabelColorTheme } from '../label-color-theme';
-
+import { isNullish } from '@lichens-innovation/ts-common';
 import {
   dateToDateOnlyString,
   formatDateOnlyForDisplay,
-  getRjsfDisplayLabel,
-  getRjsfLabelColor,
-  hasRjsfErrors,
   parseDateOnlyToLocalDate,
 } from '@lichens-innovation/ts-common/rjsf';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import type { WidgetProps } from '@rjsf/utils';
+import type { FunctionComponent } from 'react';
+import { Platform } from 'react-native';
+import { IosPickerModal } from './picker-field/ios-picker-modal';
+import { PickerInputField } from './picker-field/picker-input-field';
+import { usePickerThemeVariant } from './picker-field/use-picker-theme-variant';
+import { usePickerWidgetState } from './picker-field/use-picker-widget-state';
+import { useCommitWidgetValue } from './shared/use-commit-widget-value';
 
-export const DateWidget: FunctionComponent<WidgetProps> = ({
-  id,
-  value,
-  disabled,
-  readonly,
-  placeholder,
-  onChange,
-  onBlur,
-  onFocus,
-  label,
-  hideLabel,
-  required,
-  rawErrors,
-  options,
-}) => {
-  const theme = useAppTheme();
-  const isDarkMode = useIsDarkMode();
-  const styles = useStyles();
-  const { t, i18n } = useTranslation();
-  const [showPicker, togglePickerVisibility] = useToggle(false);
-  const hasError = hasRjsfErrors(rawErrors);
-  const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
-  const parsedDate = parseDateOnlyToLocalDate(value as string);
-  const date = parsedDate ?? new Date();
-  const hasValue = !isNullish(parsedDate);
-  const strValue = formatDateOnlyForDisplay(value as string, toDisplayLocale(i18n.language));
-  const pickerDisplay = Platform.OS === 'ios' ? 'spinner' : 'default';
-  const themeVariant = isDarkMode ? 'dark' : 'light';
-  const isDisplayOnly = disabled || readonly;
+export const DateWidget: FunctionComponent<WidgetProps> = (props) => {
+  const { value } = props;
+  const themeVariant = usePickerThemeVariant();
+  const commitValue = useCommitWidgetValue(props);
+  const { pickerValue, hasValue, displayValue, isPickerVisible, togglePickerVisibility, closePicker } =
+    usePickerWidgetState({
+      value,
+      parse: parseDateOnlyToLocalDate,
+      formatForDisplay: formatDateOnlyForDisplay,
+    });
 
-  if (isDisplayOnly) {
-    return (
-      <View style={styles.widgetBlock}>
-        <TextInput
-          mode="outlined"
-          label={displayLabel}
-          value={strValue}
-          placeholder={placeholder}
-          disabled={disabled}
-          editable={false}
-          error={hasError}
-          style={styles.input}
-          outlineColor={theme.colors.outline}
-          theme={labelColorTheme}
-          onFocus={() => onFocus(id, value)}
-          pointerEvents="auto"
-        />
-      </View>
-    );
-  }
+  const commitDate = (picked: Date) => commitValue(dateToDateOnlyString(picked));
 
   const handlePick = (_: unknown, selectedDate?: Date) => {
-    if (Platform.OS === 'android') togglePickerVisibility(false);
-    if (!isNullish(selectedDate)) {
-      const dateOnly = dateToDateOnlyString(selectedDate);
-      onChange(dateOnly);
-      onBlur(id, dateOnly);
-    }
+    if (Platform.OS === 'android') closePicker();
+    if (!isNullish(selectedDate)) commitDate(selectedDate);
   };
 
-  // On iOS the spinner only fires onChange when the user scrolls to a different
-  // value, so opening on an empty field would leave it empty. Commit the default
-  // (current) date immediately so the shown value is actually entered.
   const handleOpen = () => {
-    if (!showPicker && !hasValue) {
-      const dateOnly = dateToDateOnlyString(date);
-      onChange(dateOnly);
-      onBlur(id, dateOnly);
-    }
+    // The iOS spinner only fires onChange on scroll: commit the shown default so opening an empty field enters it. habit-hooks-disable non-essential-comment
+    if (!isPickerVisible && !hasValue) commitDate(pickerValue);
     togglePickerVisibility();
   };
 
-  const handleClear = () => {
-    onChange(undefined);
-    onBlur(id, undefined);
-  };
-
   return (
-    <View style={styles.widgetBlock}>
-      <Pressable onPress={handleOpen}>
-        <TextInput
-          mode="outlined"
-          label={displayLabel}
-          value={strValue}
-          placeholder={placeholder}
-          disabled={disabled}
-          editable={false}
-          error={hasError}
-          style={styles.input}
-          outlineColor={theme.colors.outline}
-          theme={labelColorTheme}
-          right={hasValue ? undefined : <TextInput.Icon icon="calendar" />}
-          onFocus={() => onFocus(id, value)}
-          pointerEvents="none"
-        />
-      </Pressable>
-
-      {hasValue && <IconButton icon="close" size={20} onPress={handleClear} style={styles.clearButton} />}
-
+    <PickerInputField {...props} displayValue={displayValue} icon="calendar" hasValue={hasValue} onOpen={handleOpen}>
       {Platform.OS === 'ios' ? (
-        <Modal visible={showPicker} transparent animationType="slide">
-          <Pressable style={styles.backdrop} onPress={() => togglePickerVisibility(false)} />
-          <View style={styles.iosContainer}>
-            <View style={styles.iosHeader}>
-              <Pressable onPress={() => togglePickerVisibility(false)} style={styles.doneButton}>
-                <Text style={styles.doneText}>{t('app:general.done')}</Text>
-              </Pressable>
-            </View>
-            <DateTimePicker
-              value={date}
-              mode="date"
-              display="spinner"
-              onChange={handlePick}
-              themeVariant={themeVariant}
-              textColor={theme.colors.onSurface}
-            />
-          </View>
-        </Modal>
+        <IosPickerModal
+          visible={isPickerVisible}
+          value={pickerValue}
+          mode="date"
+          onChange={handlePick}
+          onClose={closePicker}
+        />
       ) : (
-        showPicker && (
+        isPickerVisible && (
           <DateTimePicker
-            value={date}
+            value={pickerValue}
             mode="date"
-            display={pickerDisplay}
+            display="default"
             onChange={handlePick}
-            onTouchCancel={() => togglePickerVisibility(false)}
+            onTouchCancel={closePicker}
             themeVariant={themeVariant}
           />
         )
       )}
-    </View>
+    </PickerInputField>
   );
-};
-
-const useStyles = () => {
-  const theme = useAppTheme();
-  return StyleSheet.create({
-    widgetBlock: {
-      marginVertical: theme.spacing(0.5),
-    },
-    input: {
-      marginVertical: theme.spacing(0.5),
-    },
-    clearButton: {
-      position: 'absolute',
-      right: theme.spacing(0.5),
-      top: theme.spacing(1.5),
-    },
-    backdrop: {
-      flex: 1,
-    },
-    iosContainer: {
-      backgroundColor: theme.colors.surface,
-      borderTopLeftRadius: theme.spacing(1.5),
-      borderTopRightRadius: theme.spacing(1.5),
-    },
-    iosHeader: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      padding: theme.spacing(1.5),
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.colors.outline,
-    },
-    doneButton: {
-      paddingHorizontal: theme.spacing(1),
-      paddingVertical: theme.spacing(0.5),
-    },
-    doneText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.primary,
-    },
-  });
 };

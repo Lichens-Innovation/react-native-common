@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { LogEntry } from '../../../logger/logger.types';
 import { useLogEntryColor } from '../../../logger/use-log-entry-color';
 import { useAppTheme } from '../../../theme/theme';
-import { setClipboardTextContent } from '../../../utils/clipboard.utils';
+import { setClipboardTextContent } from '../../../utils/device/clipboard.utils';
 import { useSnackbar } from '../../snack-bar/snackbar-provider';
 import { formatLogMessage } from './logs-viewer.utils';
 

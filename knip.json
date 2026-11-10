@@ -1,0 +1,30 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "rules": {
+    "exports": "warn",
+    "types": "warn",
+    "duplicates": "warn"
+  },
+  "entry": ["scripts/*.js"],
+  "ignore": ["dist/**"],
+  "ignoreDependencies": [
+    "buffer",
+    "fast-xml-parser",
+    "react-hook-form",
+    "@babel/plugin-proposal-export-namespace-from",
+    "@semantic-release/github",
+    "@semantic-release/npm",
+    "babel-plugin-module-resolver",
+    "babel-plugin-transform-import-meta",
+    "concurrently",
+    "patch-package",
+    "expo-build-properties",
+    "expo-font",
+    "expo-secure-store",
+    "expo-splash-screen",
+    "expo-status-bar",
+    "react-native-svg",
+    "react-native-vector-icons",
+    "react-native-winrt"
+  ]
+}

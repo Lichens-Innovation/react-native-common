@@ -1,18 +1,19 @@
+import { isBlank } from '@lichens-innovation/ts-common';
 import { FunctionComponent } from 'react';
 import { Icon } from 'react-native-paper';
 
-export type DropDownSelectorLeftIconProps = {
+export interface DropDownSelectorLeftIconProps {
   icon?: string;
   color: string;
   size?: number;
-};
+}
 
 export const DropDownSelectorLeftIcon: FunctionComponent<DropDownSelectorLeftIconProps> = ({
   icon,
   color,
   size = 20,
 }) => {
-  if (!icon) {
+  if (isBlank(icon)) {
     return null;
   }
 

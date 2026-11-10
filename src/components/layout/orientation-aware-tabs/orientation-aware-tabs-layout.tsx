@@ -4,28 +4,28 @@ import { StyleSheet, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useScreenOrientation } from '../../../hooks/use-screen-orientation';
-import { useAppTheme } from '../../../theme';
+import { useAppTheme } from '../../../theme/theme.index';
 import { OrientationAwareTabButton } from './orientation-aware-tab-button';
 
-export type TabItem = {
+export interface TabItem {
   name: string;
   href: string;
   title: string;
   icon: string;
-};
+}
 
-export type OrientationAwareTabsLayoutProps = {
+export interface OrientationAwareTabsLayoutProps {
   tabs: TabItem[];
   activeColor?: string;
   containerStyle?: ViewStyle;
   tabListStyle?: ViewStyle;
-  /**
+  /** habit-hooks-disable non-essential-comment
    * When false, inactive tab screens stay attached to the native view hierarchy.
    * Needed for screens owning native surfaces (e.g. GL views) that must survive a tab switch.
    * Default: expo-router default (true on android/ios/web)
    */
   detachInactiveScreens?: boolean;
-};
+}
 
 export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsLayoutProps> = ({
   tabs,
@@ -61,10 +61,10 @@ export const OrientationAwareTabsLayout: FunctionComponent<OrientationAwareTabsL
   );
 };
 
-type UseOrientationAwareTabsStylesParams = {
+interface UseOrientationAwareTabsStylesParams {
   isLandscape: boolean;
   isLandscapeLeft: boolean;
-};
+}
 
 const useStyles = ({ isLandscape, isLandscapeLeft }: UseOrientationAwareTabsStylesParams) => {
   const theme = useAppTheme();

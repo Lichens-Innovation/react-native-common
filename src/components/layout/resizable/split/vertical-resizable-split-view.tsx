@@ -1,17 +1,15 @@
 import { useCallback, useEffect, type FunctionComponent } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { useAppTheme } from '../../../../theme';
-import { isDevelopment } from '../../../../utils';
-import { ResizablePaneDragChrome } from '../resizable-pane-drag-chrome';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { isDevelopment } from '../../../../utils/utils.index';
+import { ResizablePaneContent } from '../resizable-pane-content';
 import { RESIZE_HANDLE } from '../resizable-view.constants';
+import { ResizeHandle } from '../resize-handle';
+import { useResizePanGesture } from '../use-resize-pan-gesture';
 import { VerticalResizableSplitViewProps } from './vertical-resizable-split-view.types';
 import { validateResizableSplitViewProps } from './vertical-resizable-split-view.utils';
 
 export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSplitViewProps> = (props) => {
-  const styles = useStyles();
-
   useEffect(() => {
     if (isDevelopment()) validateResizableSplitViewProps(props);
   }, [props]);
@@ -29,45 +27,32 @@ export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSpli
     shouldObscureBottomPaneContentWhileResizing = false,
   } = props;
 
-  // Shared values for animation
   const containerHeight = useSharedValue(0);
   const topSectionHeight = useSharedValue(0);
   const minHeight = useSharedValue(0);
   const maxHeight = useSharedValue(0);
-  const startY = useSharedValue(0);
-  const isDragging = useSharedValue(false);
   const isLayoutReady = useSharedValue(false);
 
-  // Handle container layout measurement
   const handleLayout = useCallback(
     (event: LayoutChangeEvent) => {
       const { height } = event.nativeEvent.layout;
       if (height > 0 && !isLayoutReady.value) {
-        containerHeight.value = height;
-        minHeight.value = height * minTopRatio;
-        maxHeight.value = height * maxTopRatio;
-        topSectionHeight.value = height * initialTopRatio;
-        isLayoutReady.value = true;
+        containerHeight.set(height);
+        minHeight.set(height * minTopRatio);
+        maxHeight.set(height * maxTopRatio);
+        topSectionHeight.set(height * initialTopRatio);
+        isLayoutReady.set(true);
       }
     },
     [minTopRatio, maxTopRatio, initialTopRatio, containerHeight, minHeight, maxHeight, topSectionHeight, isLayoutReady]
   );
 
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      'worklet';
-      startY.value = topSectionHeight.value;
-      isDragging.value = true;
-    })
-    .onUpdate((event) => {
-      'worklet';
-      const newHeight = startY.value + event.translationY;
-      topSectionHeight.value = Math.max(minHeight.value, Math.min(newHeight, maxHeight.value));
-    })
-    .onFinalize(() => {
-      'worklet';
-      isDragging.value = false;
-    });
+  const { panGesture, isDragging } = useResizePanGesture({
+    size: topSectionHeight,
+    minSize: minHeight,
+    maxSize: maxHeight,
+    axis: 'y',
+  });
 
   const topSectionAnimatedStyle = useAnimatedStyle(() => ({ height: topSectionHeight.value }));
 
@@ -79,73 +64,61 @@ export const VerticalResizableSplitView: FunctionComponent<VerticalResizableSpli
     top: topSectionHeight.value - RESIZE_HANDLE.dragTargetCrossAxis / 2,
   }));
 
-  const dragHandleAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(isDragging.value ? 1.2 : 1, RESIZE_HANDLE.dragSpringConfig) }],
-  }));
-
   return (
     <View style={styles.container} onLayout={handleLayout}>
       <Animated.View style={[styles.topSection, topSectionAnimatedStyle]}>
-        {shouldObscureTopPaneContentWhileResizing ? (
-          <ResizablePaneDragChrome isDragging={isDragging} isLayoutReady={isLayoutReady} greyLevel="primary">
-            {topContent}
-          </ResizablePaneDragChrome>
-        ) : (
-          <>{topContent}</>
-        )}
+        <ResizablePaneContent
+          shouldObscureWhileResizing={shouldObscureTopPaneContentWhileResizing}
+          isDragging={isDragging}
+          isLayoutReady={isLayoutReady}
+          greyLevel="primary"
+        >
+          {topContent}
+        </ResizablePaneContent>
       </Animated.View>
 
       <Animated.View style={[styles.bottomSection, bottomSectionAnimatedStyle]}>
-        {shouldObscureBottomPaneContentWhileResizing ? (
-          <ResizablePaneDragChrome isDragging={isDragging} isLayoutReady={isLayoutReady} greyLevel="secondary">
-            {bottomContent}
-          </ResizablePaneDragChrome>
-        ) : (
-          <>{bottomContent}</>
-        )}
+        <ResizablePaneContent
+          shouldObscureWhileResizing={shouldObscureBottomPaneContentWhileResizing}
+          isDragging={isDragging}
+          isLayoutReady={isLayoutReady}
+          greyLevel="secondary"
+        >
+          {bottomContent}
+        </ResizablePaneContent>
       </Animated.View>
 
       {!hideHandle && (
-        <GestureDetector gesture={panGesture}>
-          <Animated.View style={[styles.handleContainer, handleContainerStyle, dragHandleContainerAnimatedStyle]}>
-            <Animated.View style={[styles.handle, handleStyle, dragHandleAnimatedStyle]} />
-          </Animated.View>
-        </GestureDetector>
+        <ResizeHandle
+          gesture={panGesture}
+          isDragging={isDragging}
+          barOrientation="horizontal"
+          containerStyle={[styles.handleContainer, handleContainerStyle, dragHandleContainerAnimatedStyle]}
+          handleStyle={handleStyle}
+        />
       )}
     </View>
   );
 };
 
-const useStyles = () => {
-  const theme = useAppTheme();
-
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    topSection: {
-      overflow: 'hidden',
-    },
-    bottomSection: {
-      overflow: 'hidden',
-    },
-    handleContainer: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      height: RESIZE_HANDLE.dragTargetCrossAxis,
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1,
-      elevation: 1,
-    },
-    handle: {
-      width: RESIZE_HANDLE.length,
-      height: theme.spacing(RESIZE_HANDLE.thicknessSpacing),
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.roundness,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: theme.colors.outline,
-    },
-  });
-};
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  topSection: {
+    overflow: 'hidden',
+  },
+  bottomSection: {
+    overflow: 'hidden',
+  },
+  handleContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: RESIZE_HANDLE.dragTargetCrossAxis,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+    elevation: 1,
+  },
+});

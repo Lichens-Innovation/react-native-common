@@ -1,36 +1,14 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
-import { logger } from '../../logger';
-import { DialogOkCancel } from '../dialogs/dialog-ok-cancel';
 import * as ExpoCamera from 'expo-camera';
-import { Alert, Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
-import Slider from '@react-native-community/slider';
-import { Text, Icon } from 'react-native-paper';
+import React from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import { AppModal } from '../modal/app-modal';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as MediaLibrary from 'expo-media-library';
-import * as ImagePicker from 'expo-image-picker';
-import { VolumeManager } from 'react-native-volume-manager';
-import { useTranslation } from 'react-i18next';
-import { normalizeImageToJpeg, normalizeImagesToJpeg } from '../../utils/image-convert.utils';
-import {
-  openAppSettings,
-  requestPermissionOrOpenSettings,
-  resolvePermissionRequest,
-} from '../../utils/permission.utils';
+import { CameraBottomControls } from './camera/camera-bottom-controls';
+import type { CameraFullModalArgs } from './camera/camera-capture.types';
+import { CameraCaptureFeedback } from './camera/camera-capture-feedback';
+import { CameraPermissionDialog } from './camera/camera-permission-dialog';
+import { useCameraCapture } from './camera/use-camera-capture';
 
-interface CameraFullModalArgs {
-  mode?: 'image' | 'video';
-  onClose: () => void;
-  handleObjectsTaken: (uris: string[]) => void;
-  allowMultipleSelection?: boolean;
-}
-
-const PICTURE_PARAMS = { base64: false, quality: 0.8 };
-const VIDEO_MAX_DURATION_S = 180;
-const VIDEO_PARAMS = {
-  maxDuration: VIDEO_MAX_DURATION_S,
-  codec: 'avc1' as ExpoCamera.VideoCodec,
-};
+const CAMERA_FACING: ExpoCamera.CameraType = 'back';
 const VIDEO_QUALITY: ExpoCamera.VideoQuality = '1080p';
 
 export const CameraFullModal = ({
@@ -39,521 +17,79 @@ export const CameraFullModal = ({
   handleObjectsTaken,
   allowMultipleSelection = true,
 }: CameraFullModalArgs) => {
-  const [captureCount, setCaptureCount] = useState(0);
-  const styles = useStyles();
-  const { t } = useTranslation();
-  const [facing, _setFacing] = useState<ExpoCamera.CameraType>('back');
-  const [isRecording, setIsRecording] = useState(false);
-  const manualStopRef = useRef(false);
-  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
-  const snackbarAnim = useRef(new Animated.Value(0)).current;
-  const snackbarHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const showInCameraSnackbar = useCallback(
-    (message: string) => {
-      if (snackbarHideTimerRef.current) {
-        clearTimeout(snackbarHideTimerRef.current);
-        snackbarHideTimerRef.current = null;
-      }
-      setSnackbarMessage(message);
-      snackbarAnim.stopAnimation();
-      Animated.timing(snackbarAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start(() => {
-        snackbarHideTimerRef.current = setTimeout(() => {
-          Animated.timing(snackbarAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }).start(() => setSnackbarMessage(null));
-        }, 3000);
-      });
-    },
-    [snackbarAnim]
-  );
-
-  useEffect(() => {
-    return () => {
-      if (snackbarHideTimerRef.current) clearTimeout(snackbarHideTimerRef.current);
-    };
-  }, []);
   const [permission, requestPermission] = ExpoCamera.useCameraPermissions();
-  const [audioPermission, requestAudioPermission] = ExpoCamera.useMicrophonePermissions();
-  const cameraRef = useRef<ExpoCamera.CameraView | null>(null);
-  const [zoom, setZoom] = useState(0);
-  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions({
-    writeOnly: true,
-  });
-  const [torchEnabled, setTorchEnabled] = useState(false);
-  /** Set once the user chose to record without sound, so they are not asked again for this session. */
-  const recordWithoutSoundRef = useRef(false);
-  const [pendingRecording, setPendingRecording] = useState(false);
-  /** The camera permission was requested since opening: Android's `canAskAgain` can be trusted from then on. */
-  const [cameraAsked, setCameraAsked] = useState(false);
+  const {
+    cameraRef,
+    state,
+    isAudioGranted,
+    snackbarMessage,
+    snackbarAnim,
+    flashAnim,
+    close,
+    shutter,
+    pickFromLibrary,
+  } = useCameraCapture({ mode, onClose, handleObjectsTaken, allowMultipleSelection });
 
-  const flashAnim = useRef(new Animated.Value(0)).current;
-
-  const triggerCaptureFlash = useCallback(() => {
-    flashAnim.stopAnimation();
-    flashAnim.setValue(1);
-
-    Animated.timing(flashAnim, {
-      toValue: 0,
-      duration: 180,
-      useNativeDriver: true,
-    }).start();
-  }, [flashAnim]);
-
-  const closeCamera = async () => {
-    try {
-      if (isRecording && cameraRef.current) {
-        manualStopRef.current = true;
-        cameraRef.current.stopRecording();
-        setIsRecording(false);
-        triggerCaptureFlash();
-      }
-    } finally {
-      setTorchEnabled(false);
-      setTimeout(() => onClose(), 0);
-    }
-  };
-
-  const ensureGalleryPermission = async () => {
-    if (mediaPermission?.granted) return true;
-    const res = await requestMediaPermission();
-    return !!res?.granted;
-  };
-
-  const takePicture = async () => {
-    if (!cameraRef.current) return;
-
-    try {
-      const picture = await cameraRef.current.takePictureAsync(PICTURE_PARAMS);
-      if (!picture) {
-        Alert.alert('Error', 'Failed to take picture.');
-        return;
-      }
-      if (Platform.OS === 'ios') {
-        triggerCaptureFlash();
-      }
-
-      // Copy picture in user image gallery as an additional backup
-      const ok = await ensureGalleryPermission();
-      if (ok) {
-        try {
-          await MediaLibrary.saveToLibraryAsync(picture.uri);
-        } catch (e) {
-          logger.warn('Gallery backup failed:', e);
-        }
-      }
-      const jpegUri = await normalizeImageToJpeg(picture.uri);
-      handleObjectsTaken([jpegUri]);
-      setCaptureCount((c) => c + 1);
-      if (!allowMultipleSelection) {
-        closeCamera();
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to save picture: ' + (error as Error).message);
-    }
-  };
-
-  const confirmRecordWithoutSound = () =>
-    new Promise<boolean>((resolve) => {
-      Alert.alert(
-        t('common:camera.microphoneDeniedTitle'),
-        t('common:camera.microphoneDeniedDescription'),
-        [
-          {
-            text: t('common:openSettings'),
-            onPress: () => {
-              resolve(false);
-              closeCamera();
-              openAppSettings();
-            },
-          },
-          {
-            text: t('common:camera.recordWithoutSound'),
-            onPress: () => {
-              recordWithoutSoundRef.current = true;
-              resolve(true);
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-    });
-
-  /**
-   * - `ready`: record now, with sound or muted as the user accepted.
-   * - `justGranted`: the OS prompt was just accepted, but the camera is still muted until the next render.
-   * - `cancelled`: the user went to the settings instead.
-   */
-  const ensureMicrophone = async (): Promise<'ready' | 'justGranted' | 'cancelled'> => {
-    if (recordWithoutSoundRef.current) return 'ready';
-
-    const action = resolvePermissionRequest(audioPermission);
-    if (action === 'granted') return 'ready';
-    if (action === 'prompt' && (await requestAudioPermission()).granted) return 'justGranted';
-
-    return (await confirmRecordWithoutSound()) ? 'ready' : 'cancelled';
-  };
-
-  // Starting is deferred to an effect when the microphone was just granted, so the camera has been
-  // unmuted before recordAsync reads it.
-  useEffect(() => {
-    if (!pendingRecording) return;
-    setPendingRecording(false);
-    startRecording();
-  }, [pendingRecording]);
-
-  async function takeVideo() {
-    if (!cameraRef.current) return;
-    if (isRecording) {
-      manualStopRef.current = true;
-      cameraRef.current.stopRecording();
-      setIsRecording(false);
-      triggerCaptureFlash();
-      return;
-    }
-
-    const microphone = await ensureMicrophone();
-    if (microphone === 'cancelled') return;
-    if (microphone === 'justGranted') {
-      setPendingRecording(true);
-      return;
-    }
-
-    await startRecording();
-  }
-
-  async function startRecording() {
-    if (!cameraRef.current) return;
-    manualStopRef.current = false;
-    setIsRecording(true);
-    const video = await cameraRef.current.recordAsync(VIDEO_PARAMS);
-    const wasAutoStopped = !manualStopRef.current;
-    manualStopRef.current = false;
-    if (!video) {
-      Alert.alert('Error', 'Failed to record video.');
-      setIsRecording(false);
-      return;
-    }
-    if (wasAutoStopped) {
-      logger.info('Video recording stopped automatically after reaching time limit');
-      showInCameraSnackbar(t('common:camera.videoLengthLimitReached', { seconds: VIDEO_MAX_DURATION_S }));
-      setIsRecording(false);
-      triggerCaptureFlash();
-    }
-
-    // Copy video in user gallery as an additional backup
-    const ok = await ensureGalleryPermission();
-    if (ok) {
-      try {
-        await MediaLibrary.saveToLibraryAsync(video.uri);
-      } catch (e) {
-        logger.warn('Gallery backup failed:', e);
-      }
-    }
-    handleObjectsTaken([video.uri]);
-    setCaptureCount((c) => c + 1);
-    setIsRecording(false);
-    if (!allowMultipleSelection) {
-      closeCamera();
-    }
-  }
-
-  const selectMedia = async () => {
-    try {
-      // No media-library permission requested: launchImageLibraryAsync uses the
-      // Android Photo Picker (and iOS limited picker), which need no READ permission.
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: mode === 'video' ? ['videos'] : ['images'],
-        allowsEditing: false,
-        quality: 1,
-        allowsMultipleSelection: allowMultipleSelection,
-      });
-      if (!result.canceled && result?.assets?.length > 0) {
-        const uris = result.assets.map((asset) => asset.uri);
-        const finalUris = mode === 'video' ? uris : await normalizeImagesToJpeg(uris);
-        handleObjectsTaken(finalUris);
-        closeCamera();
-      }
-    } catch (e) {
-      logger.warn('Media selection failed:', e);
-      Alert.alert('Error', 'Failed to select media. Please try again.');
-      setIsRecording(false);
-    }
-  };
-
-  const onVolumePress = useCallback(async () => {
-    if (!cameraRef.current) return;
-    if (mode === 'image') {
-      await takePicture();
-    } else {
-      await takeVideo();
-    }
-  }, [mode, isRecording]);
-
-  const onVolumePressRef = useRef(onVolumePress);
-  useEffect(() => {
-    onVolumePressRef.current = onVolumePress;
-  }, [onVolumePress]);
-
-  const lastTriggerAtRef = useRef(0);
-
-  useEffect(() => {
-    const clampInitialVolume = async () => {
-      try {
-        const { volume } = await VolumeManager.getVolume();
-        let newVolume = volume;
-        if (volume < 0.1) newVolume = 0.1;
-        if (volume > 0.9) newVolume = 0.9;
-        if (newVolume !== volume) {
-          await VolumeManager.setVolume(newVolume, { showUI: false });
-        }
-      } catch (e) {
-        logger.warn('Failed to clamp volume', e);
-      }
-    };
-
-    clampInitialVolume();
-    const sub = VolumeManager.addVolumeListener(async () => {
-      const now = Date.now();
-      if (now - lastTriggerAtRef.current < 2000) {
-        return;
-      }
-      lastTriggerAtRef.current = now;
-      await onVolumePressRef.current();
-    });
-    return () => {
-      sub?.remove?.();
-    };
-  }, []);
-
-  // Still reading the permission: showing the dialog now would flash it even when access is granted.
+  // Still reading the permission: showing the dialog now would flash it even when access is granted. habit-hooks-disable non-essential-comment
   if (!permission) return null;
 
   if (!permission.granted) {
-    const options = { askedThisSession: cameraAsked };
-    const mustOpenSettings = resolvePermissionRequest(permission, options) === 'settings';
-    // SPOTD-1064: once the OS no longer prompts, asking again silently resolves to denied and left the
-    // user stuck on this dialog; the settings are the only way out.
-    const onOk = async () => {
-      const outcome = await requestPermissionOrOpenSettings(permission, requestPermission, options);
-      setCameraAsked(true);
-      // Blocked: stay, the dialog now offers the settings.
-      if (outcome === 'denied' || outcome === 'settingsOpened') onClose();
-    };
-
-    return (
-      <DialogOkCancel
-        isVisible={true}
-        title={t(mustOpenSettings ? 'common:camera.permissionDeniedTitle' : 'common:camera.permissionRequiredTitle')}
-        description={t(
-          mustOpenSettings ? 'common:camera.permissionDeniedDescription' : 'common:camera.permissionRequiredDescription'
-        )}
-        okLabel={mustOpenSettings ? t('common:openSettings') : undefined}
-        onOk={onOk}
-        onCancel={onClose}
-      />
-    );
+    return <CameraPermissionDialog permission={permission} requestPermission={requestPermission} onClose={onClose} />;
   }
 
   return (
-    <AppModal visible={true} onDismiss={closeCamera} style={styles.container}>
+    <AppModal visible={true} onDismiss={close} style={styles.container}>
       <View style={styles.container}>
         <ExpoCamera.CameraView
           mode={mode === 'video' ? 'video' : 'picture'}
           style={StyleSheet.absoluteFill}
-          facing={facing}
+          facing={CAMERA_FACING}
           ref={cameraRef}
-          enableTorch={torchEnabled}
-          zoom={zoom}
+          enableTorch={state.torchEnabled}
+          zoom={state.zoom}
           videoQuality={VIDEO_QUALITY}
-          // Android refuses to record unmuted without the microphone permission.
-          mute={!audioPermission?.granted}
+          // Android refuses to record unmuted without the microphone permission. habit-hooks-disable non-essential-comment
+          mute={!isAudioGranted}
         />
-        <View
-          style={[styles.badgeContainer, { opacity: captureCount > 0 ? 1 : 0 }]}
-          pointerEvents={captureCount > 0 ? 'auto' : 'none'}
-        >
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{captureCount}</Text>
-          </View>
-        </View>
-        <Animated.View pointerEvents="none" style={[styles.inCameraSnackbar, { opacity: snackbarAnim }]}>
-          <Text style={styles.inCameraSnackbarText}>{snackbarMessage ?? ''}</Text>
-        </Animated.View>
+        <CameraCaptureFeedback
+          captureCount={state.captureCount}
+          snackbarMessage={snackbarMessage}
+          snackbarAnim={snackbarAnim}
+        />
         <View style={styles.overlay}>
-          <View style={{ flex: 1 }} />
-          <View style={styles.bottomControls}>
-            <View style={styles.sliderContainer}>
-              <Slider
-                style={styles.slider}
-                minimumValue={0}
-                maximumValue={1}
-                step={0.01}
-                value={zoom}
-                onValueChange={setZoom}
-                minimumTrackTintColor="#fff"
-                maximumTrackTintColor="#888"
-                thumbTintColor="#fff"
-              />
-              <TouchableOpacity
-                style={styles.flashButton}
-                onPress={() => {
-                  setTorchEnabled((v) => !v);
-                }}
-              >
-                <Icon source={'flashlight'} size={30} color={torchEnabled ? 'yellow' : 'white'} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={closeCamera}>
-                <Icon source="arrow-left" size={30} color="white" />
-              </TouchableOpacity>
-
-              {mode === 'image' ? (
-                <TouchableOpacity style={styles.button} onPress={takePicture}>
-                  <Icon source="camera" size={30} color="white" />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={styles.button} onPress={takeVideo}>
-                  {isRecording ? (
-                    <Icon source="stop" size={30} color="white" />
-                  ) : (
-                    <Icon source="video" size={30} color="white" />
-                  )}
-                  <Text style={styles.text}>{isRecording ? 'Stop' : 'Video'}</Text>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity style={styles.button} onPress={selectMedia}>
-                <Icon source="image" size={30} color="white" />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <View style={styles.spacer} />
+          <CameraBottomControls
+            mode={mode}
+            isRecording={state.isRecording}
+            zoom={state.zoom}
+            onZoomChange={state.setZoom}
+            torchEnabled={state.torchEnabled}
+            onToggleTorch={() => state.setTorchEnabled((enabled) => !enabled)}
+            onBack={close}
+            onShutter={shutter}
+            onSelectMedia={pickFromLibrary}
+          />
         </View>
-
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.captureFlashOverlay,
-            {
-              opacity: flashAnim,
-            },
-          ]}
-        />
+        <Animated.View pointerEvents="none" style={[styles.captureFlashOverlay, { opacity: flashAnim }]} />
       </View>
     </AppModal>
   );
 };
 
-const useStyles = () => {
-  const insets = useSafeAreaInsets();
-
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      width: '100%',
-    },
-    message: {
-      textAlign: 'center',
-      paddingBottom: 10,
-    },
-    camera: {
-      flex: 1,
-    },
-    overlay: {
-      flex: 1,
-      justifyContent: 'space-between',
-    },
-    bottomControls: {
-      width: '100%',
-      paddingBottom: 24 + insets.bottom,
-    },
-    sliderContainer: {
-      marginHorizontal: 40,
-      backgroundColor: 'rgba(0,0,0,0.3)',
-      borderRadius: 8,
-      padding: 8,
-      flexDirection: 'row',
-    },
-    slider: {
-      width: '80%',
-      height: 40,
-    },
-    buttonContainer: {
-      flexDirection: 'row',
-      backgroundColor: 'transparent',
-      marginHorizontal: 32,
-      marginVertical: 8,
-    },
-    button: {
-      flex: 1,
-      alignSelf: 'flex-end',
-      alignItems: 'center',
-      borderRadius: 32,
-      backgroundColor: 'rgba(0,0,0,0.3)',
-      height: 100,
-      justifyContent: 'center',
-      marginHorizontal: 8,
-    },
-    flashButton: {
-      alignSelf: 'flex-end',
-      alignItems: 'center',
-      borderRadius: 32,
-      backgroundColor: 'rgba(0,0,0,0.3)',
-      height: 50,
-      width: 50,
-      justifyContent: 'center',
-      marginHorizontal: 8,
-    },
-    text: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: 'white',
-    },
-    captureFlashOverlay: {
-      ...StyleSheet.absoluteFill,
-      backgroundColor: 'white',
-    },
-    badgeContainer: {
-      position: 'absolute',
-      top: 50,
-      right: 16,
-      zIndex: 10,
-    },
-    badge: {
-      minWidth: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: 'red',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 6,
-    },
-    badgeText: {
-      color: 'white',
-      fontWeight: 'bold',
-      fontSize: 16,
-    },
-    inCameraSnackbar: {
-      position: 'absolute',
-      top: insets.top + 16,
-      left: 16,
-      right: 16,
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      borderRadius: 8,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      zIndex: 20,
-    },
-    inCameraSnackbarText: {
-      color: 'white',
-      fontSize: 14,
-      textAlign: 'center',
-    },
-  });
-};
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    width: '100%',
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  spacer: {
+    flex: 1,
+  },
+  captureFlashOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'white',
+  },
+});

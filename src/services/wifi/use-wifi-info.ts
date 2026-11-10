@@ -74,8 +74,9 @@ export const useConnectToWifiMutation = () => {
     mutationFn: connectToWiFi,
     onSuccess: () => queryClient.clear(),
     onError: (e: Error) => {
-      // Technical debt: investigate why isError and error are not properly set because we should be able to
-      // display the error message directly on the component through a classic useEffect on isError and error
+      /* habit-hooks-disable non-essential-comment
+       * Technical debt: investigate why isError and error are not properly set because we should be able to
+       * display the error message directly on the component through a classic useEffect on isError and error */
       const title = t('common:error');
       const message = t('common:wifi.connectError', { error: e?.message });
       Alert.alert(title, message);

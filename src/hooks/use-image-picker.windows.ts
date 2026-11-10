@@ -1,4 +1,4 @@
-import { notImplementedYet } from '../utils/platform.utils';
+import { notImplementedYet } from '../utils/device/platform.utils';
 
 export const useImagePicker = () => {
   notImplementedYet('useImagePicker');

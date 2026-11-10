@@ -1,19 +1,19 @@
 import { ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
 
-type Owner = {
+interface Owner {
   id: string;
   preempt: () => void;
-  /**
+  /** habit-hooks-disable non-essential-comment
    * Stops whatever the owner started. Defaults to aborting expo-speech-recognition, which is what
    * every owner used before on-device transcription existed; an owner capturing audio some other
    * way passes its own teardown here.
    */
   abort?: () => void;
-};
+}
 
 let currentOwner: Owner | null = null;
 
-/**
+/** habit-hooks-disable non-essential-comment
  * Subscribers to "who holds the microphone". There is one recorder and one model, so a second field
  * starting while the first is still going corrupts both; the text inputs use this to disable their
  * own microphone whenever another field owns the session.
@@ -33,7 +33,6 @@ export const subscribeToDictationOwner = (listener: () => void): (() => void) =>
   };
 };
 
-/** The id of the field currently holding the microphone, or null when nothing is running. */
 export const getDictationOwnerId = (): string | null => currentOwner?.id ?? null;
 
 const POLL_INTERVAL_MS = 50;

@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { observer } from 'mobx-react-lite';
 import { createContext, PropsWithChildren, useContext, useEffect, useRef } from 'react';
 import { logger } from '../../logger/logger';
-import { commonStore } from '../../store';
+import { commonStore } from '../../store/store.index';
 import { WifiDiagnoseQueryKey } from './query-keys';
 import { useWifiInfo, useWifiInfosErrorSnackbar } from './use-wifi-info';
 
@@ -24,7 +24,7 @@ export const WifiInfosProvider = observer(({ children }: PropsWithChildren) => {
     const hasChangedToActive = newAppStatus === 'active' && prevAppStatus !== 'active';
     if (hasChangedToActive) {
       logger.info('[WifiInfosProvider] App status changed to active, invalidating wifi infos queries');
-      queryClient.invalidateQueries({ queryKey: WifiDiagnoseQueryKey.details() });
+      void queryClient.invalidateQueries({ queryKey: WifiDiagnoseQueryKey.details() });
     }
 
     prevAppStatusRef.current = newAppStatus;

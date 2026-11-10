@@ -1,4 +1,4 @@
-/**
+/** habit-hooks-disable non-essential-comment
  * Optional on-device transcription for VoiceRecognitionTextInput.
  *
  * The implementation is *injected* rather than imported. This package is consumed by several apps,
@@ -13,18 +13,26 @@
 
 export interface OnDeviceTranscription {
   text: string;
-  /** Local URI of the captured audio, when the engine kept it. */
   audioUri?: string;
 }
 
+export interface StopAndTranscribeOptions {
+  /** habit-hooks-disable non-essential-comment
+   * Whether the caller wants the audio afterwards. When false the engine may discard it once
+   * transcription succeeds -- but it must still keep it when transcription fails, so the caller can
+   * fall back to recognising the file.
+   */
+  keepAudio?: boolean;
+}
+
 export interface OnDeviceSpeechEngine {
-  /**
+  /** habit-hooks-disable non-essential-comment
    * Whether the engine can be used right now -- model present, nothing missing. Called on every
    * microphone press, so it must be cheap and must not throw.
    */
   isReady(): boolean;
 
-  /**
+  /** habit-hooks-disable non-essential-comment
    * Begins capturing audio. Should return promptly: any expensive preparation (loading a model)
    * belongs in the background while the user is already speaking.
    *
@@ -34,27 +42,21 @@ export interface OnDeviceSpeechEngine {
    */
   startCapture(onAutoStop?: () => void): Promise<boolean>;
 
-  /**
-   * Stops capturing and transcribes what was captured.
-   *
-   * @param options.keepAudio Whether the caller wants the audio afterwards. When false the engine
-   *   may discard it once transcription succeeds -- but it must still keep it when transcription
-   *   fails, so the caller can fall back to recognising the file.
+  /** habit-hooks-disable non-essential-comment
    * @returns null when transcription failed for any reason. The captured audio should still be
    *   available from `getLastAudioUri`.
    */
-  stopAndTranscribe(options?: { keepAudio?: boolean }): Promise<OnDeviceTranscription | null>;
+  stopAndTranscribe(options?: StopAndTranscribeOptions): Promise<OnDeviceTranscription | null>;
 
-  /** Stops capturing and throws the audio away, for when another field takes over the microphone. */
   abortCapture(): void;
 
-  /**
+  /** habit-hooks-disable non-essential-comment
    * The audio captured by the last session, kept even when transcription failed, so a failed
    * on-device attempt can be re-run through the system recogniser instead of being lost.
    */
   getLastAudioUri(): string | null;
 
-  /**
+  /** habit-hooks-disable non-essential-comment
    * Tells the engine the caller is finished with the last capture's audio, so it can be deleted.
    * Called after a session that did not want the recording kept.
    */
@@ -63,7 +65,7 @@ export interface OnDeviceSpeechEngine {
 
 let engine: OnDeviceSpeechEngine | null = null;
 
-/** Registers the engine. Call once during app start-up; pass null to go back to system-only. */
+/** Call once during app start-up; pass null to go back to system-only. habit-hooks-disable non-essential-comment */
 export const setOnDeviceSpeechEngine = (next: OnDeviceSpeechEngine | null): void => {
   engine = next;
 };
