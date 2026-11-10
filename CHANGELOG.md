@@ -1,3 +1,10 @@
+## [4.2.4](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.3...v4.2.4) (2026-11-10)
+
+
+### Bug Fixes
+
+* drop WinRT/Windows support ([#62](https://github.com/Lichens-Innovation/react-native-common/issues/62)) ([345656c](https://github.com/Lichens-Innovation/react-native-common/commit/345656c0831824e516cf4fd97d251519e725f7e9))
+
 ## [4.2.3](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.2...v4.2.3) (2026-11-10)
 
 
