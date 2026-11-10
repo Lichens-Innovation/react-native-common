@@ -305,6 +305,28 @@ describe('useUserLocation', () => {
     // assert
     expect(result.current.userLocation).toBe(snapshot);
   });
+
+  it('on unmount after a retry, removes the latest subscription and ignores its updates', async () => {
+    // arrange
+    const { result, unmount } = await renderHook(() => useUserLocation());
+    await flushPromises();
+    const latestSubscription = { remove: jest.fn() };
+    mocked.watchPositionAsync.mockImplementation((async (_options: unknown, callback: (location: unknown) => void) => {
+      watchCallback = callback;
+      return latestSubscription;
+    }) as never);
+    await act(async () => result.current.retry());
+    await flushPromises();
+    const snapshot = result.current.userLocation;
+
+    // act
+    await unmount();
+    await act(async () => watchCallback?.(position(9, 9)));
+
+    // assert
+    expect(latestSubscription.remove).toHaveBeenCalledTimes(1);
+    expect(result.current.userLocation).toBe(snapshot);
+  });
 });
 
 describe('LocationPickerModal', () => {

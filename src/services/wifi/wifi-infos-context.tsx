@@ -16,10 +16,12 @@ export const WifiInfosProvider = observer(({ children }: PropsWithChildren) => {
   const value = useWifiInfo();
   useWifiInfosErrorSnackbar();
 
-  const prevAppStatusRef = useRef(commonStore.appStatus);
+  // Read during render: observer re-renders on appStatus changes, and the effect re-runs on the new value. habit-hooks-disable non-essential-comment
+  const appStatus = commonStore.appStatus;
+  const prevAppStatusRef = useRef(appStatus);
 
   useEffect(() => {
-    const newAppStatus = commonStore.appStatus;
+    const newAppStatus = appStatus;
     const prevAppStatus = prevAppStatusRef.current;
     const hasChangedToActive = newAppStatus === 'active' && prevAppStatus !== 'active';
     if (hasChangedToActive) {
@@ -28,7 +30,7 @@ export const WifiInfosProvider = observer(({ children }: PropsWithChildren) => {
     }
 
     prevAppStatusRef.current = newAppStatus;
-  }, [queryClient, commonStore.appStatus]);
+  }, [queryClient, appStatus]);
 
   return <WifiInfosContext.Provider value={value}>{children}</WifiInfosContext.Provider>;
 });

@@ -121,6 +121,43 @@ describe('ErrorBoundary', () => {
     });
   });
 
+  it('reports and redirects once per error across re-renders, with the same id everywhere', async () => {
+    // arrange
+    const error = new Error('Kaboom');
+    const retry = jest.fn();
+    const errorSpy = jest.spyOn(logger, 'error');
+    const { rerender } = await renderWithProviders(<ErrorBoundary error={error} retry={retry} />);
+
+    // act
+    await rerender(<ErrorBoundary error={error} retry={retry} />);
+
+    // assert
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(mockRouter.replace).toHaveBeenCalledTimes(1);
+    const [, sentryContext] = jest.mocked(Sentry.captureException).mock.calls[0] as [
+      unknown,
+      { extra: { id: string } },
+    ];
+    const sentryId = sentryContext.extra.id;
+    expect(mockRouter.replace.mock.calls[0][0].params.id).toBe(sentryId);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining(`(ID: ${sentryId})`), error);
+  });
+
+  it('reports and redirects again for a new error', async () => {
+    // arrange
+    const retry = jest.fn();
+    const { rerender } = await renderWithProviders(<ErrorBoundary error={new Error('first')} retry={retry} />);
+
+    // act
+    await rerender(<ErrorBoundary error={new Error('second')} retry={retry} />);
+
+    // assert
+    expect(Sentry.captureException).toHaveBeenCalledTimes(2);
+    expect(mockRouter.replace).toHaveBeenLastCalledWith(
+      expect.objectContaining({ params: expect.objectContaining({ errorMsg: 'second' }) })
+    );
+  });
+
   it('renders nothing', async () => {
     // act
     await renderWithProviders(<ErrorBoundary error={new Error('x')} retry={jest.fn()} />);

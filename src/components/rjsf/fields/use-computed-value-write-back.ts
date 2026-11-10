@@ -1,5 +1,5 @@
 import type { FieldPathList, FieldProps, RJSFSchema } from '@rjsf/utils';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 interface UseComputedValueWriteBackArgs {
   computed: number | null;
@@ -23,8 +23,14 @@ export const useComputedValueWriteBack = ({
   baseId,
 }: UseComputedValueWriteBackArgs): void => {
   const hasSettledFirstPassRef = useRef<boolean>(false);
+  // Runs on `computed` only: fieldPath/baseId derive from a stable id, and onChange/formData change every render. habit-hooks-disable non-essential-comment
+  const latestRef = useRef({ formData, onChange, fieldPath, baseId });
+  useLayoutEffect(() => {
+    latestRef.current = { formData, onChange, fieldPath, baseId };
+  }, [formData, onChange, fieldPath, baseId]);
 
   useEffect(() => {
+    const { formData, onChange, fieldPath, baseId } = latestRef.current;
     const isFirstPass = !hasSettledFirstPassRef.current;
     hasSettledFirstPassRef.current = true;
     const storedIsUsable = typeof formData === 'number' && Number.isFinite(formData);
@@ -37,6 +43,5 @@ export const useComputedValueWriteBack = ({
     if (computed === formData) return;
     if (isFirstPass && storedIsUsable) return;
     onChange(computed, fieldPath, undefined, baseId);
-    // Runs on `computed` only: fieldPath/baseId derive from a stable id, and onChange/formData change every render. habit-hooks-disable non-essential-comment
   }, [computed]);
 };

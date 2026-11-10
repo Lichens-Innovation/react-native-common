@@ -63,6 +63,7 @@ export const useUserLocation = (): UseUserLocationResult => {
 
     return () => {
       clearTimeout(timeout);
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- each retry replaces the controller: the cleanup must abort the latest one, not the one present when the effect ran
       abortControllerRef.current?.abort();
       subscriptionRef.current?.remove();
       subscriptionRef.current = null;

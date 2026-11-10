@@ -35,11 +35,17 @@ jest.mock('expo-application', () => ({ nativeApplicationVersion: '1.2.3', native
 
 jest.mock('expo-device', () => ({ isDevice: true, brand: 'mock', modelName: 'mock', osName: 'mock', osVersion: '1' }));
 
+// the latest focus callback, so a test can replay a re-focus of the screen habit-hooks-disable non-essential-comment
+let mockLastFocusEffect: (() => void) | undefined;
+
 jest.mock('expo-router/react-navigation', () => {
   const { useEffect } = jest.requireActual<typeof import('react')>('react');
   return {
     ...jest.requireActual<object>('expo-router/react-navigation'),
-    useFocusEffect: (effect: () => void) => useEffect(effect, [effect]),
+    useFocusEffect: (effect: () => void) => {
+      mockLastFocusEffect = effect;
+      useEffect(effect, [effect]);
+    },
   };
 });
 
@@ -47,6 +53,10 @@ const mockLogger = getMockLogger();
 
 interface InvalidateQueriesProps {
   keys: QueryKey[];
+}
+
+interface TimeoutStateProps {
+  timeoutMs: number;
 }
 
 interface UpdatesState {
@@ -503,6 +513,27 @@ describe('hooks', () => {
       // assert
       expect(invalidate.mock.calls.map(([filters]) => filters)).toEqual([{ queryKey: ['a'] }, { queryKey: ['b', 1] }]);
     });
+
+    it('invalidates the latest keys when the screen is focused again', async () => {
+      // arrange
+      const queryClient = new QueryClient();
+      const invalidate = jest.spyOn(queryClient, 'invalidateQueries').mockResolvedValue(undefined);
+      const wrapper = ({ children }: PropsWithChildren) => (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      );
+      const { rerender } = await renderHook(({ keys }: InvalidateQueriesProps) => useInvalidateQueriesOnFocus(keys), {
+        wrapper,
+        initialProps: { keys: [['a']] },
+      });
+      await rerender({ keys: [['c']] });
+      invalidate.mockClear();
+
+      // act
+      await act(async () => mockLastFocusEffect?.());
+
+      // assert
+      expect(invalidate.mock.calls.map(([filters]) => filters)).toEqual([{ queryKey: ['c'] }]);
+    });
   });
 
   describe('useTimeoutState', () => {
@@ -520,6 +551,60 @@ describe('hooks', () => {
 
         // assert
         expect(before).toBe(true);
+        expect(result.current).toBe(false);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('stays false after the timeout, across re-renders', async () => {
+      // arrange
+      jest.useFakeTimers();
+      try {
+        const { result, rerender } = await renderHook(() => useTimeoutState(500));
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+        });
+
+        // act
+        await rerender({});
+        await act(async () => {
+          jest.advanceTimersByTime(5000);
+        });
+
+        // assert
+        expect(result.current).toBe(false);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('restarts the timeout when timeoutMs changes before it elapses', async () => {
+      // arrange
+      jest.useFakeTimers();
+      try {
+        const { result, rerender } = await renderHook(
+          ({ timeoutMs }: TimeoutStateProps) => useTimeoutState(timeoutMs),
+          {
+            initialProps: { timeoutMs: 500 },
+          }
+        );
+        await act(async () => {
+          jest.advanceTimersByTime(300);
+        });
+
+        // act
+        await rerender({ timeoutMs: 1000 });
+        await act(async () => {
+          jest.advanceTimersByTime(300);
+        });
+        const afterOldTimeout = result.current;
+        await act(async () => {
+          jest.advanceTimersByTime(700);
+        });
+
+        // assert
+        expect(afterOldTimeout).toBe(true);
         expect(result.current).toBe(false);
       } finally {
         jest.useRealTimers();
