@@ -1,3 +1,10 @@
+## [4.2.3](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.2...v4.2.3) (2026-11-10)
+
+
+### Bug Fixes
+
+* release coding-guide refactor and Jest test migration ([#59](https://github.com/Lichens-Innovation/react-native-common/issues/59)) ([33aef64](https://github.com/Lichens-Innovation/react-native-common/commit/33aef64b8c100fc1ae6b3631899b3a988d3fbd37)), closes [#57](https://github.com/Lichens-Innovation/react-native-common/issues/57) [#58](https://github.com/Lichens-Innovation/react-native-common/issues/58)
+
 ## [4.2.2](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.1...v4.2.2) (2026-11-08)
 
 
