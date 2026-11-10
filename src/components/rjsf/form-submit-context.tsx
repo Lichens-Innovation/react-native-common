@@ -1,5 +1,5 @@
 import { NO_OP } from '@lichens-innovation/ts-common';
-import { createContext, useCallback, useRef, type PropsWithChildren } from 'react';
+import { createContext, useCallback, useLayoutEffect, useRef, type PropsWithChildren } from 'react';
 import { View, type ViewProps } from 'react-native';
 
 /** habit-hooks-disable non-essential-comment
@@ -39,7 +39,9 @@ export const RjsfPaperFormWrapper: React.ComponentType<PropsWithChildren<FormWra
   ...viewProps
 }) => {
   const submitRef = useRef(onSubmit);
-  submitRef.current = onSubmit;
+  useLayoutEffect(() => {
+    submitRef.current = onSubmit;
+  }, [onSubmit]);
 
   const handleSubmit = useCallback<SubmitHandler>((event) => {
     submitRef.current?.(event);

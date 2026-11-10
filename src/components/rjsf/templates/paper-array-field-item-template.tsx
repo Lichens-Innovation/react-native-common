@@ -1,5 +1,5 @@
 import { getTemplate, getUiOptions, type ArrayFieldItemTemplateProps } from '@rjsf/utils';
-import { useMemo } from 'react';
+import { createElement, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useAppTheme } from '../../../theme/theme.index';
 
@@ -13,16 +13,13 @@ export const PaperArrayFieldItemTemplate = ({
 }: ArrayFieldItemTemplateProps) => {
   const styles = useStyles();
   const uiOptions = getUiOptions(uiSchema);
-  const ArrayFieldItemButtonsTemplate = getTemplate('ArrayFieldItemButtonsTemplate', registry, uiOptions);
+  // getTemplate looks up a component registered once in the registry, it does not create one. habit-hooks-disable non-essential-comment
+  const buttonsTemplate = getTemplate('ArrayFieldItemButtonsTemplate', registry, uiOptions);
 
   return (
     <View style={styles.arrayItemRow}>
       <View style={styles.arrayItemContent}>{children}</View>
-      {hasToolbar && (
-        <View style={styles.arrayItemToolbar}>
-          <ArrayFieldItemButtonsTemplate {...buttonsProps} />
-        </View>
-      )}
+      {hasToolbar && <View style={styles.arrayItemToolbar}>{createElement(buttonsTemplate, buttonsProps)}</View>}
     </View>
   );
 };
