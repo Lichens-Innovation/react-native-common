@@ -17,10 +17,14 @@ import {
 } from '@lib';
 import { getMockLogger } from './core-test.utils';
 
+let mockUpdatesChannel: string | null = null;
+
 jest.mock('expo-updates', () => ({
   isEnabled: false,
   isEmbeddedLaunch: false,
-  channel: null,
+  get channel() {
+    return mockUpdatesChannel;
+  },
   useUpdates: jest.fn(),
   fetchUpdateAsync: jest.fn(),
   checkForUpdateAsync: jest.fn(),
@@ -133,7 +137,7 @@ describe('hooks', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    it('checkForUpdates fakes the check in __DEV__ (sleeps 1s, no native call)', async () => {
+    it('checkForUpdates fakes the check outside the production channel (sleeps 1s, no native call)', async () => {
       // arrange
       jest.useFakeTimers();
       const { result } = await renderHook(() => useUpdates());
@@ -161,16 +165,13 @@ describe('hooks', () => {
       }
     });
 
-    describe('outside __DEV__ on a real device', () => {
-      const globalWithDev = globalThis as unknown as { __DEV__: boolean };
-      const originalDev = globalWithDev.__DEV__;
-
+    describe('on the production channel on a real device', () => {
       beforeEach(() => {
-        globalWithDev.__DEV__ = false;
+        mockUpdatesChannel = 'production';
       });
 
       afterEach(() => {
-        globalWithDev.__DEV__ = originalDev;
+        mockUpdatesChannel = null;
       });
 
       it('checkForUpdates calls the native check', async () => {
