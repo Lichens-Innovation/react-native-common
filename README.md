@@ -3,14 +3,13 @@
 This repository contains common components, utilities, and services used across React Native Expo applications.
 
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Bun](https://img.shields.io/badge/Bun-1.4+-000000.svg?style=flat-square&logo=bun)](https://bun.sh/)
-[![React](https://img.shields.io/badge/React-19.3-61DAFB.svg?style=flat-square&logo=react)](https://react.dev/)
-[![Node.js](https://img.shields.io/badge/Node.js-24-339933.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
-[![Jest](https://img.shields.io/badge/Jest-30-C21325.svg?style=flat-square&logo=jest)](https://jestjs.io/)
-[![Coverage](https://img.shields.io/badge/coverage-82%25-green.svg?style=flat-square)](#coverage)
-[![React Native](https://img.shields.io/badge/React%20Native-0.88-61DAFB.svg?style=flat-square&logo=react)](https://reactnative.dev/)
-[![Expo SDK](https://img.shields.io/badge/Expo%20SDK-58-000020.svg?style=flat-square&logo=expo)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/github/package-json/dependency-version/Lichens-Innovation/react-native-common/dev/typescript?style=flat-square&logo=typescript&label=TypeScript)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/github/package-json/packageManager/Lichens-Innovation/react-native-common?style=flat-square&logo=bun&label=package%20manager&color=000000)](https://bun.sh/)
+[![React](https://img.shields.io/github/package-json/dependency-version/Lichens-Innovation/react-native-common/dev/react?style=flat-square&logo=react&label=React&color=61DAFB)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-.nvmrc-339933.svg?style=flat-square&logo=node.js)](.nvmrc)
+[![Jest](https://img.shields.io/github/package-json/dependency-version/Lichens-Innovation/react-native-common/dev/jest?style=flat-square&logo=jest&label=Jest&color=C21325)](https://jestjs.io/)
+[![React Native](https://img.shields.io/github/package-json/dependency-version/Lichens-Innovation/react-native-common/dev/react-native?style=flat-square&logo=react&label=React%20Native&color=61DAFB)](https://reactnative.dev/)
+[![Expo SDK](https://img.shields.io/github/package-json/dependency-version/Lichens-Innovation/react-native-common/dev/expo?style=flat-square&logo=expo&label=Expo&color=000020)](https://expo.dev/)
 
 [![GitHub](https://img.shields.io/badge/GitHub-Lichens--Innovation%2Freact--native--common-blue.svg?style=flat-square&logo=github)](https://github.com/Lichens-Innovation/react-native-common) [![npm](https://img.shields.io/npm/v/@lichens-innovation/react-native-common.svg?style=flat-square&logo=npm)](https://www.npmjs.com/package/@lichens-innovation/react-native-common) [![semantic-release](https://img.shields.io/badge/semantic--release-conventionalcommits-e10079.svg?style=flat-square&logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 
@@ -184,7 +183,7 @@ export const MyForm = () => {
 
 ## Contributions
 
-Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. CI (coding-guide lint, format check, `package.json` lint, knip, typecheck, tests with coverage threshold, build) runs on every PR.
+Contributions to the project are made by simply improving the current codebase and then creating a Pull Request. CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every PR.
 
 ### Releases
 
@@ -203,8 +202,8 @@ Major versions are aligned with Expo SDK versions (see the compatibility table a
 
 ### Prerequisites
 
-- Node.js 24 (see `.nvmrc`)
-- [Bun](https://bun.sh/)
+- Node.js (version in [.nvmrc](.nvmrc))
+- [Bun](https://bun.sh/) (version in the `packageManager` field of [package.json](package.json))
 - React Native development environment set up (see [React Native documentation](https://reactnative.dev/docs/environment-setup))
 
 ### Installation
@@ -217,36 +216,21 @@ bun install
 
 ### Scripts
 
-| Command                            | Description                                                                                                                                                                                                                              |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run build`                    | Cleans the dist folder and bundles with `tsup` (CJS + types)                                                                                                                                                                             |
-| `bun run clean:node`               | Removes node_modules and bun.lock                                                                                                                                                                                                        |
-| `bun run clean:dist`               | Removes the dist directory                                                                                                                                                                                                               |
-| `bun run typecheck`                | Checks TypeScript types without emitting files (`tsc --noEmit`, sources and `tests/`)                                                                                                                                                    |
-| `bun run watch:for:rvdrain`        | Watches TS and syncs dist to rinno-rvdrain-app-mobile node_modules                                                                                                                                                                       |
-| `bun run watch:for:manufacture`    | Watches TS and syncs dist to rinno-manufacture-app node_modules                                                                                                                                                                          |
-| `bun run watch:for:rn-common-demo` | Watches TS and syncs dist to react-native-common-demo node_modules                                                                                                                                                                       |
-| `bun run test`                     | Runs unit tests with Jest (`jest-expo` preset)                                                                                                                                                                                           |
-| `bun run test:coverage`            | Runs unit tests with coverage; fails below the [coverage threshold](#coverage), HTML report in `coverage/lcov-report/`                                                                                                                   |
-| `bun run lint`                     | Coding-guide coaching on the whole project (`coding-guide check`: ESLint, knip, comments, duplication)                                                                                                                                   |
-| `bun run lint:ci`                  | Plain ESLint (no coaching, no knip / comments / duplication sensors)                                                                                                                                                                     |
-| `bun run lint:package`             | Lints `package.json` (exact versions) with npm-package-json-lint                                                                                                                                                                         |
-| `bun run lint:unused`              | Finds unused files, dependencies and exports with [knip](https://knip.dev/)                                                                                                                                                              |
-| `bun run lint:fix`                 | Runs ESLint with auto-fix                                                                                                                                                                                                                |
-| `bun run format`                   | Formats all files with Prettier (write)                                                                                                                                                                                                  |
-| `bun run format:check`             | Checks Prettier formatting of all files                                                                                                                                                                                                  |
-| `bun run habit:hooks`              | Coding-guide check on files changed since `main` (run before opening a PR)                                                                                                                                                               |
-| `bun run habit:hooks:full`         | Coding-guide check on the whole project                                                                                                                                                                                                  |
-| `bun run habit:snoozed`            | Lists the snoozed coding-guide keys (`.coding-guide/snooze.json`)                                                                                                                                                                        |
-| `bun run security:check`           | Audits dependencies for new CVEs vs [.cve-lite/baseline.json](.cve-lite/baseline.json), fails on high severity ([cve-lite-cli](https://github.com/OWASP/cve-lite-cli)); runs in `pre-commit` when `package.json` or `bun.lock` is staged |
+All scripts are defined in [package.json](package.json). Day-to-day ones:
+
+| Command                 | Description                                                        |
+| ----------------------- | ------------------------------------------------------------------ |
+| `bun run build`         | Bundles the package into `dist/`                                   |
+| `bun run typecheck`     | Checks TypeScript types without emitting files                     |
+| `bun run test`          | Runs the unit tests                                                |
+| `bun run test:coverage` | Runs the unit tests with the [coverage threshold](#coverage)       |
+| `bun run lint`          | Coding-guide check on the whole project (what CI runs)             |
+| `bun run habit:hooks`   | Coding-guide check on files changed since `main` (run before a PR) |
+| `bun run format`        | Formats all files with Prettier                                    |
 
 ### Git hooks
 
-Installed by Husky on `bun install` (`prepare` script):
-
-- **commit-msg**: commitlint ([Conventional Commits](https://www.conventionalcommits.org))
-- **pre-commit**: typecheck, Prettier on staged files (lint-staged), coding-guide on staged files (`coding-guide check --staged`), `package.json` lint, CVE check when `package.json` / `bun.lock` are staged
-- **pre-push**: knip (unused files / dependencies / exports), unit tests with [coverage threshold](#coverage) (`test:coverage`), blocks force push on `main`, `master`, `development`
+Husky installs the hooks in [.husky/](.husky) on `bun install` (`prepare` script). They run a fast subset of the CI checks locally: commit message format on `commit-msg`, checks on staged files on `pre-commit`, whole-project checks (including tests with the coverage threshold) on `pre-push`. Read the hook files for the exact list.
 
 ## Peer Dependencies
 
@@ -284,7 +268,7 @@ Interfaces and types are generated by the `react-native-winrt` package at build 
 
 ## Project coding guidelines
 
-Coding standards are enforced by ESLint (see [eslint.config.mjs](eslint.config.mjs)) and [`@lichens-innovation/eslint-plugin-coding-guide`](https://github.com/Lichens-Innovation/eslint-plugin-coding-guide), which ships both the `coding-guide/*` rules and the `coding-guide` CLI. The CLI runs four sensors (ESLint, knip, own-line comments, jscpd duplication) and prints a coaching guide per smell; it is configured in [.coding-guide/config.json](.coding-guide/config.json).
+Coding standards are enforced by ESLint (see [eslint.config.mjs](eslint.config.mjs)) and [`@lichens-innovation/eslint-plugin-coding-guide`](https://github.com/Lichens-Innovation/eslint-plugin-coding-guide), which ships both the `coding-guide/*` rules and the `coding-guide` CLI. The CLI runs several sensors (ESLint, knip, comments, duplication, ...) and prints a coaching guide per smell; it is configured in [.coding-guide/config.json](.coding-guide/config.json).
 
 - `bun run lint`: whole project, what CI runs
 - `bun run habit:hooks`: files changed since `main`, run it before opening a PR
@@ -305,22 +289,15 @@ Background reading: [Coding guidelines](https://github.com/amwebexpert/chrome-ex
 Tests run on [Jest](https://jestjs.io/) with the [`jest-expo`](https://docs.expo.dev/develop/unit-testing/) preset and [React Native Testing Library](https://callstack.github.io/react-native-testing-library/) for components and hooks.
 
 - `tests/` holds behaviour tests written against the public API only: import from `@lib` (the package entry, `src/react-native-common.index.ts`) or `@lib/rjsf`, never from an internal path, so a refactor that keeps the API keeps the tests green. Unit tests of a single module may live next to it (`src/**/*.test.ts`).
-- [jest.setup.ts](jest.setup.ts) mocks the native modules (Reanimated, Gesture Handler, Expo modules, MMKV, maps, Wi-Fi, ...); override a mock per test with `jest.mocked(...)` or a local `jest.mock` factory.
-- React Native Testing Library 14 is async: always `await render(...)`, `await renderHook(...)`, `await fireEvent.press(...)`.
+- [jest.setup.ts](jest.setup.ts) mocks the native modules; override a mock per test with `jest.mocked(...)` or a local `jest.mock` factory.
+- React Native Testing Library is async: always `await render(...)`, `await renderHook(...)`, `await fireEvent.press(...)`.
 - Mark test phases with `// arrange`, `// act`, `// assert` (enforced by `coding-guide/require-aaa-comments`).
 
 ### Coverage
 
-`bun run test:coverage` measures coverage over `src/**/*.{ts,tsx}` (tests excluded), prints a summary and writes an HTML report to `coverage/lcov-report/index.html`.
+`bun run test:coverage` measures coverage of the sources (`collectCoverageFrom` in [jest.config.js](jest.config.js)), prints a summary and writes an HTML report to `coverage/lcov-report/index.html`. CI uploads the same report as the `coverage` artifact of each run.
 
-| Metric     | Current | Minimum |
-| ---------- | ------- | ------- |
-| Statements | 81.97%  | 80%     |
-| Branches   | 78.19%  | 75%     |
-| Functions  | 76.73%  | 75%     |
-| Lines      | 82.4%   | 80%     |
-
-The minimums (`coverageThreshold` in [jest.config.js](jest.config.js)) are enforced in CI and in the Husky `pre-push` hook: a push or PR that drops coverage below them fails. CI uploads the HTML report as the `coverage` artifact. When coverage rises, raise the thresholds (and update this table and the badge) so it cannot slip back.
+Minimum coverage is set by `coverageThreshold` in [jest.config.js](jest.config.js) and enforced in CI and in the `pre-push` hook: a change that drops coverage below it fails. When coverage rises, raise the threshold in the same PR so it cannot slip back.
 
 ## License
 
