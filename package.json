@@ -34,6 +34,7 @@
     "watch:for:manufacture": "tsup --watch & cpx \"dist/**/*\" ../rinno-manufacture-app/node_modules/@lichens-innovation/react-native-common/dist --watch",
     "watch:for:rn-common-demo": "tsup --watch & cpx \"dist/**/*\" ../react-native-common-demo/node_modules/@lichens-innovation/react-native-common/dist --watch",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "lint": "coding-guide check",
     "lint:ci": "eslint",
     "lint:package": "npmPkgJsonLint .",

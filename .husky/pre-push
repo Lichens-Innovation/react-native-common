@@ -8,6 +8,11 @@ echo "Running knip to detect unused files, dependencies and exports..."
 bun run lint:unused </dev/null
 echo "  -->  ✅ Knip completed"
 
+echo "Running unit tests with coverage threshold..."
+# </dev/null so jest cannot consume the refs git feeds on stdin below
+bun run test:coverage </dev/null
+echo "  -->  ✅ Coverage threshold met"
+
 # Prevent force push on protected branches
 # This is a soft protection - can be bypassed with --no-verify if needed
 while read local_ref local_sha remote_ref remote_sha
