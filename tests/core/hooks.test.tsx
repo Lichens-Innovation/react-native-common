@@ -147,7 +147,7 @@ describe('hooks', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    it('checkForUpdates fakes the check outside the production channel (sleeps 1s, no native call)', async () => {
+    it('checkForUpdates fakes the check in development (sleeps 1s, no native call)', async () => {
       // arrange
       jest.useFakeTimers();
       const { result } = await renderHook(() => useUpdates());
@@ -175,13 +175,17 @@ describe('hooks', () => {
       }
     });
 
-    describe('on the production channel on a real device', () => {
+    describe.each(['preview', 'production'])('outside development, on the %s channel', (channel) => {
+      const initialDev = __DEV__;
+
       beforeEach(() => {
-        mockUpdatesChannel = 'production';
+        mockUpdatesChannel = channel;
+        Object.assign(globalThis, { __DEV__: false });
       });
 
       afterEach(() => {
         mockUpdatesChannel = null;
+        Object.assign(globalThis, { __DEV__: initialDev });
       });
 
       it('checkForUpdates calls the native check', async () => {
