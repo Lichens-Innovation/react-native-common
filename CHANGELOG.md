@@ -1,3 +1,10 @@
+## [4.2.5](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.4...v4.2.5) (2026-11-10)
+
+
+### Bug Fixes
+
+* resolve react-hooks exhaustive-deps warnings ([#63](https://github.com/Lichens-Innovation/react-native-common/issues/63)) ([8171fda](https://github.com/Lichens-Innovation/react-native-common/commit/8171fda758be60286da78b7fa5dcba1f43df4fcd))
+
 ## [4.2.4](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.3...v4.2.4) (2026-11-10)
 
 
