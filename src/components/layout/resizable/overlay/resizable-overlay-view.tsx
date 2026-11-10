@@ -69,31 +69,31 @@ export const ResizableOverlayView: FunctionComponent<ResizableOverlayViewProps> 
     sizeChangePerDragUnit: isBottomAnchored ? -1 : 1,
   });
 
-  const fitOverlay = () => {
-    'worklet';
-    return fitOverlayToAspectRatio({
+  // Read shared values directly in each updater: Reanimated only tracks those in the updater's own closure, habit-hooks-disable non-essential-comment
+  // not those hidden behind a nested worklet function (the style would never update). habit-hooks-disable non-essential-comment
+  const overlayAnimatedStyle = useAnimatedStyle(() => {
+    const { height, width } = fitOverlayToAspectRatio({
       overlayHeight: overlayHeight.value,
       containerWidth: containerWidth.value,
       minHeight: minHeight.value,
       aspectRatio: foregroundContentAspectRatio,
     });
-  };
-
-  const overlayAnimatedStyle = useAnimatedStyle(() => {
-    const { height, width } = fitOverlay();
     return width !== undefined ? { height, width } : { height };
   });
 
-  const dragHandleContainerAnimatedStyle = useAnimatedStyle(
-    () =>
-      computeOverlayHandlePosition({
-        overlaySize: fitOverlay(),
+  const dragHandleContainerAnimatedStyle = useAnimatedStyle(() =>
+    computeOverlayHandlePosition({
+      overlaySize: fitOverlayToAspectRatio({
+        overlayHeight: overlayHeight.value,
         containerWidth: containerWidth.value,
-        containerHeight: containerHeight.value,
-        isLeftAnchored,
-        isBottomAnchored,
+        minHeight: minHeight.value,
+        aspectRatio: foregroundContentAspectRatio,
       }),
-    [foregroundContentAspectRatio, isBottomAnchored, isLeftAnchored]
+      containerWidth: containerWidth.value,
+      containerHeight: containerHeight.value,
+      isLeftAnchored,
+      isBottomAnchored,
+    })
   );
 
   return (
