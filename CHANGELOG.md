@@ -1,3 +1,10 @@
+## [4.2.6](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.5...v4.2.6) (2026-11-10)
+
+
+### Bug Fixes
+
+* **resizable:** overlay not resizing on drag ([#64](https://github.com/Lichens-Innovation/react-native-common/issues/64)) ([ba3ea4c](https://github.com/Lichens-Innovation/react-native-common/commit/ba3ea4c27ac054bc58d9fe56ebd2f127c57f50ce))
+
 ## [4.2.5](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.4...v4.2.5) (2026-11-10)
 
 
