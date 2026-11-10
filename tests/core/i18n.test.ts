@@ -98,7 +98,7 @@ describe('i18n', () => {
       expect(instance.init).toHaveBeenCalledWith(expect.objectContaining({ lng: 'fr' }));
     });
 
-    it('uses a whitespace-only saved language as is and does not store the default', () => {
+    it('treats a whitespace-only saved language as empty: stores and uses the default language', () => {
       // arrange
       mmkv.getString.mockReturnValueOnce('   ');
       const instance = createFakeI18nInstance();
@@ -107,8 +107,8 @@ describe('i18n', () => {
       initCommonI18N({ initReactI18next: appInitReactI18next as never, instance: instance as never });
 
       // assert
-      expect(mmkv.set).not.toHaveBeenCalled();
-      expect(instance.init).toHaveBeenCalledWith(expect.objectContaining({ lng: '   ' }));
+      expect(mmkv.set).toHaveBeenCalledWith('appLanguage', 'fr');
+      expect(instance.init).toHaveBeenCalledWith(expect.objectContaining({ lng: 'fr' }));
     });
 
     it('uses the default language when nothing was saved (default value returned, nothing stored)', () => {
@@ -124,7 +124,7 @@ describe('i18n', () => {
       expect(instance.init).toHaveBeenCalledWith(expect.objectContaining({ lng: 'fr' }));
     });
 
-    it('does not handle an init failure: no rejection handler, nothing logged', () => {
+    it('handles an init failure by logging it as an error', () => {
       // arrange: a controllable thenable stands in for the init promise so the failure can be simulated
       const rejectionHandlers: Handler[] = [];
       const initResult = {
@@ -138,14 +138,15 @@ describe('i18n', () => {
         },
       };
       const instance = createFakeI18nInstance(initResult);
+      const error = new Error('init failed');
 
       // act
       initCommonI18N({ initReactI18next: appInitReactI18next as never, instance: instance as never });
-      rejectionHandlers.forEach((handler) => handler(new Error('init failed')));
+      rejectionHandlers.forEach((handler) => handler(error));
 
       // assert
-      expect(rejectionHandlers).toHaveLength(0);
-      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(rejectionHandlers).toHaveLength(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('[initCommonI18N] Failed to initialize i18n', error);
     });
   });
 });

@@ -230,7 +230,7 @@ describe('hooks', () => {
       expect(Updates.reloadAsync).not.toHaveBeenCalled();
     });
 
-    it('does not handle a reload failure: no error logged', async () => {
+    it('handles a reload failure by logging it as an error', async () => {
       // arrange: a thenable that records rejection handlers, so the failure can be simulated without an unhandled rejection
       type Handler = (value: unknown) => unknown;
       const rejectionHandlers: Handler[] = [];
@@ -246,15 +246,17 @@ describe('hooks', () => {
       };
       jest.mocked(Updates.reloadAsync).mockReturnValue(reload as never);
       setUpdatesState({ isUpdatePending: true });
+      const error = new Error('reload failed');
 
       // act
       await renderHook(() => useUpdates());
       await flushPromises();
-      rejectionHandlers.forEach((handler) => handler(new Error('reload failed')));
+      rejectionHandlers.forEach((handler) => handler(error));
+      await flushPromises();
 
       // assert
-      expect(rejectionHandlers).toHaveLength(0);
-      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(rejectionHandlers).toHaveLength(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('[useUpdates.useEffect] Failed to reload app', error);
     });
   });
 
@@ -427,7 +429,7 @@ describe('hooks', () => {
       expect(result.current.dimensions).toEqual({ width: 200, height: 100, aspectRatio: 2 });
     });
 
-    it('treats a whitespace-only picked uri as a selected image', async () => {
+    it('does not report a whitespace-only picked uri as a selected image', async () => {
       // arrange
       jest
         .mocked(ImagePicker.launchImageLibraryAsync)
@@ -441,7 +443,8 @@ describe('hooks', () => {
       });
 
       // assert
-      expect(result.current.hasSelectedImage).toBe(true);
+      expect(result.current.selectedImage).toBe('   ');
+      expect(result.current.hasSelectedImage).toBe(false);
     });
 
     it('keeps the state when cancelled', async () => {

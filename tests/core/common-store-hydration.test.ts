@@ -32,7 +32,7 @@ describe('commonStore hydration', () => {
     expect(getMockLogger().info).toHaveBeenCalledWith('[CommonStore] Hydration complete');
   });
 
-  it('does not handle a hydration failure: no rejection handler, nothing logged', () => {
+  it('handles a hydration failure by logging it as an error', () => {
     // arrange: a controllable thenable stands in for the persistence promise so the failure can be simulated
     type Handler = (value: unknown) => unknown;
     const rejectionHandlers: Handler[] = [];
@@ -47,13 +47,14 @@ describe('commonStore hydration', () => {
       },
     };
     jest.mocked(makePersistable).mockReturnValue(hydration as never);
+    const error = new Error('hydrate failed');
 
     // act
     loadLibInIsolation();
-    rejectionHandlers.forEach((handler) => handler(new Error('hydrate failed')));
+    rejectionHandlers.forEach((handler) => handler(error));
 
     // assert
-    expect(rejectionHandlers).toHaveLength(0);
-    expect(getMockLogger().error).not.toHaveBeenCalledWith('[CommonStore] Hydration failed', expect.anything());
+    expect(rejectionHandlers).toHaveLength(1);
+    expect(getMockLogger().error).toHaveBeenCalledWith('[CommonStore] Hydration failed', error);
   });
 });

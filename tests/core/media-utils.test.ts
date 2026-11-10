@@ -65,8 +65,8 @@ describe('media utils', () => {
       expect(VideoThumbnails.getThumbnailAsync).not.toHaveBeenCalled();
     });
 
-    it('returns a whitespace-only image uri as is', async () => {
-      expect(await getThumbnailUri('   ', 'image')).toBe('   ');
+    it('returns "" for a whitespace-only image uri', async () => {
+      expect(await getThumbnailUri('   ', 'image')).toBe('');
     });
 
     it('returns the image uri itself and "" for audio', async () => {
@@ -87,9 +87,10 @@ describe('media utils', () => {
       expect(VideoThumbnails.getThumbnailAsync).toHaveBeenCalledWith('/v.mp4', { time: 500, quality: 0.7 });
     });
 
-    it('retries at 1000ms then 0ms and returns "" when all attempts fail, silently', async () => {
+    it('retries at 1000ms then 0ms, logs each failed attempt as debug and returns "" when all attempts fail', async () => {
       // arrange
-      jest.mocked(VideoThumbnails.getThumbnailAsync).mockRejectedValue(new Error('no frame'));
+      const error = new Error('no frame');
+      jest.mocked(VideoThumbnails.getThumbnailAsync).mockRejectedValue(error);
 
       // act
       const result = await getThumbnailUri('/v.mp4', 'video');
@@ -99,7 +100,11 @@ describe('media utils', () => {
       expect(jest.mocked(VideoThumbnails.getThumbnailAsync).mock.calls.map(([, opts]) => opts?.time)).toEqual([
         500, 1000, 0,
       ]);
-      expect(mockLogger.debug).not.toHaveBeenCalled();
+      expect(mockLogger.debug.mock.calls).toEqual([
+        ['[getVideoThumbnail] No thumbnail at 500ms for [/v.mp4]', error],
+        ['[getVideoThumbnail] No thumbnail at 1000ms for [/v.mp4]', error],
+        ['[getVideoThumbnail] No thumbnail at 0ms for [/v.mp4]', error],
+      ]);
     });
 
     it('returns the first successful retry', async () => {
@@ -187,7 +192,7 @@ describe('media utils', () => {
       expect(ImageManipulator.manipulate).not.toHaveBeenCalled();
     });
 
-    it('still tries to convert a whitespace-only uri', async () => {
+    it('returns a whitespace-only uri untouched without converting it', async () => {
       // arrange
       mockManipulateSuccess('file:///out.jpg');
 
@@ -195,8 +200,8 @@ describe('media utils', () => {
       const result = await normalizeImageToJpeg('   ');
 
       // assert
-      expect(ImageManipulator.manipulate).toHaveBeenCalledWith('   ');
-      expect(result).toBe('file:///out.jpg');
+      expect(result).toBe('   ');
+      expect(ImageManipulator.manipulate).not.toHaveBeenCalled();
     });
 
     it.each(['file:///a.gif', 'file:///a.webp'])('returns animatable %s untouched', async (uri) => {

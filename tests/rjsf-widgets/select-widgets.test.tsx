@@ -187,7 +187,7 @@ describe('MultiSelectWidget', () => {
     }
   );
 
-  it('treats a whitespace-only options.placeholder as set (truthy)', async () => {
+  it('skips a whitespace-only options.placeholder and falls back to the next candidate', async () => {
     // act
     await renderWidget(MultiSelectWidget, {
       placeholder: 'Prop',
@@ -195,18 +195,18 @@ describe('MultiSelectWidget', () => {
     });
 
     // assert
-    expect(getMultiSelect().props.placeholder).toBe('   ');
+    expect(getMultiSelect().props.placeholder).toBe('Prop');
   });
 
-  it('treats a whitespace-only placeholder prop as set instead of falling back to "..."', async () => {
+  it('falls back to "..." for a whitespace-only placeholder prop', async () => {
     // act
     await renderWidget(MultiSelectWidget, { placeholder: '  ', options: { enumOptions: ENUM_OPTIONS } });
 
     // assert
-    expect(getMultiSelect().props.placeholder).toBe('  ');
+    expect(getMultiSelect().props.placeholder).toBe('...');
   });
 
-  it('uses a non-string truthy options.placeholder as is', async () => {
+  it('skips a non-string options.placeholder and falls back to the next candidate', async () => {
     // act
     await renderWidget(MultiSelectWidget, {
       placeholder: 'Prop',
@@ -214,7 +214,7 @@ describe('MultiSelectWidget', () => {
     });
 
     // assert
-    expect(getMultiSelect().props.placeholder).toBe(42);
+    expect(getMultiSelect().props.placeholder).toBe('Prop');
   });
 
   it('calls onChange then onBlur with the picked codes', async () => {
