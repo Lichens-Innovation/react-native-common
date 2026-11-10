@@ -1,3 +1,10 @@
+## [4.2.7](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.6...v4.2.7) (2026-11-10)
+
+
+### Bug Fixes
+
+* **updates:** check for OTA updates on every channel ([#65](https://github.com/Lichens-Innovation/react-native-common/issues/65)) ([53aa8cd](https://github.com/Lichens-Innovation/react-native-common/commit/53aa8cdce076539c66f4e6d5fa7c458f3162a6d4))
+
 ## [4.2.6](https://github.com/Lichens-Innovation/react-native-common/compare/v4.2.5...v4.2.6) (2026-11-10)
 
 
