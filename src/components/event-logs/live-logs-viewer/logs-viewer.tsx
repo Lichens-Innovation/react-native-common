@@ -2,7 +2,7 @@ import { LegendList } from '@legendapp/list';
 import { observer } from 'mobx-react-lite';
 import { type ComponentProps, type FunctionComponent, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LogBox, Platform, StyleSheet, View } from 'react-native';
+import { LogBox, StyleSheet, View } from 'react-native';
 import { IconButton, TextInput } from 'react-native-paper';
 
 import { LogEntry } from '../../../logger/logger.types';
@@ -35,17 +35,13 @@ export const LogsViewer: FunctionComponent<LogsViewerProps> = observer(
         {shouldDisplayToolbar && (
           <View style={styles.actionsBar}>
             <TextInput
-              mode={Platform.OS === 'windows' ? 'flat' : 'outlined'}
+              mode="outlined"
               autoCapitalize="none"
               value={filterText}
               onChangeText={setFilterText}
               placeholder={t('common:logs.filter')}
               style={styles.filterInput}
-              right={
-                Platform.OS === 'windows' ? undefined : (
-                  <LogEntryItemSuffix filterText={filterText} onPress={() => setFilterText('')} />
-                )
-              }
+              right={<LogEntryItemSuffix filterText={filterText} onPress={() => setFilterText('')} />}
             />
             <IconButton
               icon={isAutoScrollEnabled ? 'arrow-down-bold' : 'arrow-down-bold-outline'}

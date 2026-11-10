@@ -86,7 +86,6 @@ export default defineConfig({
     'react-native-web',
     'react-native-webview',
     'react-native-wifi-reborn',
-    'react-native-winrt',
     'react-native-zeroconf',
   ],
 });

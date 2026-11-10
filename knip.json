@@ -24,7 +24,6 @@
     "expo-splash-screen",
     "expo-status-bar",
     "react-native-svg",
-    "react-native-vector-icons",
-    "react-native-winrt"
+    "react-native-vector-icons"
   ]
 }
