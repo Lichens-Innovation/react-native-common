@@ -1,29 +1,21 @@
 import { isNullish } from '@lichens-innovation/ts-common';
-import type { EnumOptionDisplay } from '@lichens-innovation/ts-common/rjsf';
-import { getRjsfDisplayLabel, getRjsfLabelColor, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
+import { type EnumOptionDisplay, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Checkbox, Text } from 'react-native-paper';
-import { useAppTheme } from '../../../theme';
+import { useAppTheme } from '../../../theme/theme.index';
 import { RjsfDisplayLabel } from './display-label';
+import { getWidgetTitle } from './shared/widget-title.utils';
+import { useCommitWidgetValue } from './shared/use-commit-widget-value';
+import { isWidgetDisplayOnly } from './shared/widget-state.utils';
 
-export const CheckboxesWidget: FunctionComponent<WidgetProps> = ({
-  id,
-  value,
-  disabled,
-  readonly,
-  onChange,
-  onBlur,
-  label,
-  hideLabel,
-  required,
-  options,
-  schema,
-}) => {
+export const CheckboxesWidget: FunctionComponent<WidgetProps> = (props) => {
+  const { value, options, schema } = props;
   const styles = useStyles();
-  const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const labelColor = getRjsfLabelColor(options);
+  const commitValue = useCommitWidgetValue(props);
+  const isDisplayOnly = isWidgetDisplayOnly(props);
+  const widgetTitle = getWidgetTitle(props);
   const enumOptions = mapEnumOptions(options);
   const isArrayValue = Array.isArray(value);
   const currentSet = isArrayValue ? value : [];
@@ -31,27 +23,25 @@ export const CheckboxesWidget: FunctionComponent<WidgetProps> = ({
   const maxItems = hasMaxItems ? schema.maxItems : undefined;
 
   const toggle = (optValue: string) => {
-    if (disabled || readonly) return;
+    if (isDisplayOnly) return;
 
     const isChecked = currentSet.includes(optValue);
     const next = isChecked ? currentSet.filter((v) => v !== optValue) : [...currentSet, optValue];
     if (!isNullish(maxItems) && next.length > maxItems) return;
 
-    const unique = Array.from(new Set(next));
-    onChange(unique);
-    onBlur(id, unique);
+    commitValue(Array.from(new Set(next)));
   };
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.checkboxesTitle} />
+      <RjsfDisplayLabel {...widgetTitle} style={styles.checkboxesTitle} />
 
       {enumOptions.map((opt: EnumOptionDisplay) => {
         const isOptionChecked = currentSet.includes(opt.value);
         const checkboxStatus = isOptionChecked ? 'checked' : 'unchecked';
         return (
           <View key={opt.value} style={styles.checkboxRow}>
-            <Checkbox status={checkboxStatus} onPress={() => toggle(opt.value)} disabled={disabled || readonly} />
+            <Checkbox status={checkboxStatus} onPress={() => toggle(opt.value)} disabled={isDisplayOnly} />
             <Pressable onPress={() => toggle(opt.value)} style={styles.checkboxLabel}>
               <Text variant="bodyLarge">{opt.label}</Text>
             </Pressable>

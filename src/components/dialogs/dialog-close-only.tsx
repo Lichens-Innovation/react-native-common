@@ -1,3 +1,4 @@
+import { isNotBlank } from '@lichens-innovation/ts-common';
 import { type ComponentProps, type FunctionComponent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
@@ -26,7 +27,7 @@ export const DialogCloseOnly: FunctionComponent<DialogCloseOnlyProps> = ({
   const styles = useStyles();
   const { t } = useTranslation();
 
-  const hasIcon = !!icon;
+  const hasIcon = isNotBlank(icon);
   const hasTitle = !!title;
   const hasContent = !!content;
 

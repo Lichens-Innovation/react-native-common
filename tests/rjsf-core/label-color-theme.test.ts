@@ -10,13 +10,12 @@ describe('mergeLabelColorTheme', () => {
     expect(mergeLabelColorTheme(LIGHT_THEME, labelColor)).toBeUndefined();
   });
 
-  it('treats whitespace-only labelColor as set (old `!labelColor` check)', () => {
+  it('returns undefined when labelColor is whitespace-only', () => {
     // act
     const result = mergeLabelColorTheme(LIGHT_THEME, '   ');
 
     // assert
-    expect(result?.colors.primary).toBe('   ');
-    expect(result?.colors.onSurfaceVariant).toBe('   ');
+    expect(result).toBeUndefined();
   });
 
   it('overrides only primary and onSurfaceVariant, keeping the rest of the theme', () => {

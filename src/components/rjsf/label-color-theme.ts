@@ -1,8 +1,7 @@
-import type { AppTheme } from '../../theme';
+import { isBlank } from '@lichens-innovation/ts-common';
+import type { AppTheme } from '../../theme/theme.index';
 
-/**
- * Builds a Paper theme override that recolors a TextInput's floating label to `labelColor`.
- *
+/** habit-hooks-disable non-essential-comment
  * Paper exposes no per-label color prop, so we override the theme colors that drive the
  * floating label (resting = onSurfaceVariant, active = primary). Returns undefined when no
  * color is set so the input falls back to the ambient context theme.
@@ -11,7 +10,7 @@ import type { AppTheme } from '../../theme';
  * trade-off for label coloring.
  */
 export const mergeLabelColorTheme = (theme: AppTheme, labelColor?: string): AppTheme | undefined => {
-  if (!labelColor) return undefined;
+  if (isBlank(labelColor)) return undefined;
   return {
     ...theme,
     colors: {

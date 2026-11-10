@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { isBlank } from '@lichens-innovation/ts-common';
 import * as Sentry from '@sentry/react-native';
 import { LogBox } from 'react-native';
 import {
@@ -14,8 +15,8 @@ import * as FileSystemLegacy from 'expo-file-system/legacy';
 import { getSentryDns, isSentryActivated } from '../config/env.config';
 import { FileInfo } from '../services/files/native-file-system.types';
 import { commonLogsStoreTransport } from '../store/common-logs.store';
-import { getAppIdentifier } from '../utils/device.utils';
-import { isDevelopment } from '../utils/env.utils';
+import { getAppIdentifier } from '../utils/device/device.utils';
+import { isDevelopment } from '../utils/device/env.utils';
 import { LOG_LEVELS, SimpleLogger } from './logger.types';
 
 LogBox.ignoreLogs([/^ErrorBoundary /, /Support for defaultProps will be removed from function components/]);
@@ -24,7 +25,7 @@ const appName = getAppIdentifier();
 const logFilenamePrefix = `app-logs-${appName}`;
 const logFilenamePattern = `${logFilenamePrefix}-{date-today}.txt`;
 const filePath: string = Paths.document.uri;
-if (!filePath) {
+if (isBlank(filePath)) {
   throw new Error('Failed to initialize logger: document directory path is unavailable');
 }
 
@@ -62,8 +63,7 @@ const getTransports = (): transportFunctionType<any>[] => {
   if (!isDevelopment() && isSentryActivated()) {
     Sentry.init({
       dsn: getSentryDns(),
-      // We can add more context data to events (IP address, cookies, user, etc.)
-      // @see https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+      // Adds IP address, cookies and user to events: https://docs.sentry.io/platforms/react-native/data-management/data-collected/ habit-hooks-disable non-essential-comment
       sendDefaultPii: true,
     });
     transports.push(sentryTransport);
@@ -74,6 +74,45 @@ const getTransports = (): transportFunctionType<any>[] => {
   }
 
   return transports;
+};
+
+const RN_LOGS_LINE_REGEXP = /^(\S+)\s+(\S+)\s*[:|]\s*([\s\S]*)$/;
+const UUID_REGEXP = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+
+interface RnLogsLineParts {
+  timestamp: string;
+  level: string;
+  message: string;
+}
+
+const parseRnLogsLine = (line: string): RnLogsLineParts => {
+  const match = RN_LOGS_LINE_REGEXP.exec(line);
+  const trimmedMessage = match?.[3]?.trim();
+  return {
+    timestamp: match?.[1] ?? '',
+    level: match?.[2] ?? '',
+    message: isBlank(trimmedMessage) ? line : trimmedMessage,
+  };
+};
+
+const captureLoggerMessageInSentry = (msg: unknown) => {
+  if (typeof msg !== 'string') {
+    Sentry.captureException(msg);
+    return;
+  }
+
+  // Avoid withScope: known Sentry RN bug causes title to become "withScope$argument_0". habit-hooks-disable non-essential-comment
+  const { timestamp, level, message } = parseRnLogsLine(msg);
+  const fingerprint = message.replace(UUID_REGEXP, '<uuid>');
+  const err = new Error(message);
+  err.name = `Logger ${isBlank(level) ? 'ERROR' : level}`;
+  Sentry.captureException(err, {
+    fingerprint: [fingerprint],
+    tags: {
+      ...(timestamp && { loggerTimestamp: timestamp }),
+      ...(level && { loggerLevel: level }),
+    },
+  });
 };
 
 export const logger = new LoggerWrapper({
@@ -94,36 +133,15 @@ export const logger = new LoggerWrapper({
   printDate: true,
   enabled: true,
   transportOptions: {
-    // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#sentrytransport
-    // Wrap captureException so string messages become Error objects — prevents Sentry from
-    // grouping all logger.error() calls into one "sentryTransport" issue.
+    /* habit-hooks-disable non-essential-comment
+     * String messages become Error objects so Sentry doesn't group all logger.error() calls into one
+     * "sentryTransport" issue. @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#sentrytransport */
     SENTRY: {
       ...Sentry,
-      captureException: (msg: unknown) => {
-        if (typeof msg !== 'string') {
-          Sentry.captureException(msg);
-          return;
-        }
-        // Extract "TIMESTAMP  LEVEL : message" parts from react-native-logs format.
-        // Avoid withScope — known Sentry RN bug causes title to become "withScope$argument_0".
-        const match = msg.match(/^(\S+)\s+(\S+)\s*[:|]\s*([\s\S]*)$/);
-        const timestamp = match?.[1] ?? '';
-        const level = match?.[2] ?? '';
-        const message = match?.[3]?.trim() || msg;
-        const fingerprint = message.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '<uuid>');
-        const err = new Error(message);
-        err.name = `Logger ${level || 'ERROR'}`;
-        Sentry.captureException(err, {
-          fingerprint: [fingerprint],
-          tags: {
-            ...(timestamp && { loggerTimestamp: timestamp }),
-            ...(level && { loggerLevel: level }),
-          },
-        });
-      },
+      captureException: captureLoggerMessageInSentry,
     },
     errorLevels: 'error',
-    // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#mapconsoletransport
+    // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#mapconsoletransport habit-hooks-disable non-essential-comment
     mapLevels: {
       debug: 'debug',
       log: 'log',
@@ -131,7 +149,7 @@ export const logger = new LoggerWrapper({
       warn: 'warn',
       error: 'error',
     },
-    // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#fileasynctransport
+    // @see https://github.com/mowispace/react-native-logs?tab=readme-ov-file#fileasynctransport habit-hooks-disable non-essential-comment
     FS: FileSystemLegacy,
     fileNameDateType: 'iso',
     fileName: logFilenamePattern,
@@ -187,43 +205,59 @@ export const loadCurrentLogsFileUri = async (): Promise<string> => {
   return fileInfos[0]?.uri ?? '';
 };
 
-/**
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const SECONDS_TIMESTAMP_UPPER_BOUND = 1e12;
+
+/* habit-hooks-disable non-essential-comment
+ * expo-file-system has shipped modificationTime as both seconds and ms across versions.
+ * Anything below 1e12 is clearly a seconds-based Unix timestamp (~year 33658 in ms). */
+const toModificationTimeMs = (rawModificationTime: number): number =>
+  rawModificationTime > SECONDS_TIMESTAMP_UPPER_BOUND ? rawModificationTime : rawModificationTime * 1000;
+
+const deleteLogFileIfOlderThan = (file: File, cutoff: number): boolean => {
+  try {
+    const info = file.info();
+    const mtimeMs = toModificationTimeMs(info.modificationTime ?? 0);
+    if (!info.exists || mtimeMs === 0 || mtimeMs >= cutoff) return false;
+    file.delete();
+    return true;
+  } catch (e: unknown) {
+    logger.warn(`Failed to delete old log file ${file.name}:`, e);
+    return false;
+  }
+};
+
+/** habit-hooks-disable non-essential-comment
  * Delete log files older than `retentionDays` days. Default 14.
  * Call once at app startup to bound disk usage. Failures on individual files are logged
  * but don't abort the sweep, so partial cleanup is still useful.
  */
-export const deleteOldLogFiles = async (retentionDays: number = 14): Promise<void> => {
+export const deleteOldLogFiles = async (retentionDays = 14): Promise<void> => {
   try {
     const pathInfo = Paths.info(filePath);
     if (!pathInfo.exists) return;
 
-    const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - retentionDays * MS_PER_DAY;
 
     const directory = new Directory(filePath);
     const items = directory.list();
     const logFiles: File[] = items.filter(isLogFileItem);
-
-    let deleted = 0;
-    for (const file of logFiles) {
-      try {
-        const info = file.info();
-        const raw = info.modificationTime ?? 0;
-        // expo-file-system has shipped modificationTime as both seconds and ms across versions.
-        // Anything below 1e12 is clearly a seconds-based Unix timestamp (~year 33658 in ms).
-        const mtimeMs = raw > 1e12 ? raw : raw * 1000;
-        if (!info.exists || mtimeMs === 0 || mtimeMs >= cutoff) continue;
-        file.delete();
-        deleted++;
-      } catch (e: unknown) {
-        logger.warn(`Failed to delete old log file ${file.name}:`, e);
-      }
-    }
+    const deleted = logFiles.filter((file) => deleteLogFileIfOlderThan(file, cutoff)).length;
 
     if (deleted > 0) {
       logger.info(`[logger] purged ${deleted} log file(s) older than ${retentionDays} days`);
     }
   } catch (e: unknown) {
     logger.error('Error purging old log files:', e);
+  }
+};
+
+const tryDeleteFile = (file: File): Error | null => {
+  try {
+    file.delete();
+    return null;
+  } catch (e: unknown) {
+    return e instanceof Error ? e : new Error(String(e));
   }
 };
 
@@ -238,14 +272,7 @@ export const deleteAllLogFiles = async (): Promise<void> => {
     const items = directory.list();
     const logFiles: File[] = items.filter(isLogFileItem);
 
-    const errors: Error[] = [];
-    for (const file of logFiles) {
-      try {
-        file.delete();
-      } catch (e: unknown) {
-        errors.push(e instanceof Error ? e : new Error(String(e)));
-      }
-    }
+    const errors = logFiles.map(tryDeleteFile).filter((error): error is Error => error !== null);
 
     if (errors.length > 0) {
       throw new Error(`Failed to delete ${errors.length} log file(s): ${errors.map((e) => e.message).join('; ')}`);

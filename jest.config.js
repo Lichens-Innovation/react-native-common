@@ -10,7 +10,7 @@ module.exports = {
     '^@rjsf/utils$': '<rootDir>/node_modules/@rjsf/utils/dist/index.cjs',
     // the .native initializer registers CSS handlers JSReanimated (used under Jest) does not implement
     '^\\./initializers$': '<rootDir>/node_modules/react-native-reanimated/lib/module/initializers.js',
-    '^@lib$': '<rootDir>/src/index.ts',
-    '^@lib/rjsf$': '<rootDir>/src/components/rjsf/index.ts',
+    '^@lib$': '<rootDir>/src/react-native-common.index.ts',
+    '^@lib/rjsf$': '<rootDir>/src/components/rjsf/rjsf.index.ts',
   },
 };

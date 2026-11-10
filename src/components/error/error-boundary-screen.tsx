@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Button, Card, Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
-import { shareCurrentLogsFile } from '../../utils/sharing.utils';
+import { shareCurrentLogsFile } from '../../utils/files/sharing.utils';
 
 export const ErrorBoundaryScreen: FunctionComponent = () => {
   const styles = useStyles();
@@ -30,7 +30,7 @@ export const ErrorBoundaryScreen: FunctionComponent = () => {
         </Card.Content>
 
         <Card.Actions>
-          <Button mode="outlined" onPress={shareCurrentLogsFile}>
+          <Button mode="outlined" onPress={() => void shareCurrentLogsFile()}>
             {t('common:errorBoundary.details')}
           </Button>
           <Button mode="contained" onPress={() => router.replace('/')}>

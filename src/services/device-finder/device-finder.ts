@@ -14,13 +14,13 @@ interface DeviceFinderScanArgs {
 }
 
 export class DeviceFinder {
-  private type: string = '';
-  private protocol: string = '';
-  private domain: string | undefined = undefined;
+  private type = '';
+  private protocol = '';
+  private domain?: string = undefined;
 
   private zeroConf: Zeroconf | null = null;
-  public isScanning: boolean = false;
-  private timerID: ReturnType<typeof setTimeout> | undefined = undefined;
+  public isScanning = false;
+  private timerID?: ReturnType<typeof setTimeout> = undefined;
   public discoveredDevices: DiscoveredDevice[] = [];
 
   private onErrorCallback: (error: Error) => void = () => {};
@@ -71,7 +71,7 @@ export class DeviceFinder {
 
   private onScanFailure(e: unknown) {
     this.stop();
-    // only log as info because we expect this to happen regularly (wrong network, etc.)
+    // only log as info because we expect this to happen regularly (wrong network, etc.) habit-hooks-disable non-essential-comment
     logger.info('[DeviceFinder] Failed to scan for cameras:', e);
     this.onErrorCallback(toError(e));
   }
@@ -114,7 +114,7 @@ export class DeviceFinder {
     try {
       this.zeroConf?.removeDeviceListeners();
     } catch {
-      // ignore (nothing we can do at this point)
+      // ignore (nothing we can do at this point) habit-hooks-disable non-essential-comment
     } finally {
       this.zeroConf = null;
     }

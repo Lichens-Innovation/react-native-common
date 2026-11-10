@@ -1,3 +1,4 @@
+import { isNotBlank } from '@lichens-innovation/ts-common';
 import { type ComponentProps, type FunctionComponent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
@@ -10,7 +11,6 @@ interface DialogOkCancelProps extends Omit<DialogProps, 'children' | 'visible'> 
   icon?: string;
   title?: ReactNode;
   description?: ReactNode;
-  /** Replaces the default "Ok" label when the action deserves to be named. */
   okLabel?: string;
   onOk: () => void;
   onCancel: () => void;
@@ -31,7 +31,7 @@ export const DialogOkCancel: FunctionComponent<DialogOkCancelProps> = ({
   const styles = useStyles();
   const { t } = useTranslation();
 
-  const hasIcon = !!icon;
+  const hasIcon = isNotBlank(icon);
 
   const hasTitle = !!title;
   const hasTitleString = typeof title === 'string';

@@ -3,9 +3,10 @@
 # Exit immediately if any command fails
 set -e
 
-echo "Running lint..."
-bun run lint
-echo "  -->  ✅ Lint completed"
+echo "Running knip to detect unused files, dependencies and exports..."
+# </dev/null so knip cannot consume the refs git feeds on stdin below
+bun run lint:unused </dev/null
+echo "  -->  ✅ Knip completed"
 
 # Prevent force push on protected branches
 # This is a soft protection - can be bypassed with --no-verify if needed

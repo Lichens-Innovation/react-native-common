@@ -3,8 +3,6 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import { renderForm, renderWithProviders, testI18n } from './render-with-providers';
 import { RjsfPaperRenderer } from '@lib/rjsf';
 
-const keepWhitespace = { normalizer: (text: string) => text };
-
 const numberProps = {
   a: { type: 'number', title: 'A' },
   b: { type: 'number', title: 'B' },
@@ -145,8 +143,9 @@ describe('ComputedField', () => {
       ${'kg'}      | ${true}
       ${undefined} | ${false}
       ${''}        | ${false}
+      ${'  '}      | ${false}
       ${42}        | ${false}
-    `('unit=$unit renders affix: $shown', async ({ unit, shown }) => {
+    `('unit="$unit" renders affix: $shown', async ({ unit, shown }) => {
       // act
       await renderForm({ schema: buildSchema(), uiSchema: computedUi({ formula: '{a}', unit }), formData: { a: 1 } });
 
@@ -154,18 +153,6 @@ describe('ComputedField', () => {
       // eslint-disable-next-line coding-guide/prefer-role-query-over-testid -- an absent affix (empty/non-string unit) has no text to query; Paper's affix node is only reachable by testID
       expect(screen.queryByTestId('right-affix-adornment-text') !== null).toBe(shown);
       if (shown) expect(screen.getByText(unit)).toBeOnTheScreen();
-    });
-
-    it('renders a whitespace-only unit affix (old truthy check)', async () => {
-      // act
-      await renderForm({
-        schema: buildSchema(),
-        uiSchema: computedUi({ formula: '{a}', unit: '  ' }),
-        formData: { a: 1 },
-      });
-
-      // assert
-      expect(screen.getByText('  ', keepWhitespace)).toBeOnTheScreen();
     });
 
     it('is not editable', async () => {
@@ -183,9 +170,9 @@ describe('ComputedField', () => {
       ${'{a}'}     | ${false}       | ${false}
       ${''}        | ${undefined}   | ${false}
       ${undefined} | ${undefined}   | ${false}
-      ${'   '}     | ${undefined}   | ${true}
+      ${'   '}     | ${undefined}   | ${false}
     `(
-      'info button shown=$shown for formula="$formula" showInfoButton=$showInfoButton (whitespace formula still shows it)',
+      'info button shown=$shown for formula="$formula" showInfoButton=$showInfoButton',
       async ({ formula, showInfoButton, shown }) => {
         // act
         await renderForm({
@@ -242,7 +229,7 @@ describe('ComputedField', () => {
       expect(screen.queryByText('Variables')).toBeNull();
     });
 
-    it('shows the bare slug for a variable without schema title, and "name: <whitespace>" for a whitespace title', async () => {
+    it('shows the bare slug for a variable without schema title or with a whitespace-only title', async () => {
       // arrange
       await renderForm({
         schema: buildSchema({ x: { type: 'number' }, w: { type: 'number', title: '   ' } }),
@@ -255,19 +242,17 @@ describe('ComputedField', () => {
 
       // assert
       expect(screen.getByText('x = 2')).toBeOnTheScreen();
-      expect(screen.getByText('w:     = 3', keepWhitespace)).toBeOnTheScreen();
+      expect(screen.getByText('w = 3')).toBeOnTheScreen();
     });
 
-    it('shows "(none)" for a whitespace-only formula', async () => {
-      // arrange
+    it('offers no way to open the dialog for a whitespace-only formula', async () => {
+      // act
       await renderForm({ schema: buildSchema(), uiSchema: computedUi({ formula: '   ' }) });
 
-      // act
-      await fireEvent.press(screen.getByLabelText('Show formula'));
-
       // assert
+      expect(screen.queryByLabelText('Show formula')).toBeNull();
+      expect(screen.queryByText('Formula')).toBeNull();
       expect(screen.queryByText('(none)')).toBeNull();
-      expect(screen.getByText('   ', keepWhitespace)).toBeOnTheScreen();
     });
   });
 

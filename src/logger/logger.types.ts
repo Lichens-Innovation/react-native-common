@@ -7,7 +7,6 @@ export interface SimpleLogger {
   error(message: string, ...args: any[]): void;
 }
 
-// extract names of logger methods as a type
 export type LoggerMethods = keyof SimpleLogger;
 
 export const LOG_LEVELS = {

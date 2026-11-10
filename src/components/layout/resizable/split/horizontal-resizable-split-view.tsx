@@ -1,17 +1,15 @@
 import { useCallback, useEffect, type FunctionComponent } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { useAppTheme } from '../../../../theme';
-import { isDevelopment } from '../../../../utils';
-import { ResizablePaneDragChrome } from '../resizable-pane-drag-chrome';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { isDevelopment } from '../../../../utils/utils.index';
+import { ResizablePaneContent } from '../resizable-pane-content';
 import { RESIZE_HANDLE } from '../resizable-view.constants';
+import { ResizeHandle } from '../resize-handle';
+import { useResizePanGesture } from '../use-resize-pan-gesture';
 import { HorizontalResizableSplitViewProps } from './horizontal-resizable-split-view.types';
 import { validateResizableSplitViewProps } from './horizontal-resizable-split-view.utils';
 
 export const HorizontalResizableSplitView: FunctionComponent<HorizontalResizableSplitViewProps> = (props) => {
-  const styles = useStyles();
-
   useEffect(() => {
     if (isDevelopment()) validateResizableSplitViewProps(props);
   }, [props]);
@@ -29,45 +27,32 @@ export const HorizontalResizableSplitView: FunctionComponent<HorizontalResizable
     shouldObscureRightPaneContentWhileResizing = false,
   } = props;
 
-  // Shared values for animation
   const containerWidth = useSharedValue(0);
   const leftSectionWidth = useSharedValue(0);
   const minWidth = useSharedValue(0);
   const maxWidth = useSharedValue(0);
-  const startX = useSharedValue(0);
-  const isDragging = useSharedValue(false);
   const isLayoutReady = useSharedValue(false);
 
-  // Handle container layout measurement
   const handleLayout = useCallback(
     (event: LayoutChangeEvent) => {
       const { width } = event.nativeEvent.layout;
       if (width > 0 && !isLayoutReady.value) {
-        containerWidth.value = width;
-        minWidth.value = width * minLeftRatio;
-        maxWidth.value = width * maxLeftRatio;
-        leftSectionWidth.value = width * initialLeftRatio;
-        isLayoutReady.value = true;
+        containerWidth.set(width);
+        minWidth.set(width * minLeftRatio);
+        maxWidth.set(width * maxLeftRatio);
+        leftSectionWidth.set(width * initialLeftRatio);
+        isLayoutReady.set(true);
       }
     },
     [minLeftRatio, maxLeftRatio, initialLeftRatio, containerWidth, minWidth, maxWidth, leftSectionWidth, isLayoutReady]
   );
 
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      'worklet';
-      startX.value = leftSectionWidth.value;
-      isDragging.value = true;
-    })
-    .onUpdate((event) => {
-      'worklet';
-      const newWidth = startX.value + event.translationX;
-      leftSectionWidth.value = Math.max(minWidth.value, Math.min(newWidth, maxWidth.value));
-    })
-    .onFinalize(() => {
-      'worklet';
-      isDragging.value = false;
-    });
+  const { panGesture, isDragging } = useResizePanGesture({
+    size: leftSectionWidth,
+    minSize: minWidth,
+    maxSize: maxWidth,
+    axis: 'x',
+  });
 
   const leftSectionAnimatedStyle = useAnimatedStyle(() => ({ width: leftSectionWidth.value }));
 
@@ -79,74 +64,62 @@ export const HorizontalResizableSplitView: FunctionComponent<HorizontalResizable
     left: leftSectionWidth.value - RESIZE_HANDLE.dragTargetCrossAxis / 2,
   }));
 
-  const dragHandleAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(isDragging.value ? 1.2 : 1, RESIZE_HANDLE.dragSpringConfig) }],
-  }));
-
   return (
     <View style={styles.container} onLayout={handleLayout}>
       <Animated.View style={[styles.leftSection, leftSectionAnimatedStyle]}>
-        {shouldObscureLeftPaneContentWhileResizing ? (
-          <ResizablePaneDragChrome isDragging={isDragging} isLayoutReady={isLayoutReady} greyLevel="primary">
-            {leftContent}
-          </ResizablePaneDragChrome>
-        ) : (
-          <>{leftContent}</>
-        )}
+        <ResizablePaneContent
+          shouldObscureWhileResizing={shouldObscureLeftPaneContentWhileResizing}
+          isDragging={isDragging}
+          isLayoutReady={isLayoutReady}
+          greyLevel="primary"
+        >
+          {leftContent}
+        </ResizablePaneContent>
       </Animated.View>
 
       <Animated.View style={[styles.rightSection, rightSectionAnimatedStyle]}>
-        {shouldObscureRightPaneContentWhileResizing ? (
-          <ResizablePaneDragChrome isDragging={isDragging} isLayoutReady={isLayoutReady} greyLevel="secondary">
-            {rightContent}
-          </ResizablePaneDragChrome>
-        ) : (
-          <>{rightContent}</>
-        )}
+        <ResizablePaneContent
+          shouldObscureWhileResizing={shouldObscureRightPaneContentWhileResizing}
+          isDragging={isDragging}
+          isLayoutReady={isLayoutReady}
+          greyLevel="secondary"
+        >
+          {rightContent}
+        </ResizablePaneContent>
       </Animated.View>
 
       {!hideHandle && (
-        <GestureDetector gesture={panGesture}>
-          <Animated.View style={[styles.handleContainer, handleContainerStyle, dragHandleContainerAnimatedStyle]}>
-            <Animated.View style={[styles.handle, handleStyle, dragHandleAnimatedStyle]} />
-          </Animated.View>
-        </GestureDetector>
+        <ResizeHandle
+          gesture={panGesture}
+          isDragging={isDragging}
+          barOrientation="vertical"
+          containerStyle={[styles.handleContainer, handleContainerStyle, dragHandleContainerAnimatedStyle]}
+          handleStyle={handleStyle}
+        />
       )}
     </View>
   );
 };
 
-const useStyles = () => {
-  const theme = useAppTheme();
-
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      flexDirection: 'row',
-    },
-    leftSection: {
-      overflow: 'hidden',
-    },
-    rightSection: {
-      overflow: 'hidden',
-    },
-    handleContainer: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      width: RESIZE_HANDLE.dragTargetCrossAxis,
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1,
-      elevation: 1,
-    },
-    handle: {
-      width: theme.spacing(RESIZE_HANDLE.thicknessSpacing),
-      height: RESIZE_HANDLE.length,
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.roundness,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: theme.colors.outline,
-    },
-  });
-};
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  leftSection: {
+    overflow: 'hidden',
+  },
+  rightSection: {
+    overflow: 'hidden',
+  },
+  handleContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: RESIZE_HANDLE.dragTargetCrossAxis,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+    elevation: 1,
+  },
+});

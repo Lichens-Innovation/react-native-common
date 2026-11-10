@@ -10,45 +10,41 @@ const DEFAULT_OPTIONS: ImagePicker.ImagePickerOptions = {
   quality: 0.7,
 };
 
+const launchForSinglePictureUri = async (
+  launchPicker: () => Promise<ImagePicker.ImagePickerResult>,
+  onError: (e: unknown) => void
+): Promise<string | null> => {
+  try {
+    const result = await launchPicker();
+    return toSinglePictureUri(result);
+  } catch (e: unknown) {
+    onError(e);
+    return null;
+  }
+};
+
 export const useCameraImagePicker = (options = DEFAULT_OPTIONS) => {
   const { t } = useTranslation();
   const { showSnackbarMessage } = useSnackbar();
-
-  const handlePermissionDenied = () => {
-    showSnackbarMessage(t('common:imagePicker.permissionDenied'));
-    return null;
-  };
 
   const handleError = (e: unknown) => {
     logger.error('[useCameraImagePicker] Error picking image', e);
     showSnackbarMessage(t('common:imagePicker.error'));
   };
 
-  const pickImage = async () => {
-    // No media-library permission requested: launchImageLibraryAsync uses the
-    // Android Photo Picker (and iOS limited picker), which need no READ permission.
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync(options);
-      return toSinglePictureUri(result);
-    } catch (e: unknown) {
-      handleError(e);
-    }
-
-    return null;
-  };
+  /* habit-hooks-disable non-essential-comment
+   * No media-library permission requested: launchImageLibraryAsync uses the Android Photo Picker
+   * (and iOS limited picker), which need no READ permission. */
+  const pickImage = () => launchForSinglePictureUri(() => ImagePicker.launchImageLibraryAsync(options), handleError);
 
   const takePhoto = async () => {
     const hasPermission = await requestTakePhotoPermissions();
-    if (!hasPermission) return handlePermissionDenied();
-
-    try {
-      const result = await ImagePicker.launchCameraAsync(options);
-      return toSinglePictureUri(result);
-    } catch (e: unknown) {
-      handleError(e);
+    if (!hasPermission) {
+      showSnackbarMessage(t('common:imagePicker.permissionDenied'));
+      return null;
     }
 
-    return null;
+    return launchForSinglePictureUri(() => ImagePicker.launchCameraAsync(options), handleError);
   };
 
   return {

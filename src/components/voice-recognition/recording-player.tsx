@@ -3,10 +3,10 @@ import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { FunctionComponent, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from 'react-native-paper';
+import { logger } from '../../logger/logger';
 
 export interface RecordingPlayerProps {
-  /** URI of the recording to play. When null or undefined, nothing is rendered. */
-  recordingUri: string | null | undefined;
+  recordingUri?: string | null;
 }
 
 export const RecordingPlayer: FunctionComponent<RecordingPlayerProps> = ({ recordingUri }) => {
@@ -14,8 +14,8 @@ export const RecordingPlayer: FunctionComponent<RecordingPlayerProps> = ({ recor
   const player = useAudioPlayer(recordingUri ? { uri: recordingUri } : null);
 
   useEffect(() => {
-    setAudioModeAsync({ playsInSilentMode: true }).catch(() => {
-      // Ignore if not supported (e.g. web)
+    setAudioModeAsync({ playsInSilentMode: true }).catch((e: unknown) => {
+      logger.debug('[RecordingPlayer] Audio mode not supported on this platform', e);
     });
   }, []);
 
@@ -24,7 +24,7 @@ export const RecordingPlayer: FunctionComponent<RecordingPlayerProps> = ({ recor
   }
 
   const handlePlay = () => {
-    player.seekTo(0);
+    void player.seekTo(0);
     player.play();
   };
 

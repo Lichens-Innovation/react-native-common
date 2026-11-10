@@ -35,14 +35,14 @@ describe('commonLogsStore', () => {
     expect(commonLogsStore.allLogsAsText).toBe('one\ntwo');
   });
 
-  it('keeps whitespace-only messages in allLogsAsText', () => {
+  it('drops whitespace-only messages from allLogsAsText', () => {
     // act
     commonLogsStore.addLog({ msg: 'one', rawMsg: undefined, level });
     commonLogsStore.addLog({ msg: '   ', rawMsg: undefined, level });
     commonLogsStore.addLog({ msg: 'two', rawMsg: undefined, level });
 
     // assert
-    expect(commonLogsStore.allLogsAsText).toBe('one\n   \ntwo');
+    expect(commonLogsStore.allLogsAsText).toBe('one\ntwo');
   });
 
   it('is bounded to 2000 entries, dropping the oldest first', () => {

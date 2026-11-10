@@ -1,4 +1,4 @@
-import { getColorForPercentage } from '@lichens-innovation/ts-common';
+import { getColorForPercentage, isNullish } from '@lichens-innovation/ts-common';
 import React, { FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
@@ -12,7 +12,7 @@ interface ScoreIndicatorProps {
 const ScoreIndicator: FunctionComponent<ScoreIndicatorProps> = ({ score }) => {
   const styles = useStyles();
 
-  if (score === undefined || score === null) {
+  if (isNullish(score)) {
     return null;
   }
 

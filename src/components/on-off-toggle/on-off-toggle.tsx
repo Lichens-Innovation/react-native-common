@@ -1,7 +1,7 @@
 import { type FunctionComponent } from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
 import { SegmentedButtons } from 'react-native-paper';
-import { useAppTheme } from '../../theme';
+import { useAppTheme } from '../../theme/theme.index';
 
 const OnOffState = {
   on: 'on',

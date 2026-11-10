@@ -1,7 +1,7 @@
 import { type FunctionComponent, type PropsWithChildren } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { type SharedValue, useAnimatedProps, useAnimatedStyle } from 'react-native-reanimated';
-import { useAppTheme } from '../../../theme';
+import { useAppTheme } from '../../../theme/theme.index';
 
 export type ResizablePaneDragGreyLevel = 'primary' | 'secondary';
 
@@ -13,7 +13,7 @@ export type ResizablePaneDragChromeProps = PropsWithChildren<{
 
 type MaskPointerEvents = 'box-only' | 'none';
 
-/**
+/** habit-hooks-disable non-essential-comment
  * Absolute-fill mask above pane children: animates to opaque while dragging or before layout is ready.
  * Children stay mounted at full opacity; visibility is blocked by the overlay, not by fading the content.
  * pointerEvents lets touches pass through when the mask is inactive.

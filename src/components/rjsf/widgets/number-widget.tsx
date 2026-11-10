@@ -1,63 +1,39 @@
 import { isBlank } from '@lichens-innovation/ts-common';
-import {
-  getRjsfDisplayLabel,
-  getRjsfLabelColor,
-  hasRjsfErrors,
-  toStringOrEmpty,
-} from '@lichens-innovation/ts-common/rjsf';
+import { toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
 import { DEFAULT_ID_PREFIX, DEFAULT_ID_SEPARATOR, type WidgetProps } from '@rjsf/utils';
-import { useEffect, useMemo, useRef, useState, type FunctionComponent } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { useEffect, useRef, useState, type FunctionComponent } from 'react';
+import { Platform } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { logger } from '../../../logger/logger';
-import { useAppTheme } from '../../../theme';
-import { mergeLabelColorTheme } from '../label-color-theme';
 import { useRootFormDataStore } from '../root-form-data-context';
+import { useOutlinedInputProps } from './shared/use-outlined-input-props';
 
-// Reject keystrokes that would produce an invalid number-in-progress, so a
-// valid intermediate state ("1.", "-", "") is allowed but "1.2.3" is not.
-// Both "." and "," accepted — FR iOS decimal-pad emits ",".
+/** habit-hooks-disable non-essential-comment
+ * Reject keystrokes that would produce an invalid number-in-progress, so a valid intermediate state
+ * ("1.", "-", "") is allowed but "1.2.3" is not. Both "." and "," accepted — FR iOS decimal-pad emits ",".
+ */
 const INTEGER_PATTERN = /^-?\d*$/;
 const FLOAT_PATTERN = /^-?\d*[.,]?\d*$/;
 
-export const NumberWidget: FunctionComponent<WidgetProps> = ({
-  id,
-  name,
-  value,
-  disabled,
-  readonly,
-  placeholder,
-  onChange,
-  onBlur,
-  onFocus,
-  label,
-  hideLabel,
-  required,
-  rawErrors,
-  options,
-  registry,
-  schema,
-}) => {
-  const theme = useAppTheme();
-  const styles = useStyles();
-  const hasError = hasRjsfErrors(rawErrors);
-  const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(options));
+export const NumberWidget: FunctionComponent<WidgetProps> = (props) => {
+  const { id, name, value, readonly, onChange, onBlur, onFocus, options, registry, schema } = props;
+  const outlinedInputProps = useOutlinedInputProps(props);
   const externalStr = toStringOrEmpty(value);
   const isInteger = schema?.type === 'integer';
 
   const [localText, setLocalText] = useState(externalStr);
   const isFocusedRef = useRef(false);
 
-  // A ComputedField reading this value repaints in the keystroke's own frame instead of waiting for
-  // rjsf's change cycle, whose cost is a whole-schema state derivation and grows with the form
-  // (SPOTD-621). rjsf still receives the same onChange, unchanged, and remains the authority.
-  //
-  // Top-level fields only: formulas resolve top-level slugs, and `name` alone is not unique — a
-  // nested `foo` carries the same `name` as a top-level `foo`, whereas `id` is the full path.
+  /* habit-hooks-disable non-essential-comment
+   * A ComputedField reading this value repaints in the keystroke's own frame instead of waiting for
+   * rjsf's change cycle, whose cost is a whole-schema state derivation and grows with the form
+   * (SPOTD-621). rjsf still receives the same onChange, unchanged, and remains the authority.
+   *
+   * Top-level fields only: formulas resolve top-level slugs, and `name` alone is not unique — a
+   * nested `foo` carries the same `name` as a top-level `foo`, whereas `id` is the full path.
+   */
   const store = useRootFormDataStore();
-  // Defensive like the rest of this file's registry reads: a widget rendered outside a Form (a unit
-  // test with a hand-built registry) still has to work.
+  // Optional chaining: a widget rendered outside a Form (a unit test with a hand-built registry) still has to work. habit-hooks-disable non-essential-comment
   const idPrefix = registry?.globalFormOptions?.idPrefix ?? DEFAULT_ID_PREFIX;
   const idSeparator = registry?.globalFormOptions?.idSeparator ?? DEFAULT_ID_SEPARATOR;
   const isTopLevelField = id === [idPrefix, name].join(idSeparator);
@@ -67,13 +43,15 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
     store.setLiveValue(id, name, nextValue);
   };
 
-  // Hand the field back to rjsf when it is no longer being typed into, or when a conditional branch
-  // takes it out of the form. Without this, a value rjsf overruled rather than accepted — a cleared
-  // leaf, a sanitized leaf, an if/then reset — would shadow the real form data for as long as the form
-  // stayed mounted, since such an entry can never match on convergence.
-  //
-  // The trade: blurring before rjsf has converged shows the previously committed value for one cycle.
-  // That is a stale-by-one-commit number rather than a wrong-forever one, and it self-corrects.
+  /* habit-hooks-disable non-essential-comment
+   * Hand the field back to rjsf when it is no longer being typed into, or when a conditional branch
+   * takes it out of the form. Without this, a value rjsf overruled rather than accepted — a cleared
+   * leaf, a sanitized leaf, an if/then reset — would shadow the real form data for as long as the form
+   * stayed mounted, since such an entry can never match on convergence.
+   *
+   * The trade: blurring before rjsf has converged shows the previously committed value for one cycle.
+   * That is a stale-by-one-commit number rather than a wrong-forever one, and it self-corrects.
+   */
   useEffect(() => {
     if (!isTopLevelField) return;
 
@@ -82,8 +60,7 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
     };
   }, [store, id, isTopLevelField]);
 
-  // Sync from external value only when not actively editing — keeps trailing
-  // separators like "1." visible while user is mid-type.
+  // Skipped while focused so trailing separators like "1." stay visible mid-type. habit-hooks-disable non-essential-comment
   useEffect(() => {
     if (isFocusedRef.current) return;
     setLocalText(externalStr);
@@ -95,8 +72,7 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
     if (!validPattern.test(text)) return;
     setLocalText(text);
 
-    // Digitless intermediates ("-", ".", ",") are regex-valid mid-type states
-    // but don't parse to a number — treat as empty, keep the text visible.
+    // Digitless intermediates ("-", ".", ",") are regex-valid but unparseable: treat as empty, keep the text. habit-hooks-disable non-essential-comment
     if (isBlank(text) || !/\d/.test(text)) {
       publishLive(options?.emptyValue);
       onChange(options?.emptyValue);
@@ -113,12 +89,12 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
     onChange(nextValue);
   };
 
-  // Default numeric keyboards lack a minus key, so negatives can't be typed:
-  // iOS number-pad / decimal-pad have none, and some Android skins (e.g.
-  // Samsung) hide it on number-pad too. Use signed-capable keyboards instead —
-  // numbers-and-punctuation on iOS, numeric (FLAG_SIGNED|FLAG_DECIMAL) on
-  // Android. inputMode must stay undefined: when set it takes precedence over
-  // keyboardType and no inputMode maps to a signed numeric keyboard.
+  /* habit-hooks-disable non-essential-comment
+   * Default numeric keyboards lack a minus key, so negatives can't be typed: iOS number-pad / decimal-pad
+   * have none, and some Android skins (e.g. Samsung) hide it on number-pad too. Use signed-capable keyboards
+   * instead — numbers-and-punctuation on iOS, numeric (FLAG_SIGNED|FLAG_DECIMAL) on Android. inputMode must
+   * stay undefined: when set it takes precedence over keyboardType and no inputMode maps to a signed keyboard.
+   */
   const keyboardType = Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'numeric';
   const inputMode = undefined;
 
@@ -126,11 +102,8 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
 
   return (
     <TextInput
-      mode="outlined"
-      label={displayLabel}
+      {...outlinedInputProps}
       value={localText}
-      placeholder={placeholder}
-      disabled={disabled}
       editable={!readonly}
       keyboardType={keyboardType}
       inputMode={inputMode}
@@ -144,24 +117,7 @@ export const NumberWidget: FunctionComponent<WidgetProps> = ({
         isFocusedRef.current = true;
         onFocus(id, value);
       }}
-      error={hasError}
-      style={styles.input}
-      outlineColor={theme.colors.outline}
-      theme={labelColorTheme}
       right={unit ? <TextInput.Affix text={unit} /> : undefined}
     />
-  );
-};
-
-const useStyles = () => {
-  const theme = useAppTheme();
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        input: {
-          marginVertical: theme.spacing(0.5),
-        },
-      }),
-    [theme]
   );
 };

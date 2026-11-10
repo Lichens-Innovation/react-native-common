@@ -3,12 +3,8 @@ import React, { FunctionComponent } from 'react';
 import { Modal, ModalProps } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 
-/**
- * AppModal component that provides a Modal with proper theme context.
- * This ensures that all components inside the modal have access to the correct theme,
- * including the spacing function and other theme properties.
- *
- * It uses the same theme logic as app.tsx to ensure consistency across the application.
+/** habit-hooks-disable non-essential-comment
+ * Re-provides the app theme inside the Modal so its children get the full theme (incl. `spacing`).
  */
 export const AppModal: FunctionComponent<ModalProps> = ({ children, ...modalProps }) => {
   const theme = useAppTheme();

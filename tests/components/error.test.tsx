@@ -43,8 +43,8 @@ describe('useErrorDetails', () => {
     ${null}                       | ${'Unknown'}      | ${'null'}
     ${''}                         | ${'Unknown'}      | ${'empty string'}
     ${new Error('')}              | ${'Unknown'}      | ${'Error with empty message'}
-    ${'   '}                      | ${'   '}          | ${'whitespace-only string (kept as-is)'}
-    ${new Error('  ')}            | ${'  '}           | ${'Error with whitespace-only message (kept as-is)'}
+    ${'   '}                      | ${'Unknown'}      | ${'whitespace-only string'}
+    ${new Error('  ')}            | ${'Unknown'}      | ${'Error with whitespace-only message'}
   `('uses errorMsg "$expectedMessage" for $description', async ({ error, expectedMessage }) => {
     // act
     const { result } = await renderHook(() => useErrorDetails(error));

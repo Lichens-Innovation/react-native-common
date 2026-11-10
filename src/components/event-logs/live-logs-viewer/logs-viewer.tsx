@@ -64,7 +64,7 @@ export const LogsViewer: FunctionComponent<LogsViewerProps> = observer(
             <IconButton
               icon="content-copy"
               mode="contained"
-              onPress={handleCopyAllLogs}
+              onPress={() => void handleCopyAllLogs()}
               style={styles.button}
               accessibilityLabel={t('common:logs.copyAll')}
             />
@@ -72,10 +72,10 @@ export const LogsViewer: FunctionComponent<LogsViewerProps> = observer(
         )}
 
         <LegendList<LogEntry>
-          // LegendList v2 ref type intersects ScrollView instance, which RN 0.88 types no longer satisfy
+          // LegendList v2 ref type intersects ScrollView instance, which RN 0.88 types no longer satisfy habit-hooks-disable non-essential-comment
           ref={listRef as ComponentProps<typeof LegendList>['ref']}
           data={filteredLogs}
-          renderItem={({ item }: { item: LogEntry }) => <LogEntryItem logEntry={item} />}
+          renderItem={({ item }) => <LogEntryItem logEntry={item} />}
           estimatedItemSize={30}
           keyExtractor={(logEntry, index) => `${logEntry.msg.substring(0, 20)}_${index}`}
         />

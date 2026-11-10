@@ -225,9 +225,9 @@ describe('misc utils', () => {
         ${null}         | ${true}
         ${undefined}    | ${true}
         ${''}           | ${true}
-        ${'  '}         | ${false}
+        ${'  '}         | ${true}
         ${'production'} | ${false}
-      `('channel "$channel" → $expected (whitespace-only channel is not development)', ({ channel, expected }) => {
+      `('channel "$channel" → $expected (blank channel means development)', ({ channel, expected }) => {
         // arrange
         jest.replaceProperty(Updates, 'channel', channel);
 

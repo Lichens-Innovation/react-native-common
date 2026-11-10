@@ -3,10 +3,20 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Image } from 'expo-image';
 import { Icon } from 'react-native-paper';
-import { getMediaTypeFromUri, getThumbnailUri } from '../../utils/object.utils';
+import { isBlank } from '@lichens-innovation/ts-common';
+import { logger } from '../../logger/logger';
+import { getMediaTypeFromUri, getThumbnailUri, type MediaType } from '../../utils/object.utils';
+
+const PLAYABLE_MEDIA_TYPES: ReadonlyArray<MediaType | undefined> = ['video', 'audio'];
+
+const NO_URI_ICON_BY_MEDIA_TYPE: Record<MediaType, string> = {
+  video: 'video-off',
+  audio: 'music-off',
+  image: 'image-off',
+};
 
 interface ObjectThumbnailProps {
-  uri: string | undefined;
+  uri?: string;
   onPress: () => void;
   size?: number;
 }
@@ -15,19 +25,17 @@ const ObjectThumbnail: React.FC<ObjectThumbnailProps> = ({ uri, onPress, size = 
   const { t } = useTranslation();
   const mediaType = getMediaTypeFromUri(uri);
   const [thumbnailUri, setThumbnailUri] = React.useState<string>('');
-  const showPlayIcon = mediaType === 'video' || mediaType === 'audio';
-  const noUriIconName = mediaType === 'video' ? 'video-off' : mediaType === 'audio' ? 'music-off' : 'image-off';
+  const showPlayIcon = PLAYABLE_MEDIA_TYPES.includes(mediaType);
+  const noUriIconName = mediaType ? NO_URI_ICON_BY_MEDIA_TYPE[mediaType] : NO_URI_ICON_BY_MEDIA_TYPE.image;
   const playIconName = mediaType === 'video' ? 'play-circle-outline' : 'music-note';
   const styles = useMemo(() => createStyles(size), [size]);
 
   useEffect(() => {
-    if (mediaType === 'video' && uri) {
-      const fetchThumbnail = async () => {
-        const tempUri = await getThumbnailUri(uri, mediaType);
-        setThumbnailUri(tempUri);
-      };
-      fetchThumbnail();
-    }
+    if (mediaType !== 'video' || isBlank(uri)) return;
+
+    getThumbnailUri(uri, mediaType)
+      .then(setThumbnailUri)
+      .catch((error: unknown) => logger.error('[ObjectThumbnail] Failed to generate video thumbnail', error));
   }, [mediaType, uri]);
 
   const handleNoUriPress = useCallback(() => {
@@ -39,7 +47,7 @@ const ObjectThumbnail: React.FC<ObjectThumbnailProps> = ({ uri, onPress, size = 
     ]);
   }, [t]);
 
-  if (!uri) {
+  if (isBlank(uri)) {
     return (
       <TouchableOpacity style={styles.errorContainer} onPress={handleNoUriPress}>
         <Icon source={noUriIconName} size={size * 0.3} color="#999" />
@@ -50,7 +58,7 @@ const ObjectThumbnail: React.FC<ObjectThumbnailProps> = ({ uri, onPress, size = 
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <Image
-        source={thumbnailUri || uri}
+        source={isBlank(thumbnailUri) ? uri : thumbnailUri}
         style={styles.image}
         contentFit="cover"
         cachePolicy="memory-disk"

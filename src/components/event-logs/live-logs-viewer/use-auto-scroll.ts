@@ -2,7 +2,7 @@ import { LegendListRef } from '@legendapp/list';
 import { useToggle } from '@uidotdev/usehooks';
 import { useRef } from 'react';
 
-export const useAutoScroll = <T>(shouldAutoScroll: boolean = false) => {
+export const useAutoScroll = <T>(shouldAutoScroll = false) => {
   const listRef = useRef<LegendListRef>(null);
   const [isAutoScrollEnabled, toggleAutoScroll] = useToggle(shouldAutoScroll);
 

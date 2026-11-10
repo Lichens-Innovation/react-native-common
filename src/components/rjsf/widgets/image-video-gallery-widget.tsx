@@ -1,62 +1,49 @@
-import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useAppTheme } from '../../../theme';
+import { useAppTheme } from '../../../theme/theme.index';
 import { RjsfDisplayLabel } from './display-label';
+import { getWidgetTitle } from './shared/widget-title.utils';
+import { useCommitWidgetValue } from './shared/use-commit-widget-value';
+import { isWidgetDisplayOnly } from './shared/widget-state.utils';
 import { CameraAndThumbnails } from '../../objects/camera-and-thumbnails';
 
-type ImageVideoGalleryWidgetOptions = {
+interface ImageVideoGalleryWidgetOptions {
   allowMultipleSelection?: boolean;
   enableVideo?: boolean;
-};
+}
 
-// Widget for displaying a gallery of images and videos with the ability to add new ones using the camera and remove existing ones. The value is expected to be an array of uris pointing to the media files. (uris for rendering, but in the real formData the object_uuids should be used)
-export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = ({
-  id,
-  value,
-  disabled,
-  readonly,
-  onChange,
-  onBlur,
-  label,
-  hideLabel,
-  required,
-  options,
-}) => {
+// Value contract: an array of media uris used for rendering; the persisted formData should carry object_uuids instead. habit-hooks-disable non-essential-comment
+export const ImageVideoGalleryWidget: FunctionComponent<WidgetProps> = (props) => {
+  const { value, disabled, readonly, options } = props;
   const styles = useStyles();
-
-  const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const labelColor = getRjsfLabelColor(options);
+  const commitValue = useCommitWidgetValue(props);
+  const isDisplayOnly = isWidgetDisplayOnly(props);
+  const widgetTitle = getWidgetTitle(props);
   const widgetOptions = (options ?? {}) as ImageVideoGalleryWidgetOptions;
   const allowMultipleSelection = widgetOptions.allowMultipleSelection ?? true;
   const enableVideo = widgetOptions.enableVideo ?? true;
-  const uris = Array.isArray(value) ? value : [];
+  const uris = useMemo<string[]>(() => (Array.isArray(value) ? value : []), [value]);
 
   const handleObjectsTaken = useCallback(
     (newUris: string[]) => {
-      if (readonly || disabled) return;
-      const nextValue = allowMultipleSelection ? [...uris, ...newUris] : newUris;
-      onChange(nextValue);
-      onBlur(id, nextValue);
+      if (isDisplayOnly) return;
+      commitValue(allowMultipleSelection ? [...uris, ...newUris] : newUris);
     },
-    [readonly, disabled, allowMultipleSelection, uris, onChange, onBlur, id]
+    [isDisplayOnly, allowMultipleSelection, uris, commitValue]
   );
 
   const handleObjectRemove = useCallback(
     (uriToRemove: string) => {
-      if (readonly || disabled) return;
-
-      const nextValue = uris.filter((uri) => uri !== uriToRemove);
-      onChange(nextValue);
-      onBlur(id, nextValue);
+      if (isDisplayOnly) return;
+      commitValue(uris.filter((uri) => uri !== uriToRemove));
     },
-    [readonly, disabled, uris, onChange, onBlur, id]
+    [isDisplayOnly, uris, commitValue]
   );
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.title} />
+      <RjsfDisplayLabel {...widgetTitle} style={styles.title} />
       <CameraAndThumbnails
         uris={uris}
         disabled={disabled}
@@ -81,16 +68,6 @@ const useStyles = () => {
         },
         title: {
           marginBottom: theme.spacing(1),
-        },
-        actionsRow: {
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: theme.spacing(1),
-          marginTop: theme.spacing(1),
-        },
-        thumbnailsContainer: {
-          marginHorizontal: theme.spacing(1),
         },
       }),
     [theme]

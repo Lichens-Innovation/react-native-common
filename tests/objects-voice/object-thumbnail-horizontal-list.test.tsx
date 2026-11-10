@@ -132,13 +132,13 @@ describe('ObjectThumbnailHorizontalList', () => {
       expect(screen.queryByLabelText(/^expo-image:/)).toBeNull();
     });
 
-    it('treats a whitespace-only uri as a real uri (renders an image, no placeholder)', async () => {
+    it('shows the image-off placeholder instead of an image for a whitespace-only uri', async () => {
       // act
       await renderList({ uris: ['   '] });
 
       // assert
-      expect(screen.queryByLabelText('icon-image-off')).toBeNull();
-      expect(screen.getByLabelText('expo-image:   ')).toBeOnTheScreen();
+      expect(screen.getByLabelText('icon-image-off')).toBeOnTheScreen();
+      expect(screen.queryByLabelText(/^expo-image:/)).toBeNull();
     });
 
     it('alerts "not cached" with a single cancel button when the placeholder is pressed', async () => {

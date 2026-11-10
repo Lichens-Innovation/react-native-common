@@ -29,7 +29,7 @@ describe('file utils', () => {
       ${undefined}               | ${''}
       ${null}                    | ${''}
       ${''}                      | ${''}
-      ${'   '}                   | ${'file://   '}
+      ${'   '}                   | ${''}
       ${'/data/file.txt'}        | ${'file:///data/file.txt'}
       ${'file:///data/file.txt'} | ${'file:///data/file.txt'}
       ${'content://media/1'}     | ${''}
@@ -50,8 +50,8 @@ describe('file utils', () => {
       expect(applyFilenameTemplate({ filename: 'file.txt', pattern, timestamp })).toBe('file.txt');
     });
 
-    it('applies a whitespace-only pattern instead of returning the filename', () => {
-      expect(applyFilenameTemplate({ filename: 'file.txt', pattern: '   ', timestamp })).toBe('   ');
+    it('returns the filename untouched for a whitespace-only pattern', () => {
+      expect(applyFilenameTemplate({ filename: 'file.txt', pattern: '   ', timestamp })).toBe('file.txt');
     });
 
     it('renders context data and date format placeholders', () => {
@@ -86,13 +86,13 @@ describe('file utils', () => {
       expect(Sharing.shareAsync).not.toHaveBeenCalled();
     });
 
-    it('shares a whitespace-only fileUri as a file:// uri', async () => {
+    it('does nothing for a whitespace-only fileUri', async () => {
       // act
       await shareFile({ fileUri: '   ' });
 
       // assert
-      expect(Sharing.isAvailableAsync).toHaveBeenCalled();
-      expect(Sharing.shareAsync).toHaveBeenCalledWith('file://   ', {});
+      expect(Sharing.isAvailableAsync).not.toHaveBeenCalled();
+      expect(Sharing.shareAsync).not.toHaveBeenCalled();
     });
 
     it('warns and stops when sharing is unavailable', async () => {
@@ -190,7 +190,7 @@ describe('file utils', () => {
       await expect(getSQLiteVersion()).resolves.toBe('Unknown');
     });
 
-    it('getSQLiteVersion logs and rethrows a prefixed error without cause', async () => {
+    it('getSQLiteVersion logs and rethrows a prefixed error with the original error as cause', async () => {
       // arrange
       const original = new Error('no sqlite');
       jest.mocked(SQLite.openDatabaseAsync).mockRejectedValue(original);
@@ -200,7 +200,7 @@ describe('file utils', () => {
 
       // assert
       expect(error.message).toBe('[getSQLiteVersion] no sqlite');
-      expect(error.cause).toBeUndefined();
+      expect(error.cause).toBe(original);
       expect(mockLogger.error).toHaveBeenCalledWith('[getSQLiteVersion] no sqlite', original);
     });
 

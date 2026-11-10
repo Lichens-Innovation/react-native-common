@@ -1,30 +1,27 @@
 import { LegendList } from '@legendapp/list';
 import { useToggle } from '@uidotdev/usehooks';
-import { format } from 'date-fns';
-import { filesize } from 'filesize';
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
-import { Button, Icon, IconButton, List, Text } from 'react-native-paper';
+import { Button, Text } from 'react-native-paper';
 import { deleteAllLogFiles, loadAllLogFilesInfo } from '../../logger/logger';
 import { FileInfo } from '../../services/files/native-file-system.types';
 import { useAppTheme } from '../../theme/theme';
-import { shareTextFile } from '../../utils/sharing.utils';
 import { DialogOkCancel } from '../dialogs/dialog-ok-cancel';
+import { LogFileListItem } from './log-file-list-item';
 
 export const EventLogsScreen: FunctionComponent = () => {
   const styles = useStyles();
-  const theme = useAppTheme();
   const { t } = useTranslation();
   const [files, setFiles] = useState<FileInfo[]>([]);
 
   useEffect(() => {
-    loadAllLogFilesInfo().then(setFiles);
+    void loadAllLogFilesInfo().then(setFiles);
   }, []);
 
   const [isDeleteDialogVisible, toggleDeleteConfirmVisibility] = useToggle(false);
   const onDeleteConfirmed = () => {
-    deleteAllLogFiles()
+    void deleteAllLogFiles()
       .then(() => setFiles([]))
       .finally(() => toggleDeleteConfirmVisibility());
   };
@@ -35,28 +32,7 @@ export const EventLogsScreen: FunctionComponent = () => {
         {t('common:eventLogs')}
       </Text>
 
-      <LegendList
-        data={files}
-        renderItem={({ item }: { item: FileInfo }) => {
-          const title = item.uri.split('/').pop();
-          const updatedAt = 'modificationTime' in item ? new Date(item.modificationTime ?? 0) : new Date();
-          const formattedUpdatedAt = format(updatedAt, 'yyyy-MM-dd HH:mm:ss');
-          const size = 'size' in item ? filesize(item.size ?? 0) : '';
-          const description = `${formattedUpdatedAt} [ ${size} ]`;
-
-          return (
-            <List.Item
-              title={title}
-              description={description}
-              left={(props) => <List.Icon {...props} icon={(props) => <Icon source="file-document" {...props} />} />}
-              right={() => (
-                <IconButton iconColor={theme.colors.primary} icon="share" onPress={() => shareTextFile(item.uri)} />
-              )}
-            />
-          );
-        }}
-        estimatedItemSize={30}
-      />
+      <LegendList data={files} renderItem={({ item }) => <LogFileListItem file={item} />} estimatedItemSize={30} />
 
       <View style={styles.actions}>
         <Button mode="outlined" icon="delete" onPress={() => toggleDeleteConfirmVisibility()}>

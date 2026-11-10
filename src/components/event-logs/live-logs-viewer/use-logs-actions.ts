@@ -2,7 +2,7 @@ import { useDebounce } from '@uidotdev/usehooks';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { commonLogsStore } from '../../../store/common-logs.store';
-import { setClipboardTextContent } from '../../../utils/clipboard.utils';
+import { setClipboardTextContent } from '../../../utils/device/clipboard.utils';
 import { useSnackbar } from '../../snack-bar/snackbar-provider';
 
 export const useLogsActions = () => {

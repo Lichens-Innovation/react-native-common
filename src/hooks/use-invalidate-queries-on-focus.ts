@@ -8,7 +8,7 @@ export const useInvalidateQueriesOnFocus = (queryKeys: QueryKey[]) => {
   useFocusEffect(
     useCallback(() => {
       const invalidationPromises = queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey }));
-      Promise.all(invalidationPromises);
+      void Promise.all(invalidationPromises);
     }, [queryClient])
   );
 };

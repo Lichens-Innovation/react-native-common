@@ -146,7 +146,7 @@ describe('DropDownSelector', () => {
     expect(screen.queryAllByText('', { exact: true, normalizer: (text) => text })).toHaveLength(0);
   });
 
-  it('treats whitespace-only label as set (renders the whitespace title)', async () => {
+  it('does not render a whitespace-only label', async () => {
     // arrange
     await renderSelector({ label: '   ' }).utils;
 
@@ -154,7 +154,7 @@ describe('DropDownSelector', () => {
     const whitespaceTitles = screen.queryAllByText('   ', { exact: true, normalizer: (text) => text });
 
     // assert
-    expect(whitespaceTitles).toHaveLength(1);
+    expect(whitespaceTitles).toHaveLength(0);
   });
 
   it('shows the placeholder when no value is selected', async () => {
@@ -230,7 +230,7 @@ describe('DropDownSelector', () => {
       ${true}          | ${'apple'}   | ${true}      | ${false}  | ${'hidden when disabled'}
       ${true}          | ${undefined} | ${false}     | ${false}  | ${'hidden when value is undefined'}
       ${true}          | ${''}        | ${false}     | ${false}  | ${'hidden when value is empty'}
-      ${true}          | ${'   '}     | ${false}     | ${true}   | ${'visible when value is whitespace-only (truthy check)'}
+      ${true}          | ${'   '}     | ${false}     | ${false}  | ${'hidden when value is whitespace-only'}
     `('is $description', async ({ showDeleteButton, value, disabled, isVisible }) => {
       // act
       await renderSelector({ showDeleteButton, value, disabled }).utils;
@@ -269,20 +269,20 @@ describe('DropDownSelector', () => {
       expect(iconCountWithin('dropdown-left-icon')).toBe(0);
     });
 
-    it('treats whitespace-only selected icon as set (renders the left icon)', async () => {
+    it('renders no left icon when the selected option icon is whitespace-only', async () => {
       // act
       await renderSelector({ value: 'cherry' }).utils;
 
       // assert
-      expect(iconCountWithin('dropdown-left-icon')).toBe(1);
+      expect(iconCountWithin('dropdown-left-icon')).toBe(0);
     });
 
     it.each`
       value       | expectedIcons | description
       ${'apple'}  | ${1}          | ${'an icon'}
       ${'banana'} | ${0}          | ${'no icon'}
-      ${'cherry'} | ${1}          | ${'a whitespace-only icon (treated as set)'}
-    `('renders list item icon for an option with $description', async ({ value, expectedIcons }) => {
+      ${'cherry'} | ${0}          | ${'a whitespace-only icon'}
+    `('renders $expectedIcons list item icon(s) for an option with $description', async ({ value, expectedIcons }) => {
       // act
       await renderSelector().utils;
 
@@ -317,7 +317,7 @@ describe('DropDownSelector', () => {
       ${true}  | ${false} | ${false} | ${'#123456'} | ${colors.error}             | ${colors.error}           | ${1}                | ${'labelColor override ignored in error'}
       ${false} | ${true}  | ${false} | ${'#123456'} | ${colors.onSurfaceDisabled} | ${colors.surfaceDisabled} | ${1}                | ${'labelColor override ignored when disabled'}
       ${false} | ${false} | ${false} | ${''}        | ${colors.onSurface}         | ${colors.outline}         | ${1}                | ${'empty labelColor falls back'}
-      ${false} | ${false} | ${false} | ${'   '}     | ${'   '}                    | ${colors.outline}         | ${1}                | ${'whitespace-only labelColor is used as-is'}
+      ${false} | ${false} | ${false} | ${'   '}     | ${colors.onSurface}         | ${colors.outline}         | ${1}                | ${'whitespace-only labelColor falls back'}
     `(
       'applies label/border colors when $description',
       async ({ isError, disabled, focused, labelColor, expectedLabel, expectedBorder, expectedBorderWidth }) => {
@@ -403,12 +403,12 @@ describe('DropDownMultiSelector', () => {
     expect(screen.getByText('Fruits')).toBeOnTheScreen();
   });
 
-  it('treats whitespace-only label as set (renders the whitespace title)', async () => {
+  it('does not render a whitespace-only label', async () => {
     // act
     await renderMulti({ label: '  ' }).utils;
 
     // assert
-    expect(screen.queryAllByText('  ', { exact: true, normalizer: (text) => text })).toHaveLength(1);
+    expect(screen.queryAllByText('  ', { exact: true, normalizer: (text) => text })).toHaveLength(0);
   });
 
   it('shows the placeholder and clears it while focused', async () => {
@@ -482,7 +482,7 @@ describe('DropDownMultiSelector', () => {
     value                  | expectedIcons | description
     ${['banana', 'apple']} | ${1}          | ${'first option (in options order) with a selected value: apple'}
     ${['banana']}          | ${0}          | ${'selected option without icon'}
-    ${['cherry']}          | ${1}          | ${'selected option with whitespace-only icon (treated as set)'}
+    ${['cherry']}          | ${0}          | ${'selected option with a whitespace-only icon'}
     ${undefined}           | ${0}          | ${'no selection'}
   `('renders the left icon of the $description', async ({ value, expectedIcons }) => {
     // act

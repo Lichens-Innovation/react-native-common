@@ -87,12 +87,12 @@ describe('ObjectFieldTemplate (through RjsfPaperRenderer)', () => {
     expect(screen.getByText('Flag')).toBeOnTheScreen();
   });
 
-  it('renders a whitespace-only title (old truthy check)', async () => {
+  it('renders no title text when title is whitespace-only', async () => {
     // act
     await renderForm({ schema: { type: 'object', title: '   ', properties: {} } });
 
     // assert
-    expect(screen.getByText('   ', keepWhitespace)).toBeOnTheScreen();
+    expect(screen.queryByText('   ', keepWhitespace)).toBeNull();
   });
 
   it('applies a valid hex ui:options.labelColor to the title', async () => {

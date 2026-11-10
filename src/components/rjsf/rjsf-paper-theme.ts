@@ -18,8 +18,8 @@ import {
   TimeWidget,
   LabelWidget,
   MultiSelectWidget,
-} from './widgets';
-import { ComputedField, LocationField, TextWithVoiceRecordingField } from './fields';
+} from './widgets/widgets.index';
+import { ComputedField, LocationField, TextWithVoiceRecordingField } from './fields/fields.index';
 
 export const RJSF_PAPER_THEME: ThemeProps = {
   widgets: {

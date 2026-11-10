@@ -62,7 +62,7 @@ describe('DialogOkCancel', () => {
     ${undefined} | ${0}          | ${'no icon when undefined'}
     ${''}        | ${0}          | ${'no icon when empty'}
     ${'alert'}   | ${1}          | ${'an icon when set'}
-    ${'   '}     | ${1}          | ${'an icon when whitespace-only (treated as set)'}
+    ${'   '}     | ${0}          | ${'no icon when whitespace-only'}
   `('renders $description', async ({ icon, expectedIcons }) => {
     // act
     await renderDialog({ icon }).rendering;
@@ -128,8 +128,8 @@ describe('DialogCloseOnly', () => {
     ${undefined} | ${0}
     ${''}        | ${0}
     ${'info'}    | ${1}
-    ${'  '}      | ${1}
-  `('renders $expectedIcons icon(s) when icon=[$icon] (whitespace treated as set)', async ({ icon, expectedIcons }) => {
+    ${'  '}      | ${0}
+  `('renders $expectedIcons icon(s) when icon=[$icon]', async ({ icon, expectedIcons }) => {
     // act
     await renderDialog({ icon }).rendering;
 
@@ -199,7 +199,7 @@ describe('DialogSingleTextInput', () => {
     ${'name'} | ${undefined} | ${false}   | ${'populated value'}
     ${'name'} | ${''}        | ${false}   | ${'populated value and empty errorMessage'}
     ${'name'} | ${'Taken'}   | ${true}    | ${'populated value and an error'}
-    ${'name'} | ${'   '}     | ${true}    | ${'populated value and whitespace-only errorMessage (treated as an error)'}
+    ${'name'} | ${'   '}     | ${false}   | ${'populated value and whitespace-only errorMessage (not an error)'}
   `('ok disabled=$isDisabled with $description', async ({ value, errorMessage, isDisabled }) => {
     // act
     await renderDialog({ value, errorMessage }).rendering;
@@ -216,12 +216,12 @@ describe('DialogSingleTextInput', () => {
     expect(screen.getByText('Already taken')).toBeOnTheScreen();
   });
 
-  it('renders the whitespace-only errorMessage text', async () => {
+  it('does not render a whitespace-only errorMessage text', async () => {
     // act
     await renderDialog({ value: 'name', errorMessage: '   ' }).rendering;
 
     // assert
-    expect(screen.queryAllByText('   ', { exact: true, normalizer: (text) => text })).toHaveLength(1);
+    expect(screen.queryAllByText('   ', { exact: true, normalizer: (text) => text })).toHaveLength(0);
   });
 
   it('forwards typed text to onChange and submits the latest input value', async () => {
@@ -315,7 +315,7 @@ describe('DialogSyntaxColorResult', () => {
     ${undefined} | ${1}
     ${''}        | ${1}
     ${'code'}    | ${2}
-    ${'  '}      | ${2}
+    ${'  '}      | ${1}
   `(
     'renders $expectedIcons icon glyph(s) (copy button + optional dialog icon) when icon=[$icon]',
     async ({ icon, expectedIcons }) => {

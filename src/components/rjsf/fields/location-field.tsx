@@ -1,16 +1,20 @@
-import { FunctionComponent, useState } from 'react';
+import { isNotBlank } from '@lichens-innovation/ts-common';
 import { getRjsfDisplayLabel, getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 import { StyleSheet, View } from 'react-native';
-import { Button, Divider, Icon, Text } from 'react-native-paper';
+import { Button, Divider, Text } from 'react-native-paper';
 import * as Location from 'expo-location';
+import { useState, type FunctionComponent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppTheme } from '../../../theme';
-import { logger } from '../../../logger';
+import { useAppTheme } from '../../../theme/theme.index';
+import { logger } from '../../../logger/logger.index';
 import { useSnackbar } from '../../snack-bar/snackbar-provider';
-import { LocationPickerModal, geoJsonPointToLatLng, type GeoJsonPoint } from '../../map/location-picker-modal';
+import { LocationPickerModal, type GeoJsonPoint } from '../../map/location-picker-modal';
+import { CoordinatePreview } from './coordinate-preview';
 
-type LocationFieldValue = { coordinates?: GeoJsonPoint | null };
+interface LocationFieldValue {
+  coordinates?: GeoJsonPoint | null;
+}
 
 const createGeoJsonPoint = (lat: number, lng: number): GeoJsonPoint => ({
   type: 'Point',
@@ -39,15 +43,14 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
   const labelColor = getRjsfLabelColor(uiSchema?.['ui:options']);
   const baseId = fieldPathId?.$id ?? id ?? 'locationField';
   const fieldPath = fieldPathId?.path ?? [];
-  const actionsDisabled = disabled || readonly;
+  const actionsDisabled = disabled === true || readonly === true;
 
   const writeValue = (value: LocationFieldValue) => {
     onChange(value as Record<string, unknown>, fieldPath, undefined, baseId);
   };
 
   const writePoint = (lat: number, lng: number) => writeValue({ coordinates: createGeoJsonPoint(lat, lng) });
-  // Absence, not `{ coordinates: null }`: the generated schema types `coordinates` as a plain object,
-  // so a null failed validation and blocked Save for anyone who cleared a captured point (SPOTD-893).
+  // Absence, not `{ coordinates: null }`: a null failed schema validation and blocked Save (SPOTD-893). habit-hooks-disable non-essential-comment
   const clear = () => writeValue({});
 
   const captureViaGps = async () => {
@@ -72,11 +75,11 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
 
   return (
     <View style={styles.container}>
-      {displayLabel ? (
+      {isNotBlank(displayLabel) && (
         <Text variant="titleMedium" style={labelColor ? { color: labelColor } : undefined}>
           {displayLabel}
         </Text>
-      ) : null}
+      )}
 
       <CoordinatePreview point={current} onClear={clear} disabled={actionsDisabled} />
 
@@ -87,7 +90,7 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
           mode="outlined"
           icon="crosshairs-gps"
           style={styles.button}
-          onPress={captureViaGps}
+          onPress={() => void captureViaGps()}
           disabled={actionsDisabled}
         >
           {t('common:location.useGps')}
@@ -103,52 +106,15 @@ export const LocationField: FunctionComponent<FieldProps<Record<string, unknown>
         </Button>
       </View>
 
-      {mapModalVisible ? (
+      {mapModalVisible && (
         <LocationPickerModal
           initialPoint={current}
           onConfirm={confirmMapPick}
           onCancel={() => setMapModalVisible(false)}
         />
-      ) : null}
+      )}
 
       <Divider style={styles.divider} />
-    </View>
-  );
-};
-
-type CoordinatePreviewProps = {
-  point: GeoJsonPoint | null;
-  onClear: () => void;
-  disabled?: boolean;
-};
-
-const CoordinatePreview: FunctionComponent<CoordinatePreviewProps> = ({ point, onClear, disabled }) => {
-  const styles = useStyles();
-  const theme = useAppTheme();
-  const { t } = useTranslation();
-
-  if (!point) {
-    return (
-      <Text variant="bodyMedium" style={styles.emptyText}>
-        {t('common:location.noLocationCaptured')}
-      </Text>
-    );
-  }
-
-  const coord = geoJsonPointToLatLng(point);
-  if (!coord) return null;
-
-  return (
-    <View style={styles.coordRow}>
-      {/* Empty and captured states differed only by which grey line sat above the buttons; the check
-          is what makes "a position is held here" survive a glance (SPOTD-893). */}
-      <Icon source="check-circle" size={18} color={theme.colors.primary} />
-      <Text variant="bodyMedium" style={styles.coordText}>
-        {coord.latitude.toFixed(6)}, {coord.longitude.toFixed(6)}
-      </Text>
-      <Button mode="text" compact icon="close" onPress={onClear} disabled={disabled}>
-        {t('common:location.clearLocation')}
-      </Button>
     </View>
   );
 };
@@ -160,18 +126,6 @@ const useStyles = () => {
     container: {
       gap: theme.spacing(1),
       marginVertical: theme.spacing(0.5),
-    },
-    coordRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: theme.spacing(1),
-    },
-    coordText: {
-      flex: 1,
-    },
-    emptyText: {
-      opacity: 0.6,
     },
     buttonRow: {
       flexDirection: 'row',

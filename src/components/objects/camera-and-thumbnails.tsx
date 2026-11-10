@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
-import { useAppTheme } from '../../theme';
+import { useAppTheme } from '../../theme/theme.index';
 import { CameraFullModal } from './camera-full-modal';
 import { ObjectThumbnailHorizontalList } from './object-thumbnail-hozirontal-list';
 import type { ViewerFabAction } from './media-viewer-modal';
@@ -14,7 +14,6 @@ interface CameraAndThumbnailsProps {
   handleObjectsTaken: (newUris: string[]) => void;
   allowMultipleSelection?: boolean;
   enableVideo?: boolean;
-  /** Forwarded to the gallery: an optional per-uri action for the fullscreen viewer. */
   getFabAction?: (uri: string) => ViewerFabAction | null;
 }
 
@@ -23,7 +22,7 @@ interface CameraModalData {
   mode: 'image' | 'video';
 }
 
-// Widget for displaying a gallery of images and videos with the ability to add new ones using the camera and remove existing ones. The value is expected to be an array of uris pointing to the media files. (uris for rendering, but in the real formData the object_uuids should be used)
+// `uris` are for rendering only: the real formData should hold the object_uuids. habit-hooks-disable non-essential-comment
 export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = ({
   uris,
   disabled,
@@ -35,6 +34,7 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
   getFabAction,
 }) => {
   const styles = useStyles();
+  const isLocked = readonly === true || disabled === true;
 
   const [cameraModal, setCameraModal] = useState<CameraModalData>({
     visible: false,
@@ -42,14 +42,14 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
   });
 
   const onTakePhoto = useCallback(() => {
-    if (readonly || disabled) return;
+    if (isLocked) return;
     setCameraModal({ visible: true, mode: 'image' });
-  }, [readonly, disabled]);
+  }, [isLocked]);
 
   const onTakeVideo = useCallback(() => {
-    if (readonly || disabled) return;
+    if (isLocked) return;
     setCameraModal({ visible: true, mode: 'video' });
-  }, [readonly, disabled]);
+  }, [isLocked]);
 
   const onCloseCamera = useCallback(() => setCameraModal({ visible: false, mode: 'image' }), []);
 
@@ -59,26 +59,24 @@ export const CameraAndThumbnails: FunctionComponent<CameraAndThumbnailsProps> = 
         <ObjectThumbnailHorizontalList
           onRemovePress={handleObjectRemove}
           uris={uris}
-          readonly={readonly || disabled}
+          readonly={isLocked}
           getFabAction={getFabAction}
         />
       </View>
       <View style={styles.actionsRow}>
-        <IconButton mode="contained" icon="camera" onPress={onTakePhoto} disabled={readonly || disabled} />
+        <IconButton mode="contained" icon="camera" onPress={onTakePhoto} disabled={isLocked} />
 
-        {enableVideo ? (
-          <IconButton mode="contained" icon="video" onPress={onTakeVideo} disabled={readonly || disabled} />
-        ) : null}
+        {enableVideo && <IconButton mode="contained" icon="video" onPress={onTakeVideo} disabled={isLocked} />}
       </View>
 
-      {cameraModal.visible ? (
+      {cameraModal.visible && (
         <CameraFullModal
           mode={cameraModal.mode}
           onClose={onCloseCamera}
           handleObjectsTaken={handleObjectsTaken}
           allowMultipleSelection={allowMultipleSelection}
         />
-      ) : null}
+      )}
     </>
   );
 };

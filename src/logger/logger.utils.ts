@@ -1,3 +1,4 @@
+import { isBlank } from '@lichens-innovation/ts-common';
 import { type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 import { logger } from './logger';
 import { LOG_LEVELS, LogLevel, LogLevelKey } from './logger.types';
@@ -19,11 +20,10 @@ export const logRequestStart = (request: InternalAxiosRequestConfig) => {
 };
 
 export const sanitizeUrl = (url?: string | null) => {
-  if (!url) return url;
+  if (isBlank(url)) return url;
 
-  // remove any user:password@ from the url
-  const regExp = /http:\/\/(.*):(.*)@(.*)/;
-  const isMatching = url.match(regExp);
+  const credentialsInUrlRegExp = /http:\/\/(.*):(.*)@(.*)/;
+  const isMatching = url.match(credentialsInUrlRegExp);
   return isMatching ? `http://${isMatching[3]}` : url;
 };
 
@@ -41,11 +41,11 @@ export const logRequestEnd = (response: AxiosResponse) => {
   return response;
 };
 
-type BuildRequestLogInfosArgs = {
+interface BuildRequestLogInfosArgs {
   baseURL?: string;
   url?: string;
   method?: string;
-};
+}
 const buildRequestLogInfos = ({ baseURL, url, method }: BuildRequestLogInfosArgs) => {
   const fullUrl = `${baseURL ?? ''}${url ?? ''}`;
   const verb = method?.toUpperCase() ?? '';

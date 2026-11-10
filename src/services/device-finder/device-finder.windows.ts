@@ -1,5 +1,5 @@
 import { logger } from '../../logger/logger';
-import { notImplementedYet } from '../../utils/platform.utils';
+import { notImplementedYet } from '../../utils/device/platform.utils';
 import { DiscoveredDevice } from './device-finder.types';
 
 interface DeviceFinderConstructorArgs {

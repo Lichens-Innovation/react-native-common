@@ -1,36 +1,21 @@
-import {
-  getRjsfDisplayLabel,
-  getRjsfLabelColor,
-  hasRjsfErrors,
-  toStringOrEmpty,
-} from '@lichens-innovation/ts-common/rjsf';
+import { getRjsfLabelColor, hasRjsfErrors, toStringOrEmpty } from '@lichens-innovation/ts-common/rjsf';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 import { useCallback, useMemo, type FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { type RecordingTextInputArgs, VoiceRecognitionTextInput } from '../../voice-recognition';
+import {
+  type RecordingTextInputArgs,
+  VoiceRecognitionTextInput,
+} from '../../voice-recognition/voice-recognition.index';
 import { ObjectThumbnailHorizontalList } from '../../objects/object-thumbnail-hozirontal-list';
-import { useAppTheme } from '../../../theme';
+import { useAppTheme } from '../../../theme/theme.index';
 import { mergeLabelColorTheme } from '../label-color-theme';
-
-type TextWithVoiceRecordingValue = {
-  text?: string;
-  recordings?: string[];
-};
-
-const normalizeValue = (rawValue: unknown): Required<TextWithVoiceRecordingValue> => {
-  if (!rawValue || typeof rawValue !== 'object' || Array.isArray(rawValue)) {
-    return { text: '', recordings: [] };
-  }
-
-  const value = rawValue as TextWithVoiceRecordingValue;
-
-  return {
-    text: typeof value.text === 'string' ? value.text : '',
-    recordings: Array.isArray(value.recordings)
-      ? value.recordings.filter((item): item is string => typeof item === 'string')
-      : [],
-  };
-};
+import { getFieldDisplayLabel } from './field-display-label.utils';
+import {
+  getTextErrors,
+  getUiPlaceholder,
+  normalizeTextWithVoiceRecordingValue,
+  type TextWithVoiceRecordingValue,
+} from './text-input-with-voice-recording-field.utils';
 
 export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<string, unknown>, RJSFSchema>> = ({
   formData,
@@ -47,29 +32,12 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
   const styles = useStyles();
   const theme = useAppTheme();
 
-  const normalized = normalizeValue(formData);
-  const text = normalized.text;
-  const recordings = normalized.recordings;
-
-  const label = typeof schema.title === 'string' ? schema.title : '';
-  const hideLabel = uiSchema?.['ui:options']?.label === false;
-  const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
+  const { text, recordings } = normalizeTextWithVoiceRecordingValue(formData);
+  const displayLabel = getFieldDisplayLabel({ schema, uiSchema, required });
   const labelColorTheme = mergeLabelColorTheme(theme, getRjsfLabelColor(uiSchema?.['ui:options']));
 
-  const textErrors =
-    errorSchema &&
-    typeof errorSchema === 'object' &&
-    'text' in errorSchema &&
-    errorSchema.text &&
-    typeof errorSchema.text === 'object' &&
-    '__errors' in errorSchema.text
-      ? (errorSchema.text.__errors as string[] | undefined)
-      : undefined;
-
-  const hasError = hasRjsfErrors(textErrors);
-
-  const baseId = fieldPathId?.$id ?? id ?? 'textWithVoiceRecordingField';
-  const fieldPath = fieldPathId?.path ?? [];
+  const hasError = hasRjsfErrors(getTextErrors(errorSchema));
+  const isLocked = readonly === true || disabled === true;
 
   const updateValue = useCallback(
     (next: Partial<Required<TextWithVoiceRecordingValue>>) => {
@@ -78,9 +46,11 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
         recordings: 'recordings' in next ? (next.recordings ?? []) : recordings,
       };
 
+      const baseId = fieldPathId?.$id ?? id ?? 'textWithVoiceRecordingField';
+      const fieldPath = fieldPathId?.path ?? [];
       onChange(nextValue as unknown as Record<string, unknown>, fieldPath, undefined, baseId);
     },
-    [onChange, text, recordings, fieldPath, baseId]
+    [onChange, text, recordings, fieldPathId, id]
   );
 
   const handleValueChange = useCallback(
@@ -111,7 +81,7 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
         mode="outlined"
         label={displayLabel}
         value={text}
-        placeholder={typeof uiSchema?.['ui:placeholder'] === 'string' ? uiSchema['ui:placeholder'] : undefined}
+        placeholder={getUiPlaceholder(uiSchema)}
         disabled={disabled}
         editable={!readonly}
         onValueChange={handleValueChange}
@@ -124,10 +94,7 @@ export const TextWithVoiceRecordingField: FunctionComponent<FieldProps<Record<st
       />
 
       <View style={styles.thumbnailsContainer}>
-        <ObjectThumbnailHorizontalList
-          onRemovePress={readonly || disabled ? () => {} : handleObjectRemove}
-          uris={recordings}
-        />
+        <ObjectThumbnailHorizontalList onRemovePress={isLocked ? () => {} : handleObjectRemove} uris={recordings} />
       </View>
     </View>
   );

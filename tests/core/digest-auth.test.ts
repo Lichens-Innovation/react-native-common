@@ -151,7 +151,7 @@ describe('DigestAuth', () => {
     expect(params.response).toBe(expectedResponseHash(params, 'POST'));
   });
 
-  it('uses a whitespace-only method as is in the hash (no GET fallback)', async () => {
+  it('falls back to GET in the hash for a whitespace-only method', async () => {
     // arrange
     adapter.mockImplementation(async (config) => {
       throw unauthorized(config, 'Digest realm="r", nonce="n"');
@@ -163,8 +163,8 @@ describe('DigestAuth', () => {
 
     // assert
     const params = parseDigestHeader(header);
-    expect(params.response).toBe(expectedResponseHash(params, '  '));
-    expect(params.response).not.toBe(expectedResponseHash(params, 'GET'));
+    expect(params.response).toBe(expectedResponseHash(params, 'GET'));
+    expect(params.response).not.toBe(expectedResponseHash(params, '  '));
   });
 
   it('increments nc for the same nonce and resets it for a new nonce', async () => {
@@ -213,18 +213,15 @@ describe('DigestAuth', () => {
     await expect(auth.request({ url: '/p' })).rejects.toThrow('Failed to parse authentication headers');
   });
 
-  it('accepts a whitespace-only realm', async () => {
+  it('throws when the challenge has a whitespace-only realm', async () => {
     // arrange
     adapter.mockImplementation(async (config) => {
       throw unauthorized(config, 'Digest realm="  ", nonce="n"');
     });
     const auth = new DigestAuth({ username: 'u', password: 'pw', shouldEmit2ndRequest: false });
 
-    // act
-    const header = (await auth.request({ url: '/p' })) as string;
-
-    // assert
-    expect(header).toContain('realm="  "');
+    // act & assert
+    await expect(auth.request({ url: '/p' })).rejects.toThrow('Failed to parse authentication headers');
   });
 
   it.each`

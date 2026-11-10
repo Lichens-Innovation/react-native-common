@@ -1,4 +1,6 @@
+import { isBlank } from '@lichens-innovation/ts-common';
 import * as VideoThumbnails from 'expo-video-thumbnails';
+import { logger } from '../logger/logger';
 
 export type MediaType = 'image' | 'video' | 'audio';
 
@@ -33,17 +35,14 @@ export const VIDEO_EXTENSIONS = new Set([
 
 export const AUDIO_EXTENSIONS = new Set(['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a', 'opus']);
 
-export const getMediaTypeFromUri = (uri: string | null | undefined): MediaType | undefined => {
-  if (!uri) return undefined;
+export const getMediaTypeFromUri = (uri?: string | null): MediaType | undefined => {
+  if (isBlank(uri)) return undefined;
 
-  // Remove query params and hash fragments
-  const cleanUri = uri.split('?')[0].split('#')[0];
+  const uriWithoutQueryAndHash = uri.split('?')[0].split('#')[0];
+  const extensionMatch = uriWithoutQueryAndHash.match(/\.([a-zA-Z0-9]+)$/);
+  if (!extensionMatch) return undefined;
 
-  // Extract extension safely
-  const match = cleanUri.match(/\.([a-zA-Z0-9]+)$/);
-  if (!match) return undefined;
-
-  const extension = match[1].toLowerCase();
+  const extension = extensionMatch[1].toLowerCase();
 
   if (IMAGE_EXTENSIONS.has(extension)) return 'image';
   if (VIDEO_EXTENSIONS.has(extension)) return 'video';
@@ -52,22 +51,33 @@ export const getMediaTypeFromUri = (uri: string | null | undefined): MediaType |
   return undefined;
 };
 
-async function getVideoThumbnail(uri: string): Promise<{ uri: string }> {
-  const times = [500, 1000, 0]; // ms - try to get thumbnail at 0.5s, then 1s, then 0s (sometimes videos have issues generating thumbnails at 0ms, so we try a few options if necessary)
-  for (const t of times) {
-    try {
-      return await VideoThumbnails.getThumbnailAsync(uri, { time: t, quality: 0.7 });
-    } catch (_) {}
-  }
-  return { uri: '' };
+// Generating a thumbnail at 0ms sometimes fails, so 0.5s and 1s are tried first. habit-hooks-disable non-essential-comment
+const THUMBNAIL_CANDIDATE_TIMES_MS = [500, 1000, 0];
+
+interface VideoThumbnail {
+  uri: string;
 }
 
-export const getThumbnailUri = async (uri: string | null | undefined, mediaType: MediaType): Promise<string> => {
-  if (!uri) return '';
+const getVideoThumbnail = async (uri: string): Promise<VideoThumbnail> => {
+  for (const time of THUMBNAIL_CANDIDATE_TIMES_MS) {
+    try {
+      return await VideoThumbnails.getThumbnailAsync(uri, { time, quality: 0.7 });
+    } catch (e: unknown) {
+      logger.debug(`[getVideoThumbnail] No thumbnail at ${time}ms for [${uri}]`, e);
+    }
+  }
+  return { uri: '' };
+};
+
+export const getThumbnailUri = async (
+  // eslint-disable-next-line coding-guide/no-explicit-undefined-optional -- public API: `?` impossible before required params, callers may pass undefined
+  uri: string | null | undefined,
+  mediaType: MediaType
+): Promise<string> => {
+  if (isBlank(uri)) return '';
   if (mediaType === 'image') {
     return uri;
   } else if (mediaType === 'video') {
-    // We need to create a thumbnail from the video
     const thumbnail = await getVideoThumbnail(uri);
     return thumbnail.uri;
   } else {

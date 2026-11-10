@@ -1,35 +1,29 @@
-import type { EnumOptionDisplay } from '@lichens-innovation/ts-common/rjsf';
-import { getRjsfDisplayLabel, getRjsfLabelColor, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
+import { type EnumOptionDisplay, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { RadioButton, Text } from 'react-native-paper';
-import { useAppTheme } from '../../../theme';
+import { StyleSheet, View } from 'react-native';
+import { useAppTheme } from '../../../theme/theme.index';
 import { RjsfDisplayLabel } from './display-label';
+import { getWidgetTitle } from './shared/widget-title.utils';
+import { RadioYesNoOption } from './radio-yes-no-option';
+import { useCommitWidgetValue } from './shared/use-commit-widget-value';
+import { isWidgetDisplayOnly } from './shared/widget-state.utils';
 
-type YesNoWidgetOptions = {
+interface YesNoWidgetOptions {
   yesColor?: string;
   noColor?: string;
-};
+}
 
-// Widget for rendering a "yes/no" value as two radio button group, any other value will be treated as null/undefined and rendered as no selection
-// Add an option "" to the enum options to allow for an explicit "no answer" option, otherwise the first option will be selected by default
-export const RadioYesNoWidget: FunctionComponent<WidgetProps> = ({
-  id,
-  value,
-  disabled,
-  readonly,
-  onChange,
-  onBlur,
-  label,
-  hideLabel,
-  required,
-  options,
-}) => {
+/** habit-hooks-disable non-essential-comment
+ * Any value other than the yes/no option values renders as no selection. Add a "" enum option to offer an
+ * explicit "no answer"; otherwise the first option is selected by default.
+ */
+export const RadioYesNoWidget: FunctionComponent<WidgetProps> = (props) => {
+  const { value, options } = props;
   const styles = useStyles();
-
-  const displayLabel = getRjsfDisplayLabel({ label, required, hideLabel });
-  const labelColor = getRjsfLabelColor(options);
+  const commitValue = useCommitWidgetValue(props);
+  const isDisplayOnly = isWidgetDisplayOnly(props);
+  const widgetTitle = getWidgetTitle(props);
   const enumOptions = mapEnumOptions(options);
   const widgetOptions = (options ?? {}) as YesNoWidgetOptions;
 
@@ -39,53 +33,34 @@ export const RadioYesNoWidget: FunctionComponent<WidgetProps> = ({
   const currentValue = typeof value === 'string' && value.length > 0 ? value : undefined;
 
   const handleSelect = (nextValue: string) => {
-    if (disabled || readonly) return;
-    onChange(nextValue);
-    onBlur(id, nextValue);
+    if (isDisplayOnly) return;
+    commitValue(nextValue);
   };
 
   return (
     <View style={styles.widgetBlock}>
-      <RjsfDisplayLabel label={displayLabel} color={labelColor} style={styles.title} />
+      <RjsfDisplayLabel {...widgetTitle} style={styles.title} />
 
       <View style={styles.row}>
-        {yesOption ? (
-          <Pressable
-            onPress={() => handleSelect(yesOption.value)}
-            style={styles.option}
-            disabled={disabled || readonly}
-          >
-            <RadioButton.Android
-              value={yesOption.value}
-              status={currentValue === yesOption.value ? 'checked' : 'unchecked'}
-              onPress={() => handleSelect(yesOption.value)}
-              disabled={disabled || readonly}
-            />
-            <Text
-              variant="bodyLarge"
-              style={[styles.optionLabel, widgetOptions.yesColor ? { color: widgetOptions.yesColor } : null]}
-            >
-              {yesOption.label}
-            </Text>
-          </Pressable>
-        ) : null}
+        {!!yesOption && (
+          <RadioYesNoOption
+            option={yesOption}
+            isChecked={currentValue === yesOption.value}
+            disabled={isDisplayOnly}
+            labelColor={widgetOptions.yesColor}
+            onSelect={handleSelect}
+          />
+        )}
 
-        {noOption ? (
-          <Pressable onPress={() => handleSelect(noOption.value)} style={styles.option} disabled={disabled || readonly}>
-            <RadioButton.Android
-              value={noOption.value}
-              status={currentValue === noOption.value ? 'checked' : 'unchecked'}
-              onPress={() => handleSelect(noOption.value)}
-              disabled={disabled || readonly}
-            />
-            <Text
-              variant="bodyLarge"
-              style={[styles.optionLabel, widgetOptions.noColor ? { color: widgetOptions.noColor } : null]}
-            >
-              {noOption.label}
-            </Text>
-          </Pressable>
-        ) : null}
+        {!!noOption && (
+          <RadioYesNoOption
+            option={noOption}
+            isChecked={currentValue === noOption.value}
+            disabled={isDisplayOnly}
+            labelColor={widgetOptions.noColor}
+            onSelect={handleSelect}
+          />
+        )}
       </View>
     </View>
   );
@@ -107,13 +82,6 @@ const useStyles = () => {
       justifyContent: 'flex-end',
       alignItems: 'center',
       gap: theme.spacing(2),
-    },
-    option: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    optionLabel: {
-      marginLeft: theme.spacing(0.5),
     },
   });
 };

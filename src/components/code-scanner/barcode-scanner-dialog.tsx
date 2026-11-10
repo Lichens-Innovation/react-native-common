@@ -21,7 +21,7 @@ export const BarcodeScannerDialog: FunctionComponent<BarcodeScannerDialogProps> 
   const [hasPermission, setHasPermission] = useState<boolean>();
 
   useEffect(() => {
-    requestCameraPermissions().then(setHasPermission);
+    void requestCameraPermissions().then(setHasPermission);
   }, []);
 
   if (!isVisible) {

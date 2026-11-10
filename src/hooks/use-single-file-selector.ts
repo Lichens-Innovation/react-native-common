@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useSnackbar } from '../components/snack-bar/snackbar-provider';
 import { logger } from '../logger/logger';
-import { pickSingleFile } from '../utils/file-picker.utils';
+import { pickSingleFile } from '../utils/files/file-picker.utils';
 
 export interface SingleFile {
   name: string;

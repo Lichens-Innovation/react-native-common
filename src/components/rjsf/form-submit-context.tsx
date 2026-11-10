@@ -1,9 +1,8 @@
 import { NO_OP } from '@lichens-innovation/ts-common';
-import type { PropsWithChildren } from 'react';
-import { createContext, useCallback, useRef } from 'react';
+import { createContext, useCallback, useRef, type PropsWithChildren } from 'react';
 import { View, type ViewProps } from 'react-native';
 
-/**
+/** habit-hooks-disable non-essential-comment
  * Form submit context for RJSF on React Native.
  *
  * On the web, a form submit is handled by the DOM: a <form> wraps inputs and a button with
@@ -34,7 +33,6 @@ interface FormWrapperProps extends ViewProps {
   onSubmit?: SubmitHandler;
 }
 
-/** Wraps RJSF form content in a View and provides submit handler via context for Paper SubmitButton. */
 export const RjsfPaperFormWrapper: React.ComponentType<PropsWithChildren<FormWrapperProps>> = ({
   onSubmit,
   children,

@@ -3,14 +3,12 @@ import { FunctionComponent, ComponentProps, useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
-import type { RecordingTextInputArgs } from './voice-recognition-text-input';
-import { VoiceRecognitionTextInput } from './voice-recognition-text-input';
+import { type RecordingTextInputArgs, VoiceRecognitionTextInput } from './voice-recognition-text-input';
 
 type VoiceRecognitionTextInputSubmitProps = Omit<
   ComponentProps<typeof VoiceRecognitionTextInput>,
   'onEffectiveValueChange'
 > & {
-  /** Called when send is pressed with the currently displayed effective value (and recording URI if present). */
   onValueSubmit: (args: RecordingTextInputArgs) => void;
 };
 

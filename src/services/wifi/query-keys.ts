@@ -1,8 +1,4 @@
-/**
- * The keys defined here are used to identify the queries in the database.
- *
- * @see https://tkdodo.eu/blog/effective-react-query-keys#use-query-key-factories
- */
+// @see https://tkdodo.eu/blog/effective-react-query-keys#use-query-key-factories habit-hooks-disable non-essential-comment
 
 export const WifiDiagnoseQueryKey = {
   all: ['wifi-diagnose'] as const,
