@@ -33,7 +33,17 @@ jest.mock('expo-updates', () => ({
 
 jest.mock('expo-application', () => ({ nativeApplicationVersion: '1.2.3', nativeBuildVersion: '45' }));
 
-jest.mock('expo-device', () => ({ isDevice: true, brand: 'mock', modelName: 'mock', osName: 'mock', osVersion: '1' }));
+let mockIsDevice = true;
+
+jest.mock('expo-device', () => ({
+  get isDevice() {
+    return mockIsDevice;
+  },
+  brand: 'mock',
+  modelName: 'mock',
+  osName: 'mock',
+  osVersion: '1',
+}));
 
 // the latest focus callback, so a test can replay a re-focus of the screen habit-hooks-disable non-essential-comment
 let mockLastFocusEffect: (() => void) | undefined;
@@ -186,6 +196,32 @@ describe('hooks', () => {
       afterEach(() => {
         mockUpdatesChannel = null;
         Object.assign(globalThis, { __DEV__: initialDev });
+      });
+
+      it('checkForUpdates fakes the check on a simulator or emulator (no native call)', async () => {
+        // arrange
+        mockIsDevice = false;
+        jest.useFakeTimers();
+        const { result } = await renderHook(() => useUpdates());
+
+        try {
+          // act
+          let pending: Promise<void> = Promise.resolve();
+          await act(async () => {
+            pending = result.current.checkForUpdates();
+          });
+          await act(async () => {
+            await jest.advanceTimersByTimeAsync(1000);
+            await pending;
+          });
+
+          // assert
+          expect(Updates.checkForUpdateAsync).not.toHaveBeenCalled();
+          expect(result.current.isLoading).toBe(false);
+        } finally {
+          jest.useRealTimers();
+          mockIsDevice = true;
+        }
       });
 
       it('checkForUpdates calls the native check', async () => {

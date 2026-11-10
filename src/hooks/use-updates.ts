@@ -4,13 +4,13 @@ import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 
 import { logger } from '../logger/logger';
-import { getDeviceType } from '../utils/device/device.utils';
+import { getDeviceType, isRealDevice } from '../utils/device/device.utils';
 import { isDevelopment } from '../utils/device/env.utils';
 
 const checkForUpdateAsync = async (): Promise<void> => {
   const deviceType = getDeviceType();
 
-  if (isDevelopment()) {
+  if (isDevelopment() || !isRealDevice()) {
     logger.info(`[checkForUpdateAsync] Faking update check on ${deviceType}`);
     await sleep(1000);
     return;
