@@ -55,7 +55,8 @@ const repairOrder = (order: string[], properties: PropertyMap) => {
   const listed = new Set(order);
   const missing = wildcards === 0 ? Object.keys(properties).filter((name) => !listed.has(name)) : [];
   const named = order.filter((name) => name !== WILDCARD);
-  // A lone `*` stays where the author put it; a missing one goes last, so unlisted fields follow the rest.
+  // The first `*` stays where the author put it and the extras go; a missing one goes last, so unlisted
+  // fields follow the rest.
   const firstWildcard = order.indexOf(WILDCARD);
   const repaired =
     firstWildcard === -1
@@ -106,8 +107,9 @@ const sanitizeNode = (uiSchema: UiSchema, schema: SchemaNode, path: string, repa
  * - an order without `*` gets one at the end, so unlisted fields show last;
  * - only the first `*` is kept.
  *
- * Names the schema does not declare are left alone: rjsf already ignores them. Pure: returns the same
- * object when no order needed changing, so a memo keyed on the input stays put.
+ * Names the schema does not declare are left alone: rjsf already ignores them. Pure and never mutates
+ * its input: the caller's own object comes back only when every order already holds exactly one `*`
+ * (or there is none); otherwise a copy, with a complete order closed by `*` without being reported.
  */
 export const sanitizeUiOrder = (uiSchema: UiSchema | undefined, schema: RJSFSchema): SanitizedUiOrder => {
   if (!isRecord(uiSchema)) return { uiSchema, repairs: [] };
