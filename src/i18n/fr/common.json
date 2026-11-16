@@ -88,6 +88,9 @@
     "filter": "Filtrer",
     "finish": "Terminer",
     "folder": "Dossier",
+    "form": {
+      "unsupportedField": "Ce champ ne peut pas être affiché."
+    },
     "formValidations": {
       "filePathMustNotContainsRelativePath": "Le chemin du fichier ne doit pas contenir de chemin relatif",
       "filePathShouldNotContainsSpecialChars": "Caractères invalides détectés dans le chemin du fichier",

@@ -88,6 +88,9 @@
     "filter": "Filter",
     "finish": "Finish",
     "folder": "Folder",
+    "form": {
+      "unsupportedField": "This field can't be displayed."
+    },
     "formValidations": {
       "filePathMustNotContainsRelativePath": "The file path must not contain a relative path",
       "filePathShouldNotContainsSpecialChars": "Invalid characters detected in the file path",

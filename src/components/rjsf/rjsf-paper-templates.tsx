@@ -8,12 +8,15 @@ import type {
   FieldTemplateProps,
   GridTemplateProps,
   ObjectFieldTemplateProps,
+  UnsupportedFieldProps,
 } from '@rjsf/utils';
 import { getTemplate, getUiOptions } from '@rjsf/utils';
 import { getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
-import { useMemo, type ComponentType } from 'react';
+import { useEffect, useMemo, type ComponentType } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
+import { logger } from '../../logger';
 import { useAppTheme } from '../../theme';
 import { useProgressiveCount } from './progressive-count';
 import {
@@ -148,6 +151,31 @@ const PaperArrayFieldTemplate = ({ title, items, canAdd, onAddClick, registry, u
   );
 };
 
+/**
+ * A field rjsf cannot draw (unknown type, array without `items`). rjsf's own template is web DOM
+ * (`<div>`, Markdown `<em>`, a `<pre>` schema dump) and crashes React Native (SPOTD-1300): this one names
+ * the field and says it cannot be shown, and leaves the reason to the log.
+ */
+const PaperUnsupportedFieldTemplate = ({ schema, fieldPathId, reason }: UnsupportedFieldProps) => {
+  const styles = useStyles();
+  const { t } = useTranslation();
+  const id = fieldPathId?.$id;
+  const title = typeof schema?.title === 'string' && schema.title ? schema.title : id;
+
+  useEffect(() => {
+    logger.warn(`[rjsf] unsupported field ${id ?? '<no id>'}: ${reason || 'no reason given'}`);
+  }, [id, reason]);
+
+  return (
+    <View style={styles.field}>
+      {title ? <Text variant="bodyMedium">{title}</Text> : null}
+      <Text variant="bodySmall" style={styles.fieldError}>
+        {t('common:form.unsupportedField')}
+      </Text>
+    </View>
+  );
+};
+
 const PaperGridTemplate = ({ children, column, style, ...rest }: GridTemplateProps) => {
   const styles = useStyles();
   const layoutStyle = column ? styles.gridCol : styles.gridRow;
@@ -169,6 +197,7 @@ export const PAPER_TEMPLATES = {
   ArrayFieldItemTemplate: PaperArrayFieldItemTemplate as ComponentType<ArrayFieldItemTemplateProps>,
   ErrorListTemplate: NoopErrorList as ComponentType<ErrorListProps>,
   GridTemplate: PaperGridTemplate as ComponentType<GridTemplateProps>,
+  UnsupportedFieldTemplate: PaperUnsupportedFieldTemplate as ComponentType<UnsupportedFieldProps>,
   ButtonTemplates: {
     ...defaultTemplates.ButtonTemplates,
     AddButton,

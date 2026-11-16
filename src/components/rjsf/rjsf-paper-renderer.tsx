@@ -7,10 +7,12 @@ import type { FunctionComponent } from 'react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { logger } from '../../logger';
 import { SubmitButtonOptionsContext } from './form-submit-context';
 import { PAPER_TEMPLATES } from './rjsf-paper-templates';
 import { RJSF_PAPER_THEME } from './rjsf-paper-theme';
 import { RootFormDataContext, type RootFormDataStore, type RootFormSnapshot } from './root-form-data-context';
+import { sanitizeUiOrder } from './sanitize-ui-order';
 
 const ThemedForm = withTheme(RJSF_PAPER_THEME);
 
@@ -58,6 +60,7 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
   formContext: formContextProp,
   submitButtonAbsolutePosition = false,
   submitButtonOverrideLabel = null,
+  uiSchema: uiSchemaProp,
   ...rest
 }) => {
   // The shared validator keeps AJV's schema cache and RJSF's schemaUtils/retrieveSchema cache warm
@@ -127,6 +130,19 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
     emit();
   }, [formDataProp, emit]);
 
+  // A broken `ui:order` makes rjsf throw and draw the error with web DOM, which crashes the whole sheet
+  // (SPOTD-1300). Repaired here, once per template: the caller hands a stable uiSchema and schema.
+  const { schema } = rest;
+  const uiSchema = useMemo(() => {
+    const { uiSchema: sanitized, repairs } = sanitizeUiOrder(uiSchemaProp, schema);
+    for (const { path, missing, duplicateWildcards } of repairs) {
+      logger.warn(
+        `[rjsf] ui:order at ${path} repaired: missing ${JSON.stringify(missing)}, extra "*" dropped: ${duplicateWildcards}`
+      );
+    }
+    return sanitized;
+  }, [uiSchemaProp, schema]);
+
   const mergedTemplates = useMemo(
     () => ({
       ...(RJSF_PAPER_THEME.templates ?? {}),
@@ -192,6 +208,7 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
       <RootFormDataContext.Provider value={store}>
         <ThemedForm
           {...rest}
+          uiSchema={uiSchema}
           key={i18n.language}
           // The caller's own object, not a mirrored copy: a stable `formData` prop keeps rjsf's
           // getSnapshotBeforeUpdate path (whole-props deep compare + a second getStateFromProps)
