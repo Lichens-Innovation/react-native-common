@@ -1,6 +1,6 @@
 import { createRjsfValidator, translateRjsfString } from '@lichens-innovation/ts-common/rjsf';
 import type { FormProps, IChangeEvent } from '@rjsf/core';
-import { withTheme } from '@rjsf/core';
+import { getDefaultRegistry } from '@rjsf/core';
 import type { RJSFSchema } from '@rjsf/utils';
 import { i18n } from 'i18next';
 import type { FunctionComponent } from 'react';
@@ -8,13 +8,31 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { logger } from '../../logger';
+import { withCoalescingTheme } from './coalescing-form';
 import { SubmitButtonOptionsContext } from './form-submit-context';
 import { PAPER_TEMPLATES } from './rjsf-paper-templates';
 import { RJSF_PAPER_THEME } from './rjsf-paper-theme';
 import { RootFormDataContext, type RootFormDataStore, type RootFormSnapshot } from './root-form-data-context';
+import { sanitizeSchemaTypes } from './sanitize-schema-types';
 import { sanitizeUiOrder } from './sanitize-ui-order';
+import { UNKNOWN_WIDGET, sanitizeUiWidgets } from './sanitize-ui-widgets';
+import { UnknownWidget } from './widgets/unknown-widget';
 
-const ThemedForm = withTheme(RJSF_PAPER_THEME);
+// Changes still waiting in rjsf's queue are merged: a long text field that falls behind no longer crashes the
+// sheet with "Maximum update depth exceeded" (SPOTD-1346).
+const ThemedForm = withCoalescingTheme(RJSF_PAPER_THEME);
+
+/**
+ * rjsf's own widgets the Paper theme does not replace. They draw web DOM (`<input>`) and crash React
+ * Native, so every default widget the theme does not override shows the notice instead (SPOTD-1346):
+ * Email, URL, Color, File, AltDate, AltDateTime and Rating, which the aliases `email`, `uri`, `color`,
+ * `file`, `data-url`, `alt-date` and `alt-datetime` resolve to.
+ */
+const WEB_ONLY_WIDGETS = Object.fromEntries(
+  Object.keys(getDefaultRegistry().widgets)
+    .filter((name) => !(name in (RJSF_PAPER_THEME.widgets ?? {})))
+    .map((name) => [name, UnknownWidget])
+);
 
 export type FormData = Record<string, unknown>;
 
@@ -22,13 +40,30 @@ export type FormData = Record<string, unknown>;
 // compiles, and compiling a 155-field checklist cost 0.85 s on a recent Android, 1.9 s on an old one:
 // a validator per form opening paid it again on every save. rjsf's own default validator is a
 // module-level singleton for the same reason.
-const validatorsByLanguage = new Map<string, ReturnType<typeof createRjsfValidator>>();
+type RjsfValidator = ReturnType<typeof createRjsfValidator>;
+
+const validatorsByLanguage = new Map<string, RjsfValidator>();
+
+/**
+ * `validator`, handed schemas AJV can compile: a `type` JSON Schema does not define (`"drawing"`) made AJV
+ * reject the whole schema, and the sheet could never be saved (SPOTD-1346). The form still draws from the
+ * original schema.
+ */
+const withCompilableSchemas = (validator: RjsfValidator): RjsfValidator => {
+  const wrapped: RjsfValidator = Object.create(validator);
+  wrapped.validateFormData = (formData, schema, ...rest) =>
+    validator.validateFormData(formData, sanitizeSchemaTypes(schema), ...rest);
+  wrapped.isValid = (schema, formData, rootSchema) =>
+    validator.isValid(sanitizeSchemaTypes(schema), formData, sanitizeSchemaTypes(rootSchema));
+  wrapped.rawValidation = (schema, formData) => validator.rawValidation(sanitizeSchemaTypes(schema), formData);
+  return wrapped;
+};
 
 /** The shared validator for `language`, created on first use. */
-export const getRjsfValidator = (language: string): ReturnType<typeof createRjsfValidator> => {
+export const getRjsfValidator = (language: string): RjsfValidator => {
   let validator = validatorsByLanguage.get(language);
   if (!validator) {
-    validator = createRjsfValidator(language);
+    validator = withCompilableSchemas(createRjsfValidator(language));
     validatorsByLanguage.set(language, validator);
   }
   return validator;
@@ -130,8 +165,18 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
     emit();
   }, [formDataProp, emit]);
 
+  const mergedWidgets = useMemo(
+    () => ({
+      ...WEB_ONLY_WIDGETS,
+      ...(RJSF_PAPER_THEME.widgets ?? {}),
+      ...(widgets ?? {}),
+      [UNKNOWN_WIDGET]: UnknownWidget,
+    }),
+    [widgets]
+  );
+
   // A broken `ui:order` makes rjsf throw and draw the error with web DOM, which crashes the whole sheet
-  // (SPOTD-1300). Repaired here, once per template: the caller hands a stable uiSchema and schema.
+  // (SPOTD-1300). Repaired here, once per template: the caller hands a stable uiSchema, schema and widgets.
   const { schema } = rest;
   const uiSchema = useMemo(() => {
     const { uiSchema: sanitized, repairs } = sanitizeUiOrder(uiSchemaProp, schema);
@@ -140,8 +185,10 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
         `[rjsf] ui:order at ${path} repaired: missing ${JSON.stringify(missing)}, extra "*" dropped: ${duplicateWildcards}`
       );
     }
-    return sanitized;
-  }, [uiSchemaProp, schema]);
+    // A widget name the app does not know makes rjsf's getWidget throw (SPOTD-1346): it is renamed to
+    // UnknownWidget, which shows the "can't be displayed" notice.
+    return sanitizeUiWidgets(sanitized, Object.keys(mergedWidgets));
+  }, [uiSchemaProp, schema, mergedWidgets]);
 
   const mergedTemplates = useMemo(
     () => ({
@@ -150,14 +197,6 @@ export const RjsfPaperRenderer: FunctionComponent<RjsfPaperRendererProps> = ({
       ...(templates ?? {}),
     }),
     [templates]
-  );
-
-  const mergedWidgets = useMemo(
-    () => ({
-      ...(RJSF_PAPER_THEME.widgets ?? {}),
-      ...(widgets ?? {}),
-    }),
-    [widgets]
   );
 
   const mergedFields = useMemo(

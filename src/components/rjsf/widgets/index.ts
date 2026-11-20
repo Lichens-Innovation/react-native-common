@@ -16,3 +16,4 @@ export * from './time-widget';
 export * from './image-video-gallery-widget';
 export * from './label-widget';
 export * from './multi-select-widget';
+export * from './unknown-widget';

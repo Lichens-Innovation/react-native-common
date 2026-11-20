@@ -13,7 +13,6 @@ import type {
 import { getTemplate, getUiOptions } from '@rjsf/utils';
 import { getRjsfLabelColor } from '@lichens-innovation/ts-common/rjsf';
 import { useEffect, useMemo, type ComponentType } from 'react';
-import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { logger } from '../../logger';
@@ -28,6 +27,7 @@ import {
   RemoveButton,
   SubmitButton,
 } from './rjsf-paper-buttons';
+import { UnsupportedFieldNotice } from './unsupported-field-notice';
 
 const defaultTemplates = getDefaultRegistry().templates;
 
@@ -158,7 +158,6 @@ const PaperArrayFieldTemplate = ({ title, items, canAdd, onAddClick, registry, u
  */
 const PaperUnsupportedFieldTemplate = ({ schema, fieldPathId, reason }: UnsupportedFieldProps) => {
   const styles = useStyles();
-  const { t } = useTranslation();
   const id = fieldPathId?.$id;
   const title = typeof schema?.title === 'string' && schema.title ? schema.title : id;
 
@@ -168,10 +167,7 @@ const PaperUnsupportedFieldTemplate = ({ schema, fieldPathId, reason }: Unsuppor
 
   return (
     <View style={styles.field}>
-      {title ? <Text variant="bodyMedium">{title}</Text> : null}
-      <Text variant="bodySmall" style={styles.fieldError}>
-        {t('common:form.unsupportedField')}
-      </Text>
+      <UnsupportedFieldNotice title={title} />
     </View>
   );
 };
