@@ -1,13 +1,11 @@
-import { type EnumOptionDisplay, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
+import { type EnumOptionDisplay } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useAppTheme } from '../../../theme/theme.index';
 import { RjsfDisplayLabel } from './display-label';
-import { getWidgetTitle } from './shared/widget-title.utils';
 import { RadioYesNoOption } from './radio-yes-no-option';
-import { useCommitWidgetValue } from './shared/use-commit-widget-value';
-import { isWidgetDisplayOnly } from './shared/widget-state.utils';
+import { useEnumOptionsWidget } from './shared/use-enum-options-widget';
 
 interface YesNoWidgetOptions {
   yesColor?: string;
@@ -21,10 +19,7 @@ interface YesNoWidgetOptions {
 export const RadioYesNoWidget: FunctionComponent<WidgetProps> = (props) => {
   const { value, options } = props;
   const styles = useStyles();
-  const commitValue = useCommitWidgetValue(props);
-  const isDisplayOnly = isWidgetDisplayOnly(props);
-  const widgetTitle = getWidgetTitle(props);
-  const enumOptions = mapEnumOptions(options);
+  const { commitValue, isDisplayOnly, widgetTitle, enumOptions } = useEnumOptionsWidget(props);
   const widgetOptions = (options ?? {}) as YesNoWidgetOptions;
 
   const yesOption = enumOptions.find((opt: EnumOptionDisplay) => opt.value === 'yes') ?? enumOptions[0];

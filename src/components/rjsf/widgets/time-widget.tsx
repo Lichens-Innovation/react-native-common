@@ -4,15 +4,19 @@ import {
   parseTimeOnlyToLocalDate,
   timeToTimeOnlyString,
 } from '@lichens-innovation/ts-common/rjsf';
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { Platform } from 'react-native';
-import { IosPickerModal } from './picker-field/ios-picker-modal';
+import { NativeDateOrTimePicker } from './picker-field/native-date-or-time-picker';
 import { PickerInputField } from './picker-field/picker-input-field';
-import { usePickerThemeVariant } from './picker-field/use-picker-theme-variant';
-import { usePickerWidgetState } from './picker-field/use-picker-widget-state';
-import { useCommitWidgetValue } from './shared/use-commit-widget-value';
+import { type PickerValueFormat, usePickerWidgetState } from './picker-field/use-picker-widget-state';
+
+const TIME_ONLY_FORMAT: PickerValueFormat = {
+  parse: parseTimeOnlyToLocalDate,
+  formatForDisplay: formatTimeOnlyForDisplay,
+  serialize: timeToTimeOnlyString,
+};
 
 /** habit-hooks-disable non-essential-comment
  * A clock reading with no day behind it: the date is entered once in the form header and
@@ -26,20 +30,17 @@ import { useCommitWidgetValue } from './shared/use-commit-widget-value';
  * format demands seconds, and the display strips them back off.
  */
 export const TimeWidget: FunctionComponent<WidgetProps> = (props) => {
-  const { value } = props;
-  const themeVariant = usePickerThemeVariant();
-  const commitValue = useCommitWidgetValue(props);
-  const { pickerValue, hasValue, displayValue, isPickerVisible, togglePickerVisibility, closePicker } =
-    usePickerWidgetState({
-      value,
-      parse: parseTimeOnlyToLocalDate,
-      formatForDisplay: formatTimeOnlyForDisplay,
-    });
-
-  const commitTime = (picked: Date) => commitValue(timeToTimeOnlyString(picked));
+  const {
+    pickerValue,
+    hasValue,
+    displayValue,
+    isPickerVisible,
+    togglePickerVisibility,
+    closePicker,
+    commitPicked: commitTime,
+  } = usePickerWidgetState(props, TIME_ONLY_FORMAT);
 
   const handlePick = (event: DateTimePickerEvent, selectedTime?: Date) => {
-    if (Platform.OS === 'android') closePicker();
     // Android reports 'dismissed' on back-out (storing then would keep an unconfirmed time); iOS only ever reports 'set'. habit-hooks-disable non-essential-comment
     if (event.type !== 'set' || isNullish(selectedTime)) return;
     commitTime(selectedTime);
@@ -59,27 +60,13 @@ export const TimeWidget: FunctionComponent<WidgetProps> = (props) => {
       hasValue={hasValue}
       onOpen={handleOpen}
     >
-      {Platform.OS === 'ios' ? (
-        <IosPickerModal
-          visible={isPickerVisible}
-          value={pickerValue}
-          mode="time"
-          onChange={handlePick}
-          onClose={closePicker}
-        />
-      ) : (
-        isPickerVisible && (
-          // `is24Hour` only shapes the Android dialog; the STORED value is always 24-hour HH:MM:00. habit-hooks-disable non-essential-comment
-          <DateTimePicker
-            value={pickerValue}
-            mode="time"
-            display="default"
-            is24Hour
-            onChange={handlePick}
-            themeVariant={themeVariant}
-          />
-        )
-      )}
+      <NativeDateOrTimePicker
+        mode="time"
+        visible={isPickerVisible}
+        value={pickerValue}
+        onChange={handlePick}
+        onClose={closePicker}
+      />
     </PickerInputField>
   );
 };
