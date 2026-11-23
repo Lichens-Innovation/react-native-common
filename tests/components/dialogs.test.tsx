@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 import { act, fireEvent, screen } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { DialogCloseOnly, DialogOkCancel, DialogSingleTextInput, DialogSyntaxColorResult } from '@lib';
 import { ICON_GLYPH, renderWithProviders } from './render-with-providers';
 
@@ -352,5 +352,192 @@ describe('DialogSyntaxColorResult', () => {
 
     // assert
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});
+
+// jest's window is 750 x 1334: wider than the 600 breakpoint, so dialogs are capped at 500 and centered habit-hooks-disable non-essential-comment
+type HostElement = ReturnType<typeof screen.getByText>;
+type StyleKey = 'width' | 'alignSelf' | 'maxHeight';
+
+// the nearest value of `key` styled on `from` or its ancestors, stopping before the ancestors of `stopAt` habit-hooks-disable non-essential-comment
+const closestStyle = (from: HostElement, key: StyleKey, stopAt?: HostElement) => {
+  const boundary = new Set<HostElement>();
+  for (let node = stopAt?.parent ?? null; node; node = node.parent) boundary.add(node);
+  for (let node: HostElement | null = from; node && !boundary.has(node); node = node.parent) {
+    const value = StyleSheet.flatten(node.props.style)?.[key];
+    if (value !== undefined) return value;
+  }
+  return undefined;
+};
+
+// the title sits in the dialog box, below any button's own styles habit-hooks-disable non-essential-comment
+const dialogStyle = (key: StyleKey) => closestStyle(screen.getByText('Title'), key);
+const pressBackdrop = () => fireEvent.press(screen.getByLabelText('Close modal'));
+
+const DIALOGS = [
+  [
+    'DialogOkCancel',
+    (props: object) => <DialogOkCancel isVisible title="Title" onOk={jest.fn()} onCancel={jest.fn()} {...props} />,
+  ],
+  ['DialogCloseOnly', (props: object) => <DialogCloseOnly isVisible title="Title" onClose={jest.fn()} {...props} />],
+  [
+    'DialogSingleTextInput',
+    (props: object) => (
+      <DialogSingleTextInput
+        isVisible
+        title="Title"
+        value=""
+        onChange={jest.fn()}
+        onOk={jest.fn()}
+        onCancel={jest.fn()}
+        {...props}
+      />
+    ),
+  ],
+  [
+    'DialogSyntaxColorResult',
+    (props: object) => (
+      <DialogSyntaxColorResult isVisible title="Title" code="a" language="javascript" onClose={jest.fn()} {...props} />
+    ),
+  ],
+] as const;
+
+describe.each(DIALOGS)('%s frame', (_name, renderDialogElement) => {
+  it('caps the width at 500 and centers on a wide screen', async () => {
+    // act
+    await renderWithProviders(renderDialogElement({}));
+
+    // assert
+    expect(dialogStyle('width')).toBe(500);
+    expect(dialogStyle('alignSelf')).toBe('center');
+  });
+});
+
+describe.each(DIALOGS.filter(([name]) => name !== 'DialogSyntaxColorResult'))(
+  '%s style prop',
+  (_name, renderDialogElement) => {
+    it('lets the style prop override the frame sizing while keeping the rest', async () => {
+      // act
+      await renderWithProviders(renderDialogElement({ style: { width: 320 } }));
+
+      // assert
+      expect(dialogStyle('width')).toBe(320);
+      expect(dialogStyle('alignSelf')).toBe('center');
+    });
+  }
+);
+
+describe('dialog OK button width', () => {
+  const okButtonWidth = (okText = 'common:ok') =>
+    closestStyle(screen.getByText(okText), 'width', screen.getByText('common:cancel'));
+
+  it.each`
+    okLabel      | expectedWidth
+    ${undefined} | ${60}
+    ${'Delete'}  | ${undefined}
+  `('DialogOkCancel OK button width is $expectedWidth when okLabel=$okLabel', async ({ okLabel, expectedWidth }) => {
+    // act
+    await renderWithProviders(<DialogOkCancel isVisible okLabel={okLabel} onOk={jest.fn()} onCancel={jest.fn()} />);
+
+    // assert
+    expect(okButtonWidth(okLabel)).toBe(expectedWidth);
+  });
+
+  it('DialogSingleTextInput OK button is 60 wide', async () => {
+    // act
+    await renderWithProviders(
+      <DialogSingleTextInput isVisible title="T" value="" onChange={jest.fn()} onOk={jest.fn()} onCancel={jest.fn()} />
+    );
+
+    // assert
+    expect(okButtonWidth()).toBe(60);
+  });
+});
+
+describe('dialog backdrop dismissal', () => {
+  it.each`
+    name                 | renderDialogElement
+    ${'DialogOkCancel'}  | ${(onDismiss: () => void) => <DialogOkCancel isVisible onOk={jest.fn()} onCancel={jest.fn()} onDismiss={onDismiss} />}
+    ${'DialogCloseOnly'} | ${(onDismiss: () => void) => <DialogCloseOnly isVisible onClose={jest.fn()} onDismiss={onDismiss} />}
+  `('$name lets an onDismiss prop replace the default dismissal', async ({ renderDialogElement }) => {
+    // arrange
+    const onDismiss = jest.fn();
+    await renderWithProviders(renderDialogElement(onDismiss));
+
+    // act
+    await pressBackdrop();
+
+    // assert
+    expect(onDismiss).toHaveBeenCalled();
+  });
+
+  it('DialogSingleTextInput always cancels on dismissal, ignoring an onDismiss prop', async () => {
+    // arrange
+    const onCancel = jest.fn();
+    const onDismiss = jest.fn();
+    await renderWithProviders(
+      <DialogSingleTextInput
+        isVisible
+        title="T"
+        value=""
+        onChange={jest.fn()}
+        onOk={jest.fn()}
+        onCancel={onCancel}
+        onDismiss={onDismiss}
+      />
+    );
+
+    // act
+    await pressBackdrop();
+
+    // assert
+    expect(onCancel).toHaveBeenCalled();
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
+
+  it('DialogSyntaxColorResult closes on dismissal', async () => {
+    // arrange
+    const onClose = jest.fn();
+    await renderWithProviders(
+      <DialogSyntaxColorResult isVisible title="R" code="a" language="javascript" onClose={onClose} />
+    );
+
+    // act
+    await pressBackdrop();
+
+    // assert
+    expect(onClose).toHaveBeenCalled();
+  });
+});
+
+describe('DialogSyntaxColorResult height', () => {
+  it('caps its height at 80% of the window', async () => {
+    // act
+    await renderWithProviders(
+      <DialogSyntaxColorResult isVisible title="Title" code="a" language="javascript" onClose={jest.fn()} />
+    );
+
+    // assert
+    expect(dialogStyle('maxHeight')).toBe(1334 * 0.8);
+  });
+
+  // intentional change in the refactor: the style prop used to replace the frame sizing too (no consumer passes one) habit-hooks-disable non-essential-comment
+  it('a style prop replaces its height cap but keeps the frame sizing', async () => {
+    // act
+    await renderWithProviders(
+      <DialogSyntaxColorResult
+        isVisible
+        title="Title"
+        code="a"
+        language="javascript"
+        onClose={jest.fn()}
+        style={{ width: 320 }}
+      />
+    );
+
+    // assert
+    expect(dialogStyle('width')).toBe(320);
+    expect(dialogStyle('alignSelf')).toBe('center');
+    expect(dialogStyle('maxHeight')).toBeUndefined();
   });
 });

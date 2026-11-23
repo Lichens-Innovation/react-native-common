@@ -6,16 +6,24 @@ import { Platform } from 'react-native';
 import { AndroidDateTimeDialogs } from './picker-field/android-date-time-dialogs';
 import { IosPickerModal } from './picker-field/ios-picker-modal';
 import { PickerInputField } from './picker-field/picker-input-field';
-import { usePickerWidgetState } from './picker-field/use-picker-widget-state';
-import { useCommitWidgetValue } from './shared/use-commit-widget-value';
+import { type PickerValueFormat, usePickerWidgetState } from './picker-field/use-picker-widget-state';
+
+const DATE_TIME_FORMAT: PickerValueFormat = {
+  parse: parseDateOrNull,
+  formatForDisplay: formatDateTimeForDisplay,
+  serialize: (picked) => picked.toISOString(),
+};
 
 export const DateTimeWidget: FunctionComponent<WidgetProps> = (props) => {
-  const { value } = props;
-  const commitValue = useCommitWidgetValue(props);
-  const { pickerValue, hasValue, displayValue, isPickerVisible, togglePickerVisibility, closePicker } =
-    usePickerWidgetState({ value, parse: parseDateOrNull, formatForDisplay: formatDateTimeForDisplay });
-
-  const commitDateTime = (picked: Date) => commitValue(picked.toISOString());
+  const {
+    pickerValue,
+    hasValue,
+    displayValue,
+    isPickerVisible,
+    togglePickerVisibility,
+    closePicker,
+    commitPicked: commitDateTime,
+  } = usePickerWidgetState(props, DATE_TIME_FORMAT);
 
   const handleIosPick = (_: unknown, selectedDate?: Date) => {
     if (!isNullish(selectedDate)) commitDateTime(selectedDate);

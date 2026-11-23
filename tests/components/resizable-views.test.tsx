@@ -1,6 +1,8 @@
-import { fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
 import { cloneElement, type ReactElement } from 'react';
 import { StyleSheet, Text } from 'react-native';
+import { Gesture } from 'react-native-gesture-handler';
+import { createGestureController } from 'react-native-gesture-handler/jest-utils';
 import {
   HorizontalResizableSplitView,
   ResizableOverlayView,
@@ -68,7 +70,38 @@ const renderResizable = async (ui: ReactElement, contentText: string) => {
     });
     await rerender(cloneElement(ui));
   };
-  return { relayout };
+  const refresh = async () => {
+    await rerender(cloneElement(ui));
+  };
+  return { relayout, refresh };
+};
+
+interface DragTranslation {
+  translationX?: number;
+  translationY?: number;
+}
+
+// a fresh pan gesture is built on every render; the last one built is the one mounted on the handle habit-hooks-disable non-essential-comment
+const capturePanGestures = () => {
+  const createPan = Gesture.Pan.bind(Gesture);
+  const built: ReturnType<typeof Gesture.Pan>[] = [];
+  jest.spyOn(Gesture, 'Pan').mockImplementation(() => {
+    const pan = createPan();
+    built.push(pan);
+    return pan;
+  });
+  return async (translation: DragTranslation, rerenderAfter: () => Promise<void>) => {
+    const pan = built.at(-1);
+    if (!pan) throw new Error('no pan gesture built');
+    const controller = createGestureController(pan);
+    await act(() => {
+      controller.begin();
+      controller.activate();
+      controller.update(translation);
+      controller.end();
+    });
+    await rerenderAfter();
+  };
 };
 
 const expectRenderToThrow = async (ui: ReactElement, message: string) => {
@@ -144,6 +177,29 @@ describe('ResizableOverlayView', () => {
     // assert
     expect(flatten(paneOf('Foreground'))).toMatchObject({ height: 0 });
   });
+
+  it.each`
+    anchorType       | translationY | expectedHeight
+    ${'topRight'}    | ${100}       | ${600}
+    ${'topRight'}    | ${1000}      | ${850}
+    ${'bottomLeft'}  | ${100}       | ${400}
+    ${'bottomLeft'}  | ${1000}      | ${150}
+    ${'bottomRight'} | ${-1000}     | ${850}
+  `(
+    'drags a $anchorType overlay by $translationY to $expectedHeight in a 1000 high container',
+    async ({ anchorType, translationY, expectedHeight }) => {
+      // arrange
+      const drag = capturePanGestures();
+      const { relayout, refresh } = await renderResizable(overlay({ anchorType }), 'Foreground');
+      await relayout(400, 1000);
+
+      // act
+      await drag({ translationX: 37, translationY }, refresh);
+
+      // assert
+      expect(flatten(paneOf('Foreground'))).toMatchObject({ height: expectedHeight });
+    }
+  );
 
   it('sizes the overlay from the default ratios after layout (0.5 of height)', async () => {
     // arrange
@@ -374,6 +430,45 @@ describe('HorizontalResizableSplitView', () => {
     }
   );
 
+  it.each`
+    minLeftRatio | maxLeftRatio | translationX | expectedLeft | expectedRight
+    ${undefined} | ${undefined} | ${100}       | ${400}       | ${200}
+    ${undefined} | ${undefined} | ${1000}      | ${510}       | ${90}
+    ${undefined} | ${undefined} | ${-1000}     | ${90}        | ${510}
+    ${0.2}       | ${0.7}       | ${1000}      | ${420}       | ${180}
+    ${0.2}       | ${0.7}       | ${-1000}     | ${120}       | ${480}
+  `(
+    'drags the handle by $translationX within [$minLeftRatio, $maxLeftRatio] of a 600 wide container',
+    async ({ minLeftRatio, maxLeftRatio, translationX, expectedLeft, expectedRight }) => {
+      // arrange
+      const drag = capturePanGestures();
+      const { relayout, refresh } = await renderResizable(split({ minLeftRatio, maxLeftRatio }), 'Left');
+      await relayout(600, 400);
+
+      // act
+      await drag({ translationX, translationY: 37 }, refresh);
+
+      // assert
+      expect(flatten(paneOf('Left'))).toMatchObject({ width: expectedLeft });
+      expect(flatten(paneOf('Right'))).toMatchObject({ width: expectedRight });
+      expect(flatten(handleContainer())).toMatchObject({ left: expectedLeft - 10 });
+    }
+  );
+
+  it('keeps the animated handle position over a handleContainerStyle offset', async () => {
+    // arrange
+    const { relayout } = await renderResizable(
+      split({ handleContainerStyle: { left: 999, backgroundColor: 'red' } }),
+      'Left'
+    );
+
+    // act
+    await relayout(600, 400);
+
+    // assert
+    expect(flatten(handleContainer())).toMatchObject({ left: 290, backgroundColor: 'red', width: 20 });
+  });
+
   it('ignores a zero-width layout, then freezes the first positive layout', async () => {
     // arrange
     const { relayout } = await renderResizable(split(), 'Left');
@@ -496,6 +591,45 @@ describe('VerticalResizableSplitView', () => {
       expect(flatten(handleContainer())).toMatchObject({ top: expectedHandleTop });
     }
   );
+
+  it.each`
+    minTopRatio  | maxTopRatio  | translationY | expectedTop | expectedBottom
+    ${undefined} | ${undefined} | ${100}       | ${500}      | ${300}
+    ${undefined} | ${undefined} | ${1000}      | ${680}      | ${120}
+    ${undefined} | ${undefined} | ${-1000}     | ${120}      | ${680}
+    ${0.25}      | ${0.6}       | ${1000}      | ${480}      | ${320}
+    ${0.25}      | ${0.6}       | ${-1000}     | ${200}      | ${600}
+  `(
+    'drags the handle by $translationY within [$minTopRatio, $maxTopRatio] of an 800 high container',
+    async ({ minTopRatio, maxTopRatio, translationY, expectedTop, expectedBottom }) => {
+      // arrange
+      const drag = capturePanGestures();
+      const { relayout, refresh } = await renderResizable(split({ minTopRatio, maxTopRatio }), 'Top');
+      await relayout(300, 800);
+
+      // act
+      await drag({ translationX: 37, translationY }, refresh);
+
+      // assert
+      expect(flatten(paneOf('Top'))).toMatchObject({ height: expectedTop });
+      expect(flatten(paneOf('Bottom'))).toMatchObject({ height: expectedBottom });
+      expect(flatten(handleContainer())).toMatchObject({ top: expectedTop - 10 });
+    }
+  );
+
+  it('keeps the animated handle position over a handleContainerStyle offset', async () => {
+    // arrange
+    const { relayout } = await renderResizable(
+      split({ handleContainerStyle: { top: 999, backgroundColor: 'red' } }),
+      'Top'
+    );
+
+    // act
+    await relayout(300, 800);
+
+    // assert
+    expect(flatten(handleContainer())).toMatchObject({ top: 390, backgroundColor: 'red', height: 20 });
+  });
 
   it('ignores a zero-height layout, then freezes the first positive layout', async () => {
     // arrange

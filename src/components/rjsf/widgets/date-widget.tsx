@@ -4,31 +4,30 @@ import {
   formatDateOnlyForDisplay,
   parseDateOnlyToLocalDate,
 } from '@lichens-innovation/ts-common/rjsf';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
-import { Platform } from 'react-native';
-import { IosPickerModal } from './picker-field/ios-picker-modal';
+import { NativeDateOrTimePicker } from './picker-field/native-date-or-time-picker';
 import { PickerInputField } from './picker-field/picker-input-field';
-import { usePickerThemeVariant } from './picker-field/use-picker-theme-variant';
-import { usePickerWidgetState } from './picker-field/use-picker-widget-state';
-import { useCommitWidgetValue } from './shared/use-commit-widget-value';
+import { type PickerValueFormat, usePickerWidgetState } from './picker-field/use-picker-widget-state';
+
+const DATE_ONLY_FORMAT: PickerValueFormat = {
+  parse: parseDateOnlyToLocalDate,
+  formatForDisplay: formatDateOnlyForDisplay,
+  serialize: dateToDateOnlyString,
+};
 
 export const DateWidget: FunctionComponent<WidgetProps> = (props) => {
-  const { value } = props;
-  const themeVariant = usePickerThemeVariant();
-  const commitValue = useCommitWidgetValue(props);
-  const { pickerValue, hasValue, displayValue, isPickerVisible, togglePickerVisibility, closePicker } =
-    usePickerWidgetState({
-      value,
-      parse: parseDateOnlyToLocalDate,
-      formatForDisplay: formatDateOnlyForDisplay,
-    });
-
-  const commitDate = (picked: Date) => commitValue(dateToDateOnlyString(picked));
+  const {
+    pickerValue,
+    hasValue,
+    displayValue,
+    isPickerVisible,
+    togglePickerVisibility,
+    closePicker,
+    commitPicked: commitDate,
+  } = usePickerWidgetState(props, DATE_ONLY_FORMAT);
 
   const handlePick = (_: unknown, selectedDate?: Date) => {
-    if (Platform.OS === 'android') closePicker();
     if (!isNullish(selectedDate)) commitDate(selectedDate);
   };
 
@@ -40,26 +39,13 @@ export const DateWidget: FunctionComponent<WidgetProps> = (props) => {
 
   return (
     <PickerInputField {...props} displayValue={displayValue} icon="calendar" hasValue={hasValue} onOpen={handleOpen}>
-      {Platform.OS === 'ios' ? (
-        <IosPickerModal
-          visible={isPickerVisible}
-          value={pickerValue}
-          mode="date"
-          onChange={handlePick}
-          onClose={closePicker}
-        />
-      ) : (
-        isPickerVisible && (
-          <DateTimePicker
-            value={pickerValue}
-            mode="date"
-            display="default"
-            onChange={handlePick}
-            onTouchCancel={closePicker}
-            themeVariant={themeVariant}
-          />
-        )
-      )}
+      <NativeDateOrTimePicker
+        mode="date"
+        visible={isPickerVisible}
+        value={pickerValue}
+        onChange={handlePick}
+        onClose={closePicker}
+      />
     </PickerInputField>
   );
 };

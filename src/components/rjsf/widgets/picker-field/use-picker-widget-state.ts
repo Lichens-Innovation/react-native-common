@@ -1,15 +1,19 @@
 import { type DisplayLocale, isNullish, toDisplayLocale } from '@lichens-innovation/ts-common';
+import type { WidgetProps } from '@rjsf/utils';
 import { useToggle } from '@uidotdev/usehooks';
 import { useTranslation } from 'react-i18next';
+import { useCommitWidgetValue } from '../shared/use-commit-widget-value';
 
-interface PickerWidgetStateArgs {
-  value: unknown;
+export interface PickerValueFormat {
   parse: (value?: string) => Date | null;
   formatForDisplay: (value?: string, locale?: DisplayLocale) => string;
+  serialize: (picked: Date) => string;
 }
 
-export const usePickerWidgetState = ({ value, parse, formatForDisplay }: PickerWidgetStateArgs) => {
+export const usePickerWidgetState = (props: WidgetProps, { parse, formatForDisplay, serialize }: PickerValueFormat) => {
+  const { value } = props;
   const { i18n } = useTranslation();
+  const commitValue = useCommitWidgetValue(props);
   const [isPickerVisible, togglePickerVisibility] = useToggle(false);
   const parsedValue = parse(value as string);
 
@@ -20,5 +24,6 @@ export const usePickerWidgetState = ({ value, parse, formatForDisplay }: PickerW
     isPickerVisible,
     togglePickerVisibility,
     closePicker: () => togglePickerVisibility(false),
+    commitPicked: (picked: Date) => commitValue(serialize(picked)),
   };
 };

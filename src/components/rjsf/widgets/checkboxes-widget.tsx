@@ -1,22 +1,17 @@
 import { isNullish } from '@lichens-innovation/ts-common';
-import { type EnumOptionDisplay, mapEnumOptions } from '@lichens-innovation/ts-common/rjsf';
+import { type EnumOptionDisplay } from '@lichens-innovation/ts-common/rjsf';
 import type { WidgetProps } from '@rjsf/utils';
 import type { FunctionComponent } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Checkbox, Text } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/theme.index';
 import { RjsfDisplayLabel } from './display-label';
-import { getWidgetTitle } from './shared/widget-title.utils';
-import { useCommitWidgetValue } from './shared/use-commit-widget-value';
-import { isWidgetDisplayOnly } from './shared/widget-state.utils';
+import { useEnumOptionsWidget } from './shared/use-enum-options-widget';
 
 export const CheckboxesWidget: FunctionComponent<WidgetProps> = (props) => {
-  const { value, options, schema } = props;
+  const { value, schema } = props;
   const styles = useStyles();
-  const commitValue = useCommitWidgetValue(props);
-  const isDisplayOnly = isWidgetDisplayOnly(props);
-  const widgetTitle = getWidgetTitle(props);
-  const enumOptions = mapEnumOptions(options);
+  const { commitValue, isDisplayOnly, widgetTitle, enumOptions } = useEnumOptionsWidget(props);
   const isArrayValue = Array.isArray(value);
   const currentSet = isArrayValue ? value : [];
   const hasMaxItems = typeof schema?.maxItems === 'number';

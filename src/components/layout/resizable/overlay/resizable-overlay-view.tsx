@@ -1,11 +1,9 @@
-import { useEffect, type FunctionComponent } from 'react';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { isDevelopment } from '../../../../utils/utils.index';
-import { ResizablePaneContent } from '../resizable-pane-content';
+import { type FunctionComponent } from 'react';
+import { LayoutChangeEvent, StyleSheet } from 'react-native';
+import { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { ResizablePaneLayout } from '../resizable-pane-layout';
 import { RESIZE_HANDLE } from '../resizable-view.constants';
-import { ResizeHandle } from '../resize-handle';
-import { useResizePanGesture } from '../use-resize-pan-gesture';
+import { useDevPropsValidation } from '../use-dev-props-validation';
 import { ResizableOverlayViewProps } from './resizable-overlay-view.types';
 import {
   computeOverlayHandlePosition,
@@ -16,9 +14,7 @@ import {
 } from './resizable-overlay-view.utils';
 
 export const ResizableOverlayView: FunctionComponent<ResizableOverlayViewProps> = (props) => {
-  useEffect(() => {
-    if (isDevelopment()) validateResizableOverlayProps(props);
-  }, [props]);
+  useDevPropsValidation(props, validateResizableOverlayProps);
 
   const {
     foregroundContent,
@@ -61,14 +57,6 @@ export const ResizableOverlayView: FunctionComponent<ResizableOverlayViewProps> 
     isLayoutReady.set(true);
   };
 
-  const { panGesture, isDragging } = useResizePanGesture({
-    size: overlayHeight,
-    minSize: minHeight,
-    maxSize: maxHeight,
-    axis: 'y',
-    sizeChangePerDragUnit: isBottomAnchored ? -1 : 1,
-  });
-
   // Read shared values directly in each updater: Reanimated only tracks those in the updater's own closure, habit-hooks-disable non-essential-comment
   // not those hidden behind a nested worklet function (the style would never update). habit-hooks-disable non-essential-comment
   const overlayAnimatedStyle = useAnimatedStyle(() => {
@@ -97,39 +85,34 @@ export const ResizableOverlayView: FunctionComponent<ResizableOverlayViewProps> 
   );
 
   return (
-    <View style={styles.container} onLayout={handleLayout}>
-      <View style={styles.backgroundSection}>
-        <ResizablePaneContent
-          shouldObscureWhileResizing={shouldObscureBackgroundPaneContentWhileResizing}
-          isDragging={isDragging}
-          isLayoutReady={isLayoutReady}
-          greyLevel="primary"
-        >
-          {backgroundContent}
-        </ResizablePaneContent>
-      </View>
-
-      <Animated.View style={[styles.overlaySection, anchorStyle, overlayAnimatedStyle]}>
-        <ResizablePaneContent
-          shouldObscureWhileResizing={shouldObscureForegroundPaneContentWhileResizing}
-          isDragging={isDragging}
-          isLayoutReady={isLayoutReady}
-          greyLevel="secondary"
-        >
-          {foregroundContent}
-        </ResizablePaneContent>
-      </Animated.View>
-
-      {!hideHandle && (
-        <ResizeHandle
-          gesture={panGesture}
-          isDragging={isDragging}
-          barOrientation="horizontal"
-          containerStyle={[styles.handleContainer, handleContainerStyle, dragHandleContainerAnimatedStyle]}
-          handleStyle={handleStyle}
-        />
-      )}
-    </View>
+    <ResizablePaneLayout
+      style={styles.container}
+      onLayout={handleLayout}
+      firstPane={{
+        content: backgroundContent,
+        style: styles.backgroundSection,
+        shouldObscureWhileResizing: shouldObscureBackgroundPaneContentWhileResizing,
+      }}
+      secondPane={{
+        content: foregroundContent,
+        style: [styles.overlaySection, anchorStyle, overlayAnimatedStyle],
+        shouldObscureWhileResizing: shouldObscureForegroundPaneContentWhileResizing,
+      }}
+      isLayoutReady={isLayoutReady}
+      resize={{
+        size: overlayHeight,
+        minSize: minHeight,
+        maxSize: maxHeight,
+        axis: 'y',
+        sizeChangePerDragUnit: isBottomAnchored ? -1 : 1,
+      }}
+      handle={{
+        isHidden: hideHandle,
+        barOrientation: 'horizontal',
+        containerStyle: [styles.handleContainer, handleContainerStyle, dragHandleContainerAnimatedStyle],
+        handleStyle,
+      }}
+    />
   );
 };
 
