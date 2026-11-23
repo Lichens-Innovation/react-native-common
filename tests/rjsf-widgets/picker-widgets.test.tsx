@@ -317,6 +317,20 @@ describe('DateWidget', () => {
       expect(queryPicker()).not.toBeOnTheScreen();
     });
 
+    it('uses a default date dialog with the theme variant and no 24h flag', async () => {
+      // arrange
+      await renderWidget(DateWidget, { value: '2024-03-05' });
+
+      // act
+      await openPicker();
+
+      // assert
+      expect(getPicker().props).toEqual(
+        expect.objectContaining({ mode: 'date', display: 'default', themeVariant: 'light' })
+      );
+      expect(getPicker().props.is24Hour).toBeFalsy();
+    });
+
     it('closes on touch cancel', async () => {
       // arrange
       await renderWidget(DateWidget, { value: '2024-03-05' });
@@ -557,7 +571,9 @@ describe('TimeWidget', () => {
 
       // assert
       expect(props.onChange).not.toHaveBeenCalled();
-      expect(getPicker().props).toEqual(expect.objectContaining({ mode: 'time', display: 'default', is24Hour: true }));
+      expect(getPicker().props).toEqual(
+        expect.objectContaining({ mode: 'time', display: 'default', is24Hour: true, themeVariant: 'light' })
+      );
     });
 
     it('closes and commits a confirmed time', async () => {
