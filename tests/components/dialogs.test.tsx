@@ -357,47 +357,35 @@ describe('DialogSyntaxColorResult', () => {
 
 // jest's window is 750 x 1334: wider than the 600 breakpoint, so dialogs are capped at 500 and centered habit-hooks-disable non-essential-comment
 type HostElement = ReturnType<typeof screen.getByText>;
+type StyleKey = 'width' | 'alignSelf' | 'maxHeight';
 
-const ancestorsOf = (element: HostElement) => {
-  const nodes: HostElement[] = [];
-  for (let node = element.parent as HostElement | null; node; node = node.parent as HostElement | null)
-    nodes.push(node);
-  return nodes;
+// the nearest value of `key` styled on `from` or its ancestors, stopping before the ancestors of `stopAt` habit-hooks-disable non-essential-comment
+const closestStyle = (from: HostElement, key: StyleKey, stopAt?: HostElement) => {
+  const boundary = new Set<HostElement>();
+  for (let node = stopAt?.parent ?? null; node; node = node.parent) boundary.add(node);
+  for (let node: HostElement | null = from; node && !boundary.has(node); node = node.parent) {
+    const value = StyleSheet.flatten(node.props.style)?.[key];
+    if (value !== undefined) return value;
+  }
+  return undefined;
 };
 
-const styleOf = (element: HostElement) => StyleSheet.flatten(element.props.style) ?? {};
-
-// nodes from `element` up to, excluding, the first ancestor it shares with `other` habit-hooks-disable non-essential-comment
-const ownChain = (element: HostElement, other: HostElement) => {
-  const shared = new Set(ancestorsOf(other));
-  const chain = [element, ...ancestorsOf(element)];
-  return chain.slice(
-    0,
-    chain.findIndex((node) => shared.has(node))
-  );
-};
-
-const primaryButton = () => {
-  const button = screen.getAllByRole('button').at(-1);
-  if (!button) throw new Error('dialog buttons not found');
-  return button;
-};
-
-// the dialog box is whatever wraps its buttons but not the backdrop; outermost first habit-hooks-disable non-essential-comment
-const dialogBoxStyles = () => ownChain(primaryButton(), screen.getByLabelText('Close modal')).map(styleOf).reverse();
-const dialogFrameStyle = () => dialogBoxStyles().find((style) => style.width !== undefined) ?? {};
-const dialogSurfaceStyle = () => dialogBoxStyles().find((style) => style.maxHeight !== undefined) ?? {};
+// the title sits in the dialog box, below any button's own styles habit-hooks-disable non-essential-comment
+const dialogStyle = (key: StyleKey) => closestStyle(screen.getByText('Title'), key);
 const pressBackdrop = () => fireEvent.press(screen.getByLabelText('Close modal'));
 
 const DIALOGS = [
-  ['DialogOkCancel', (props: object) => <DialogOkCancel isVisible onOk={jest.fn()} onCancel={jest.fn()} {...props} />],
-  ['DialogCloseOnly', (props: object) => <DialogCloseOnly isVisible onClose={jest.fn()} {...props} />],
+  [
+    'DialogOkCancel',
+    (props: object) => <DialogOkCancel isVisible title="Title" onOk={jest.fn()} onCancel={jest.fn()} {...props} />,
+  ],
+  ['DialogCloseOnly', (props: object) => <DialogCloseOnly isVisible title="Title" onClose={jest.fn()} {...props} />],
   [
     'DialogSingleTextInput',
     (props: object) => (
       <DialogSingleTextInput
         isVisible
-        title="Rename"
+        title="Title"
         value=""
         onChange={jest.fn()}
         onOk={jest.fn()}
@@ -409,7 +397,7 @@ const DIALOGS = [
   [
     'DialogSyntaxColorResult',
     (props: object) => (
-      <DialogSyntaxColorResult isVisible title="Result" code="a" language="javascript" onClose={jest.fn()} {...props} />
+      <DialogSyntaxColorResult isVisible title="Title" code="a" language="javascript" onClose={jest.fn()} {...props} />
     ),
   ],
 ] as const;
@@ -420,7 +408,8 @@ describe.each(DIALOGS)('%s frame', (_name, renderDialogElement) => {
     await renderWithProviders(renderDialogElement({}));
 
     // assert
-    expect(dialogFrameStyle()).toMatchObject({ width: 500, alignSelf: 'center' });
+    expect(dialogStyle('width')).toBe(500);
+    expect(dialogStyle('alignSelf')).toBe('center');
   });
 });
 
@@ -432,16 +421,15 @@ describe.each(DIALOGS.filter(([name]) => name !== 'DialogSyntaxColorResult'))(
       await renderWithProviders(renderDialogElement({ style: { width: 320 } }));
 
       // assert
-      expect(dialogFrameStyle()).toMatchObject({ width: 320, alignSelf: 'center' });
+      expect(dialogStyle('width')).toBe(320);
+      expect(dialogStyle('alignSelf')).toBe('center');
     });
   }
 );
 
 describe('dialog OK button width', () => {
-  const okButtonWidth = () =>
-    ownChain(primaryButton(), screen.getByText('common:cancel'))
-      .map(styleOf)
-      .find((style) => style.width !== undefined)?.width;
+  const okButtonWidth = (okText = 'common:ok') =>
+    closestStyle(screen.getByText(okText), 'width', screen.getByText('common:cancel'));
 
   it.each`
     okLabel      | expectedWidth
@@ -452,7 +440,7 @@ describe('dialog OK button width', () => {
     await renderWithProviders(<DialogOkCancel isVisible okLabel={okLabel} onOk={jest.fn()} onCancel={jest.fn()} />);
 
     // assert
-    expect(okButtonWidth()).toBe(expectedWidth);
+    expect(okButtonWidth(okLabel)).toBe(expectedWidth);
   });
 
   it('DialogSingleTextInput OK button is 60 wide', async () => {
@@ -526,11 +514,11 @@ describe('DialogSyntaxColorResult height', () => {
   it('caps its height at 80% of the window', async () => {
     // act
     await renderWithProviders(
-      <DialogSyntaxColorResult isVisible title="R" code="a" language="javascript" onClose={jest.fn()} />
+      <DialogSyntaxColorResult isVisible title="Title" code="a" language="javascript" onClose={jest.fn()} />
     );
 
     // assert
-    expect(dialogSurfaceStyle()).toMatchObject({ maxHeight: 1334 * 0.8 });
+    expect(dialogStyle('maxHeight')).toBe(1334 * 0.8);
   });
 
   // intentional change in the refactor: the style prop used to replace the frame sizing too (no consumer passes one) habit-hooks-disable non-essential-comment
@@ -539,7 +527,7 @@ describe('DialogSyntaxColorResult height', () => {
     await renderWithProviders(
       <DialogSyntaxColorResult
         isVisible
-        title="R"
+        title="Title"
         code="a"
         language="javascript"
         onClose={jest.fn()}
@@ -548,8 +536,8 @@ describe('DialogSyntaxColorResult height', () => {
     );
 
     // assert
-    expect(dialogFrameStyle().width).toBe(320);
-    expect(dialogFrameStyle().alignSelf).toBe('center');
-    expect(dialogSurfaceStyle().maxHeight).toBeUndefined();
+    expect(dialogStyle('width')).toBe(320);
+    expect(dialogStyle('alignSelf')).toBe('center');
+    expect(dialogStyle('maxHeight')).toBeUndefined();
   });
 });
