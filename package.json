@@ -147,7 +147,7 @@
     "prettier": "3.9.10",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-i18next": "17.1.11",
+    "react-i18next": "18.0.3",
     "react-native": "0.88.1",
     "react-native-element-dropdown": "2.12.4",
     "react-native-gesture-handler": "3.4.0",
