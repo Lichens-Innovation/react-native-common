@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import MapView, { Marker, PROVIDER_GOOGLE, type LatLng, type Region } from 'react-native-maps';
 import { useAppTheme } from '../../theme';
 import { useUserLocation } from './use-user-location';
+import { MAP_DARK_STYLE } from './map-dark-style';
 
 export type GeoJsonPoint = {
   type: 'Point';
@@ -42,6 +43,7 @@ export const LocationPickerModal: FunctionComponent<LocationPickerModalProps> = 
   onCancel,
 }) => {
   const styles = useStyles();
+  const theme = useAppTheme();
   const { t } = useTranslation();
   const { userLocation, region: fallbackRegion } = useUserLocation();
 
@@ -68,6 +70,10 @@ export const LocationPickerModal: FunctionComponent<LocationPickerModalProps> = 
             <MapView
               provider={PROVIDER_GOOGLE}
               style={styles.map}
+              // Same as the app's main map: left unset, react-native-maps follows the device's dark
+              // setting, so the base scheme is pinned to light and the dark theme rides on the style.
+              userInterfaceStyle="light"
+              customMapStyle={theme.dark ? MAP_DARK_STYLE : undefined}
               initialRegion={initialRegion}
               showsUserLocation
               onPress={handleMapPress}
